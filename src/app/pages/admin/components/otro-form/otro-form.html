@@ -1,0 +1,17 @@
+<label>
+    Code
+</label>
+<input pInputText [formField]="form.code"/>
+<br>
+
+<small [appErrorMessage]="$any(form.code)"></small>
+
+<hr>
+<label>
+    Name
+</label>
+<input pPassword [formField]="form.name"/>
+<small [appErrorMessage]="$any(form.name)"></small>
+<br>
+
+<p-button label="Save" (onClick)="save()"/>

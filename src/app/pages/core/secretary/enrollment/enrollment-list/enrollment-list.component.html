@@ -1,0 +1,71 @@
+<div class="card">
+    <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
+        <div>
+            <h2 class="m-0">Lista de Matriculados</h2>
+            <span class="text-600">Gestión de matrícula por secretaría</span>
+        </div>
+        <div class="flex gap-2">
+            <p-button label="Refrescar" icon="pi pi-refresh" severity="secondary" [outlined]="true" (onClick)="findEnrollments()" />
+        </div>
+    </div>
+
+    <div class="grid mb-4">
+        <div class="col-12 md:col-3">
+            <label class="block mb-2 font-medium">Periodo lectivo</label>
+            <p-select class="w-full" [ngModel]="selectedSchoolPeriod()" (ngModelChange)="selectedSchoolPeriod.set($event); findEnrollments()" [options]="schoolPeriods()" optionLabel="name" placeholder="Seleccione" />
+        </div>
+        <div class="col-12 md:col-3">
+            <label class="block mb-2 font-medium">Carrera</label>
+            <p-select class="w-full" [ngModel]="selectedCareer()" (ngModelChange)="selectedCareer.set($event); findEnrollments()" [options]="careers()" optionLabel="name" placeholder="Seleccione" />
+        </div>
+        <div class="col-12 md:col-3">
+            <label class="block mb-2 font-medium">Nivel</label>
+            <p-select class="w-full" [ngModel]="selectedAcademicPeriod()" (ngModelChange)="selectedAcademicPeriod.set($event); findEnrollments()" [options]="academicPeriods()" optionLabel="name" [showClear]="true" placeholder="Todos" />
+        </div>
+        <div class="col-12 md:col-3">
+            <label class="block mb-2 font-medium">Estado</label>
+            <p-select class="w-full" [ngModel]="selectedEnrollmentState()" (ngModelChange)="selectedEnrollmentState.set($event); findEnrollments()" [options]="enrollmentStates()" optionLabel="name" [showClear]="true" placeholder="Todos" />
+        </div>
+        <div class="col-12">
+            <label class="block mb-2 font-medium">Búsqueda</label>
+            <input pInputText class="w-full" [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="findEnrollments()" placeholder="Buscar por documento, apellidos o nombres" />
+        </div>
+    </div>
+
+    <p-table [value]="enrollments()" [loading]="loading()" [paginator]="true" [rows]="rows()" [first]="first()" [totalRecords]="totalRecords()" [lazy]="true" (onLazyLoad)="onPage($event)" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Carrera</th>
+                <th>Número de documento</th>
+                <th>Apellidos y nombres</th>
+                <th>Estado</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-item>
+            <tr>
+                <td>{{ item.career?.name }}</td>
+                <td>{{ item.student?.user?.identification }}</td>
+                <td>{{ getStudentName(item) }}</td>
+                <td><p-tag [value]="getEnrollmentState(item)" [severity]="getSeverity(item)" /></td>
+                <td>
+                    <div class="flex justify-content-center flex-wrap gap-2">
+                        <p-button icon="pi pi-pencil" label="Editar" size="small" [outlined]="true" (onClick)="edit(item)" />
+                        <p-button icon="pi pi-book" label="Asignaturas" size="small" severity="info" [outlined]="true" (onClick)="subjects(item)" />
+                        <p-button icon="pi pi-check" label="Aprobar" size="small" severity="success" [outlined]="true" (onClick)="approve(item)" />
+                        <p-button icon="pi pi-id-card" label="Matricular" size="small" severity="info" [outlined]="true" (onClick)="enroll(item)" />
+                        <p-button icon="pi pi-times" label="Rechazar" size="small" severity="danger" [outlined]="true" (onClick)="reject(item)" />
+                        <p-button icon="pi pi-ban" label="Anular" size="small" severity="warn" [outlined]="true" (onClick)="revoke(item)" />
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="5" class="text-center py-4">No existen matrículas para los filtros seleccionados.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

@@ -1,0 +1,62 @@
+<div class="card">
+    <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
+        <div>
+            <h2 class="m-0">Asignaturas de Matrícula</h2>
+            <span class="text-600">{{ getStudentName() || 'Detalle académico de la matrícula' }}</span>
+        </div>
+        <div class="flex gap-2">
+            <p-button label="Crear" icon="pi pi-plus" (onClick)="create()" />
+            <p-button label="Refrescar" icon="pi pi-refresh" severity="secondary" [outlined]="true" (onClick)="findDetails()" />
+            <p-button label="Regresar" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (onClick)="back()" />
+        </div>
+    </div>
+
+    <p-table [value]="details()" [loading]="loading()" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Periodo académico</th>
+                <th>Asignatura</th>
+                <th>Número de matrícula</th>
+                <th>Horario</th>
+                <th>Paralelo</th>
+                <th>Tipo de matrícula</th>
+                <th>Estado</th>
+                <th>Calificación</th>
+                <th>Asistencia</th>
+                <th>Estado académico</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-item>
+            <tr>
+                <td>{{ item.academicPeriod?.name || item.subject?.academicPeriod?.name }}</td>
+                <td>{{ item.subject?.code }} - {{ item.subject?.name }}</td>
+                <td>{{ item.number }}</td>
+                <td>{{ item.workday?.name }}</td>
+                <td>{{ item.parallel?.name }}</td>
+                <td>{{ item.type?.name }}</td>
+                <td><p-tag [value]="getDetailState(item)" [severity]="getSeverity(item)" /></td>
+                <td>{{ item.finalGrade }}</td>
+                <td>{{ item.finalAttendance }}</td>
+                <td>{{ item.academicState?.name }}</td>
+                <td>
+                    <div class="flex justify-content-center flex-wrap gap-2">
+                        <p-button icon="pi pi-pencil" label="Editar" size="small" [outlined]="true" (onClick)="edit(item)" />
+                        <p-button icon="pi pi-check" label="Aprobar" size="small" severity="success" [outlined]="true" (onClick)="approve(item)" />
+                        <p-button icon="pi pi-id-card" label="Matricular" size="small" severity="info" [outlined]="true" (onClick)="enroll(item)" />
+                        <p-button icon="pi pi-times" label="Rechazar" size="small" severity="danger" [outlined]="true" (onClick)="reject(item)" />
+                        <p-button icon="pi pi-ban" label="Anular" size="small" severity="warn" [outlined]="true" (onClick)="revoke(item)" />
+                        <p-button icon="pi pi-trash" label="Eliminar" size="small" severity="danger" (onClick)="remove(item)" />
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="11" class="text-center py-4">No existen asignaturas matriculadas.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
