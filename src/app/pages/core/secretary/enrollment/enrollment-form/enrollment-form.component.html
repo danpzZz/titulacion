@@ -1,99 +1,123 @@
 <div class="card">
-    <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
-        <div>
-            <h2 class="m-0">Formulario de Matrícula</h2>
-            <span class="text-600">Cabecera de matrícula del estudiante</span>
+    <!-- Breadcrumb -->
+    <p-breadcrumb
+        class="mb-4"
+        [model]="[{ label: 'Matrículas', command: back.bind(this) }, { label: 'Formulario' }]"
+        [home]="{ icon: 'pi pi-home', routerLink: '/' }"
+    />
+
+    <!-- Header -->
+    <div class="flex align-items-center justify-content-between mb-1">
+        <div class="flex align-items-center gap-2">
+            <i class="pi pi-pencil text-primary text-xl"></i>
+            <h2 class="m-0 text-xl font-semibold">Editar</h2>
         </div>
         <div class="flex gap-2">
+            <p-button label="Cancelar" icon="pi pi-arrow-left" severity="secondary" (onClick)="back()" />
             <p-button label="Asignaturas" icon="pi pi-book" severity="info" (onClick)="goToDetails()" />
-            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [outlined]="true" (onClick)="back()" />
         </div>
     </div>
+    <p class="text-500 mt-0 mb-1 text-sm">Todos los campos con <span class="text-red-500">*</span> son obligatorios.</p>
+
+    <p-divider class="my-3" />
 
     @if (loading()) {
-        <div class="p-4 border-round surface-100">Cargando matrícula...</div>
+        <div class="grid">
+            @for (i of [1,2,3,4,5,6,7]; track i) {
+                <div class="col-12 md:col-4"><p-skeleton height="2.5rem" styleClass="mb-2" /></div>
+            }
+        </div>
     } @else {
         <form (submit)="save($event)">
-            <h4>Datos del estudiante</h4>
+            <!-- Datos del estudiante -->
             <div class="grid">
                 <div class="col-12 md:col-4">
-                    <label class="block mb-2 font-medium">Número de documento</label>
+                    <label class="block mb-1 text-sm font-medium text-700">Número de documento:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.student.user.identification" />
                 </div>
                 <div class="col-12 md:col-4">
-                    <label class="block mb-2 font-medium">Apellidos</label>
+                    <label class="block mb-1 text-sm font-medium text-700">Apellidos:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.student.user.lastname" />
                 </div>
                 <div class="col-12 md:col-4">
-                    <label class="block mb-2 font-medium">Nombres</label>
+                    <label class="block mb-1 text-sm font-medium text-700">Nombres:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.student.user.name" />
                 </div>
                 <div class="col-12 md:col-4">
-                    <label class="block mb-2 font-medium">Correo institucional</label>
+                    <label class="block mb-1 text-sm font-medium text-700">Correo electrónico institucional:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.student.user.email" />
                 </div>
                 <div class="col-12 md:col-4">
-                    <label class="block mb-2 font-medium">Correo personal</label>
+                    <label class="block mb-1 text-sm font-medium text-700">Correo electrónico personal:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.student.user.personalEmail" />
                 </div>
                 <div class="col-12 md:col-2">
-                    <label class="block mb-2 font-medium">Celular</label>
+                    <label class="block mb-1 text-sm font-medium text-700">Teléfono celular:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.student.user.cellPhone" />
                 </div>
                 <div class="col-12 md:col-2">
-                    <label class="block mb-2 font-medium">Teléfono</label>
+                    <label class="block mb-1 text-sm font-medium text-700">Teléfono de fijo:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.student.user.phone" />
                 </div>
             </div>
 
-            <h4 class="mt-4">Información de matrícula</h4>
+            <p-divider class="my-2" />
+
+            <!-- Datos de matrícula -->
             <div class="grid">
-                <div class="col-12 md:col-3">
-                    <label class="block mb-2 font-medium">Fecha de matrícula</label>
+                <div class="col-12 md:col-4">
+                    <label class="block mb-1 text-sm font-medium text-700">Fecha de matrícula: <i class="pi pi-question-circle text-400 ml-1" style="font-size:0.8rem"></i></label>
                     <input type="date" class="p-inputtext p-component w-full" [formField]="enrollmentForm.date" />
                 </div>
-                <div class="col-12 md:col-3">
-                    <label class="block mb-2 font-medium">Código de matrícula</label>
+                <div class="col-12 md:col-4">
+                    <label class="block mb-1 text-sm font-medium text-700">Código de matrícula: <i class="pi pi-question-circle text-400 ml-1" style="font-size:0.8rem"></i></label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.code" />
                 </div>
-                <div class="col-12 md:col-3">
-                    <label class="block mb-2 font-medium">Estado de matrícula</label>
+                <div class="col-12 md:col-4">
+                    <label class="block mb-1 text-sm font-medium text-700">Estado de la matrícula:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.enrollmentStateName" />
                 </div>
             </div>
 
-            <h4 class="mt-4">Ficha socioeconómica</h4>
+            <p-divider class="my-2" />
+
+            <!-- Ficha socioeconómica -->
             <div class="grid">
                 <div class="col-12 md:col-4">
-                    <label class="block mb-2 font-medium">Categoría</label>
+                    <label class="block mb-1 text-sm font-medium text-700">Categoría Ficha Socioeconómica:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.socioeconomicCategory" />
                 </div>
                 <div class="col-12 md:col-4">
-                    <label class="block mb-2 font-medium">Porcentaje</label>
+                    <label class="block mb-1 text-sm font-medium text-700">Porcentaje Ficha Socioeconómica:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.socioeconomicPercentage" />
                 </div>
                 <div class="col-12 md:col-4">
-                    <label class="block mb-2 font-medium">Puntaje</label>
+                    <label class="block mb-1 text-sm font-medium text-700">Puntaje Ficha Socioeconómica:</label>
                     <input pInputText class="w-full" [formField]="enrollmentForm.socioeconomicScore" />
                 </div>
             </div>
 
-            <h4 class="mt-4">Observación</h4>
+            <p-divider class="my-2" />
+
+            <!-- Observación -->
             <div class="grid">
                 <div class="col-12">
-                    <label class="block mb-2 font-medium">Observación de la matrícula</label>
-                    <textarea class="p-inputtext p-component w-full" rows="4" [formField]="enrollmentForm.observation"></textarea>
+                    <label class="block mb-1 text-sm font-medium text-700">Observación de la matrícula: <span class="text-red-500">*</span></label>
+                    <textarea class="p-inputtext p-component w-full" rows="3" [formField]="enrollmentForm.observation"></textarea>
                     <small [appErrorMessage]="$any(enrollmentForm.observation)"></small>
                 </div>
             </div>
 
             @if (message()) {
-                <div class="mt-3 p-3 border-round surface-100">{{ message() }}</div>
+                <p-divider class="my-2" />
+                <div class="p-3 border-round bg-red-50 text-red-700 text-sm">
+                    <i class="pi pi-exclamation-triangle mr-2"></i>{{ message() }}
+                </div>
             }
 
             <div class="flex justify-content-end gap-2 mt-4">
-                <p-button label="Cancelar" severity="secondary" [outlined]="true" type="button" (onClick)="back()" />
-                <p-button label="Guardar" icon="pi pi-save" type="submit" />
+                <p-button label="Cancelar" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" type="button" (onClick)="back()" />
+                <p-button label="Guardar" icon="pi pi-save" severity="info" type="submit" />
             </div>
         </form>
     }

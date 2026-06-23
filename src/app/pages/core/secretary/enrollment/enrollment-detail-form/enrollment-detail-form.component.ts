@@ -3,8 +3,13 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { disabled, FieldTree, form, FormField, max, min, required, SchemaPathTree, submit } from '@angular/forms/signals';
 import { Button } from 'primeng/button';
-import { InputText } from 'primeng/inputtext';
+import { Breadcrumb } from 'primeng/breadcrumb';
+import { Divider } from 'primeng/divider';
+import { Skeleton } from 'primeng/skeleton';
+import { FormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
 import { ErrorMessageDirective } from '@utils/directives/error-message.directive';
+import { MY_ROUTES } from '@routes';
 import { SecretaryEnrollmentApiService } from '../services/secretary-enrollment-api.service';
 import {
     CatalogueModel,
@@ -17,7 +22,7 @@ import {
 @Component({
     selector: 'app-enrollment-detail-form',
     standalone: true,
-    imports: [CommonModule, Button, InputText, FormField, ErrorMessageDirective],
+    imports: [CommonModule, FormsModule, Button, Select, FormField, ErrorMessageDirective, Breadcrumb, Divider, Skeleton],
     templateUrl: './enrollment-detail-form.component.html',
     styleUrl: './enrollment-detail-form.component.scss'
 })
@@ -173,7 +178,7 @@ export class EnrollmentDetailFormComponent implements OnInit {
     }
 
     protected back(): void {
-        void this.router.navigate(['/main/secretary/enrollments', this.enrollmentId, 'enrollment-details']);
+        void this.router.navigate([MY_ROUTES.corePages.secretary.enrollment.absolute, this.enrollmentId, 'enrollment-details']);
     }
 
     private formatDate(value: string | Date | null | undefined): string | null {

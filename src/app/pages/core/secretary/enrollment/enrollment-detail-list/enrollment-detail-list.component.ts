@@ -1,16 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Button } from 'primeng/button';
 import { Tag } from 'primeng/tag';
 import { TableModule } from 'primeng/table';
+import { Breadcrumb } from 'primeng/breadcrumb';
+import { Divider } from 'primeng/divider';
+import { MY_ROUTES } from '@routes';
 import { SecretaryEnrollmentApiService } from '../services/secretary-enrollment-api.service';
 import { EnrollmentDetailModel, EnrollmentModel } from '../shared/secretary-enrollment-form.models';
 
 @Component({
     selector: 'app-enrollment-detail-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, Button, Tag, TableModule],
+    imports: [CommonModule, Button, Tag, TableModule, Breadcrumb, Divider],
     templateUrl: './enrollment-detail-list.component.html',
     styleUrl: './enrollment-detail-list.component.scss'
 })
@@ -47,15 +50,15 @@ export class EnrollmentDetailListComponent implements OnInit {
     }
 
     protected create(): void {
-        void this.router.navigate(['/main/secretary/enrollments', this.enrollmentId, 'enrollment-details', 'new']);
+        void this.router.navigate([MY_ROUTES.corePages.secretary.enrollment.absolute, this.enrollmentId, 'enrollment-details', 'new']);
     }
 
     protected edit(item: EnrollmentDetailModel): void {
-        void this.router.navigate(['/main/secretary/enrollments', this.enrollmentId, 'enrollment-details', item.id]);
+        void this.router.navigate([MY_ROUTES.corePages.secretary.enrollment.absolute, this.enrollmentId, 'enrollment-details', item.id]);
     }
 
     protected back(): void {
-        void this.router.navigate(['/main/secretary/enrollments']);
+        void this.router.navigate([MY_ROUTES.corePages.secretary.enrollment.absolute]);
     }
 
     protected approve(item: EnrollmentDetailModel): void {

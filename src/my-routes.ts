@@ -149,6 +149,14 @@ export const MY_ROUTES = {
                 base: 'process-logs',
                 absolute: '/main/core/technician/process-logs'
             }
+        },
+        secretary: {
+            base: 'secretary',
+            absolute: '/main/secretary',
+            enrollment: {
+                base: 'enrollments',
+                absolute: '/main/secretary/enrollments'
+            }
         }
     },
     publicPages: {
