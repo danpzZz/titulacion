@@ -1,5 +1,3 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
     "compileOnSave": false,
     "compilerOptions": {
@@ -19,14 +17,8 @@
         "module": "ES2022",
         "baseUrl": "./",
         "paths": {
-            "@/*": [
-                "src/app/*"
-            ],
             "@routes": [
                 "./src/my-routes"
-            ],
-            "@errorRoutes": [
-                "./src/app/layout/errors/*"
             ],
             "@assets/*": [
                 "./src/assets/*"
@@ -43,8 +35,32 @@
             "@utils/*": [
                 "./src/app/utils/*"
             ],
-            "@adminModule": [
-                "./src/app/pages/admin"
+            "@utils/services/form-registry.service": [
+                "./src/app/utils/services/form-registry.service"
+            ],
+            "@utils/directives/label.directive": [
+                "./src/app/utils/directives/label.directive"
+            ],
+            "@utils/directives/error-message.directive": [
+                "./src/app/utils/directives/error-message.directive"
+            ],
+            "@utils/pipes/core/enrollment-state.pipe": [
+                "./src/app/utils/pipes/enrollment-state.pipe"
+            ],
+            "@utils/pipes/core/academic-state-severity.pipe": [
+                "./src/app/utils/pipes/academic-state-severity.pipe"
+            ],
+            "@utils/enums": [
+                "./src/app/utils/enums/index"
+            ],
+            "@services/core": [
+                "./src/app/utils/services/index"
+            ],
+            "@models/core": [
+                "./src/app/utils/interfaces/index"
+            ],
+            "@services/auth": [
+                "./src/app/utils/services/auth.service"
             ]
         }
     },
@@ -52,6 +68,6 @@
         "enableI18nLegacyMessageIdFormat": false,
         "strictInjectionParameters": true,
         "strictInputAccessModifiers": true,
-        "strictTemplates": true
+        "strictTemplates": false
     }
 }

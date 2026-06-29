@@ -15,7 +15,7 @@ import { ColInterface } from '@utils/interfaces/col.interface';
 import { DatePipe } from '@angular/common';
 import { debounceTime } from 'rxjs';
 import { Tag } from 'primeng/tag';
-import { FontAwesome } from '@modules/public/icons/font-awesome';
+import { CustomIcons } from '@modules/public/icons/custom-icons';
 
 @Component({
     selector: 'app-list',
@@ -43,7 +43,7 @@ export class ListComponent implements OnInit {
     protected readonly coreService = inject(CoreService);
     protected searchControl: FormControl = new FormControl(null);
     protected currentYear: string;
-    protected readonly FontAwesome = FontAwesome;
+    protected readonly CustomIcons = CustomIcons;
 
     constructor() {
         this.currentYear = format(new Date(), 'yyyy');

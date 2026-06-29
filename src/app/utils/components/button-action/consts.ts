@@ -1,56 +1,56 @@
 import { PrimeIcons } from 'primeng/api';
-import { FontAwesome } from '@modules/public/icons/font-awesome';
+import { CustomIcons } from '@modules/public/icons/custom-icons';
 
 export const viewButtonAction = {
     id: 'view',
     label: 'Visualizar',
-    icon: FontAwesome.EYE_SOLID
+    icon: CustomIcons.EYE_SOLID
 };
 
 export const editButtonAction = {
     id: 'edit',
     label: 'Editar',
-    icon: FontAwesome.PENCIL_SOLID
+    icon: CustomIcons.PENCIL_SOLID
 };
 
 export const deleteButtonAction = {
     id: 'delete',
     label: 'Eliminar',
-    icon: FontAwesome.TRASH_CAN_SOLID
+    icon: CustomIcons.TRASH_CAN_SOLID
 };
 
 export const suspendButtonAction = {
     id: 'suspend',
     label: 'Suspender',
-    icon: FontAwesome.BAN_SOLID
+    icon: CustomIcons.BAN_SOLID
 };
 
 export const activateButtonAction = {
     id: 'activate',
     label: 'Activar',
-    icon: FontAwesome.CLOCK_ROTATE_LEFT_SOLID
+    icon: CustomIcons.CLOCK_ROTATE_LEFT_SOLID
 };
 
 export const attachButtonAction = {
     id: 'attach',
     label: 'adjuntar',
-    icon: FontAwesome.PAPERCLIP_SOLID
+    icon: CustomIcons.PAPERCLIP_SOLID
 };
 
 export const documentButtonAction = {
     id: 'document',
     label: 'Documentos',
-    icon: FontAwesome.PAPERCLIP_SOLID
+    icon: CustomIcons.PAPERCLIP_SOLID
 };
 
 export const inactivationButtonAction = {
     id: 'inactivation',
     label: 'Inactivar',
-    icon: FontAwesome.BAN_SOLID
+    icon: CustomIcons.BAN_SOLID
 };
 
 export const registrationButtonAction = {
     id: 'registration',
     label: 'Registro',
-    icon: FontAwesome.FILE_SIGNATURE_SOLID
+    icon: CustomIcons.FILE_SIGNATURE_SOLID
 };

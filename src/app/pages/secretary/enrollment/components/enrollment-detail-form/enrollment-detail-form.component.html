@@ -1,0 +1,174 @@
+@if (isLoading()) {
+  <div class="p-4 text-center">
+    <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i>
+  </div>
+} @else {
+
+  <!-- Header tipo "Editar / Nueva Asignatura" + botones -->
+  <div class="flex align-items-center justify-content-between mb-3 px-2">
+    <div>
+      <div class="flex align-items-center gap-2 mb-1">
+        <i class="pi pi-pencil text-primary"></i>
+        <span class="text-xl font-semibold text-primary">
+          {{ isNew() ? 'Nueva Asignatura' : 'Editar' }}
+        </span>
+      </div>
+      <small class="text-color-secondary">Todos los campos con * son obligatorios.</small>
+    </div>
+    <div class="flex gap-2">
+      <p-button
+        label="Cancelar"
+        icon="pi pi-arrow-left"
+        severity="danger"
+        (click)="back()">
+      </p-button>
+      <p-button
+        label="Guardar"
+        icon="pi pi-save"
+        severity="info"
+        (click)="onSubmit()">
+      </p-button>
+    </div>
+  </div>
+
+  <p-panel>
+    <div class="formgrid grid p-fluid">
+
+      <!-- Asignatura (solo lectura al editar) -->
+      <div class="field col-12 xl:col-6">
+        <label appLabel label="Asignatura" [field]="subjectField"></label>
+        <p-select
+          dataKey="id"
+          [formField]="subjectField"
+          [options]="subjects()"
+          [filter]="true"
+          filterBy="code,name"
+          optionLabel="name"
+          placeholder="Seleccione"
+          [disabled]="!isNew()"
+          styleClass="w-full">
+          <ng-template pTemplate="selectedItem">
+            @if (form$().subject) {
+              {{ form$().subject.code }} - {{ form$().subject.name }}
+              ({{ form$().subject.academicPeriod?.name }})
+            }
+          </ng-template>
+          <ng-template pTemplate="item" let-item>
+            {{ item.code }} - {{ item.name }} ({{ item.academicPeriod?.name }})
+          </ng-template>
+        </p-select>
+        <small [appErrorMessage]="$any(subjectField)"></small>
+      </div>
+
+      <!-- Tipo de matrícula -->
+      <div class="field col-12 xl:col-6">
+        <label appLabel label="Tipo de matrícula" [field]="typeField"></label>
+        <p-select
+          dataKey="id"
+          [formField]="typeField"
+          [options]="types()"
+          optionLabel="name"
+          placeholder="Seleccione"
+          styleClass="w-full">
+        </p-select>
+        <small [appErrorMessage]="$any(typeField)"></small>
+      </div>
+
+      <!-- Horario -->
+      <div class="field col-12 xl:col-6">
+        <label appLabel label="Horario" [field]="workdayField"></label>
+        <p-select
+          dataKey="id"
+          [formField]="workdayField"
+          [options]="workdays()"
+          optionLabel="name"
+          placeholder="Seleccione"
+          styleClass="w-full">
+        </p-select>
+        <small [appErrorMessage]="$any(workdayField)"></small>
+      </div>
+
+      <!-- Paralelo -->
+      <div class="field col-12 xl:col-6">
+        <label appLabel label="Paralelo" [field]="parallelField"></label>
+        <p-select
+          dataKey="id"
+          [formField]="parallelField"
+          [options]="parallels()"
+          optionLabel="name"
+          placeholder="Seleccione"
+          styleClass="w-full">
+        </p-select>
+        <small [appErrorMessage]="$any(parallelField)"></small>
+      </div>
+
+      <!-- Número de matrícula -->
+      <div class="field col-12 xl:col-6">
+        <label appLabel label="Numero de matrícula" [field]="numberField"></label>
+        <p-inputNumber
+          [formField]="numberField"
+          [min]="1" [max]="3"
+          [showButtons]="true"
+          styleClass="w-full">
+        </p-inputNumber>
+        <small [appErrorMessage]="$any(numberField)"></small>
+      </div>
+
+      <!-- Fecha (solo lectura) -->
+      <div class="field col-12 xl:col-6">
+        <label appLabel label="Fecha de matrícula"></label>
+        <input pInputText [value]="form$().date ?? ''" readonly class="w-full"/>
+      </div>
+
+      <!-- Calificación Final -->
+      <div class="field col-12 xl:col-4">
+        <label appLabel label="Calificación Final" [field]="finalGradeField"></label>
+        <p-inputNumber
+          [formField]="finalGradeField"
+          mode="decimal"
+          [useGrouping]="false"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          styleClass="w-full">
+        </p-inputNumber>
+        <small [appErrorMessage]="$any(finalGradeField)"></small>
+      </div>
+
+      <!-- Asistencia -->
+      <div class="field col-12 xl:col-4">
+        <label appLabel label="Asistencia" [field]="finalAttendanceField"></label>
+        <p-inputNumber
+          [formField]="finalAttendanceField"
+          mode="decimal"
+          [useGrouping]="false"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          styleClass="w-full">
+        </p-inputNumber>
+        <small [appErrorMessage]="$any(finalAttendanceField)"></small>
+      </div>
+
+      <!-- Estado Académico -->
+      <div class="field col-12 xl:col-4">
+        <label appLabel label="Estado Académico" [field]="academicStateField"></label>
+        <p-select
+          dataKey="id"
+          [formField]="academicStateField"
+          [options]="academicStates()"
+          optionLabel="name"
+          placeholder="Seleccione"
+          styleClass="w-full">
+        </p-select>
+        <small [appErrorMessage]="$any(academicStateField)"></small>
+      </div>
+
+      <!-- Observación -->
+      <div class="field col-12">
+        <label appLabel label="Observación de la matrícula" [field]="observationField"></label>
+        <input pInputText [formField]="observationField" class="w-full"/>
+        <small [appErrorMessage]="$any(observationField)"></small>
+      </div>
+
+    </div>
+  </p-panel>
+}

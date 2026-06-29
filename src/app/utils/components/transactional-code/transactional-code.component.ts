@@ -5,7 +5,7 @@ import { AuthHttpService } from '@/pages/auth/auth-http.service';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Button } from 'primeng/button';
-import { FontAwesome } from '@modules/public/icons/font-awesome';
+import { CustomIcons } from '@modules/public/icons/custom-icons';
 import { InputGroup } from 'primeng/inputgroup';
 
 @Component({
@@ -15,7 +15,7 @@ import { InputGroup } from 'primeng/inputgroup';
             <div (paste)="onContainerPaste($event)">
                 <p-inputOtp id="transactionalCode" [ngModel]="value" [length]="6" [integerOnly]="true" (onChange)="handleChange($event)" [disabled]="disabled" [mask]="isMask" />
             </div>
-            <p-button class="ml-2" [icon]="isMask ? FontAwesome.EYE_SOLID : FontAwesome.EYE_SLASH_SOLID" (onClick)="isMask = !isMask" [text]="true" [raised]="true" />
+            <p-button class="ml-2" [icon]="isMask ? CustomIcons.EYE_SOLID : CustomIcons.EYE_SLASH_SOLID" (onClick)="isMask = !isMask" [text]="true" [raised]="true" />
         </p-inputgroup>
     `,
     imports: [FormsModule, InputOtp, Button, InputGroup],
@@ -119,5 +119,5 @@ export class TransactionalCodeComponent implements ControlValueAccessor, AsyncVa
     private onChange: (val: string) => void = () => {};
 
     private onTouched: () => void = () => {};
-    protected readonly FontAwesome = FontAwesome;
+    protected readonly CustomIcons = CustomIcons;
 }

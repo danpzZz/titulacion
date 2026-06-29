@@ -1,8 +1,26 @@
-import { inject, Injectable, signal } from '@angular/core';
-import { MessageService } from 'primeng/api';
-import { FontAwesome } from '@modules/public/icons/font-awesome';
+import {inject, Injectable, signal} from '@angular/core';
+import {MessageService} from 'primeng/api';
+import {CustomIcons} from "@utils/icons/custom-icons";
 
-type Severity = 'success' | 'info' | 'warn' | 'danger' | 'help' | 'primary' | 'secondary' | 'contrast' | null | undefined;
+
+type Severity =
+    'success'
+    | 'info'
+    | 'warn'
+    | 'danger'
+    | 'help'
+    | 'primary'
+    | 'secondary'
+    | 'contrast'
+    | null
+    | undefined;
+
+export interface FormError {
+    label: string;
+    form: string;
+    field: string;
+    message: string;
+}
 
 @Injectable({
     providedIn: 'root'
@@ -66,9 +84,9 @@ export class CustomMessageService {
         return this._modalTitle;
     }
 
-    private _modalMessage: string | string[] = '';
+    private _modalMessage: string | FormError[] = '';
 
-    get modalMessage(): string | string[] {
+    get modalMessage(): string | FormError[] {
         return this._modalMessage;
     }
 
@@ -78,25 +96,25 @@ export class CustomMessageService {
         return this._modalLife;
     }
 
-    showSuccess({ summary, detail }: { summary: string; detail: string }) {
-        this._messageService.add({ severity: 'success', summary, detail });
+    showSuccess({summary, detail}: { summary: string; detail: string }) {
+        this._messageService.add({severity: 'success', summary, detail});
     }
 
-    showError({ summary, detail }: { summary: string; detail: string }) {
+    showError({summary, detail}: { summary: string; detail: string }) {
         this._modalLife = detail.length * 150;
-        this._messageService.add({ severity: 'error', summary, detail });
+        this._messageService.add({severity: 'error', summary, detail});
     }
 
-    showInfo({ summary, detail }: { summary: string; detail: string }) {
-        this._messageService.add({ severity: 'info', summary, detail });
+    showInfo({summary, detail}: { summary: string; detail: string }) {
+        this._messageService.add({severity: 'info', summary, detail});
     }
 
-    showWarning({ summary, detail }: { summary: string; detail: string }) {
-        this._messageService.add({ severity: 'warn', summary, detail });
+    showWarning({summary, detail}: { summary: string; detail: string }) {
+        this._messageService.add({severity: 'warn', summary, detail});
     }
 
     showHttpSuccess(response: string | string[] | any) {
-        this._messageService.add({ severity: 'success', summary: response.title, detail: response.message });
+        this._messageService.add({severity: 'success', summary: response.title, detail: response.message});
     }
 
     showHttpError(error: string | string[] | any) {
@@ -123,39 +141,39 @@ export class CustomMessageService {
         }
     }
 
-    showFormErrors(message: string | string[]): void {
+    showFormErrors(message: string | FormError[]): void {
         if (Array.isArray(message)) message.sort();
 
         this._isModalVisible.set(true);
         this._modalAcceptSeverity = 'info';
-        this._modalIcon = FontAwesome.CIRCLE_XMARK_REGULAR;
+        this._modalIcon = CustomIcons.CIRCLE_XMARK_REGULAR;
         this._modalIconColor = 'red';
         this._modalTitle = 'Falta completar o existen errores en los siguientes campos';
         this._modalMessage = message;
     }
 
-    showModalInfo({ summary, detail }: { summary: string; detail: string }): void {
+    showModalInfo({summary, detail}: { summary: string; detail: string }): void {
         this._isModalVisible.set(true);
         this._modalAcceptSeverity = 'info';
-        this._modalTitleIcon = FontAwesome.CIRCLE_INFO_SOLID;
+        this._modalTitleIcon = CustomIcons.CIRCLE_INFO_SOLID;
         this._modalIconColor = 'var(--primary-color)';
         this._modalTitle = summary;
         this._modalMessage = detail;
     }
 
-    showModalError({ summary, detail }: { summary: string; detail: string }): void {
+    showModalError({summary, detail}: { summary: string; detail: string }): void {
         this._isModalVisible.set(true);
         this._modalAcceptSeverity = 'danger';
-        this._modalTitleIcon = FontAwesome.CIRCLE_XMARK_REGULAR;
+        this._modalTitleIcon = CustomIcons.CIRCLE_XMARK_REGULAR;
         this._modalIconColor = 'var(--p-red-500)';
         this._modalTitle = summary;
         this._modalMessage = detail;
     }
 
-    showModalWarn({ summary, detail }: { summary: string; detail: string }): void {
+    showModalWarn({summary, detail}: { summary: string; detail: string }): void {
         this._isModalVisible.set(true);
         this._modalAcceptSeverity = 'warn';
-        this._modalTitleIcon = FontAwesome.CIRCLE_XMARK_REGULAR;
+        this._modalTitleIcon = CustomIcons.CIRCLE_XMARK_REGULAR;
         this._modalIconColor = 'var(--primary-color)';
         this._modalTitle = summary;
         this._modalMessage = detail;

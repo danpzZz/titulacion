@@ -1,0 +1,115 @@
+<div class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full mx-auto max-w-3xl">
+        <div
+            style="border-radius: 56px; padding: 0.3rem;"
+            [style.background]="'linear-gradient(180deg, color-mix(in srgb, ' + uiState().color + ', transparent 50%) 10%, var(--surface-ground) 90%)'">
+
+            <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 flex flex-col items-center"
+                 style="border-radius: 53px">
+                <div>
+                    <div class="custom-form-grid md:grid-cols-12">
+
+                        <div class="col-span-12 flex flex-row justify-center items-center gap-6 text-center">
+                            <i [ngClass]="[uiState().icon, 'fa-6x', uiState().iconClass]"
+                               style="--fa-animation-duration: 10s;"></i>
+                        </div>
+
+                        <div class="custom-form-field col-span-12 text-center">
+                            <h2 [style.color]="uiState().color" class="mt-4 mb-4">
+                                {{ uiState().title }}
+                            </h2>
+                        </div>
+
+                        <div class="custom-form-field col-span-12 text-center mb-4">
+                            <p [style.color]="uiState().color">
+                                {{ uiState().message }}
+                            </p>
+                        </div>
+
+                        <div class="custom-form-field md:col-span-12">
+
+                            @if (currentStatus() === 'SUCCESS' || currentStatus() === 'USED') {
+                                <p-button
+                                    label="Redirigiendo al Login en {{ counter() }} ..."
+                                    styleClass="w-full"
+                                    [raised]="true"
+                                    [severity]="currentStatus() === 'USED' ? 'help' : 'success'"
+                                    (onClick)="backToSignIn()" />
+                            }
+
+                            @if (currentStatus() === 'ACCOUNT_VERIFIED') {
+                                <p-button
+                                    label="Redirigiendo al Login en {{ counter() }} ..."
+                                    styleClass="w-full"
+                                    [raised]="true"
+                                    severity="info"
+                                    (onClick)="backToSignIn()" />
+                            }
+
+                            @if (currentStatus() === 'EXPIRED') {
+                                <p-button
+                                    label="Solicitar nuevo enlace"
+                                    styleClass="w-full"
+                                    severity="warn"
+                                    [icon]="CustomIcons.ENVELOPE_SOLID"
+                                    [raised]="true"
+                                    (onClick)="requestEmailVerificationModal.set(true)" />
+                            }
+
+                            @if (currentStatus() === 'INVALID') {
+                                <p-button
+                                    label="Volver al inicio"
+                                    styleClass="w-full"
+                                    severity="danger"
+                                    [outlined]="true"
+                                    (onClick)="backToSignIn()" />
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p-dialog
+    [visible]="requestEmailVerificationModal()"
+    (visibleChange)="requestEmailVerificationModal.set($event)"
+    [modal]="true"
+    [style]="{ width: '400px' }"
+    header="Solicitar enlace de verificación">
+
+    <div class="custom-form-card">
+        <form class="custom-form-grid md:grid-cols-12" (ngSubmit)="resendEmailVerification()">
+
+            <div class="custom-form-field md:col-span-12">
+                <label
+                    appLabel
+                    for="transactionalCode"
+                    [required]="usernameControl"
+                    label="Ingresa tu identificación para recibir un nuevo enlace"></label>
+
+                <input
+                    pInputText
+                    id="transactionalCode"
+                    type="email"
+                    [formControl]="usernameControl" />
+
+                <small appErrorMessage
+                       [errors]="usernameControl.errors"
+                       [touched]="usernameControl.touched"
+                       [dirty]="usernameControl.dirty"></small>
+            </div>
+
+            <div class="custom-form-field md:col-span-12 mt-4">
+                <p-button
+                    type="submit"
+                    styleClass="w-full"
+                    label="Solicitar nuevo enlace"
+                    [icon]="CustomIcons.ENVELOPE_OPEN_SOLID"
+                    [raised]="true"
+                    [disabled]="usernameControl.invalid" />
+            </div>
+        </form>
+    </div>
+</p-dialog>

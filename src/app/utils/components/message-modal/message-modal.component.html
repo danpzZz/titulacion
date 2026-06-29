@@ -12,23 +12,26 @@
 
     <ng-template #content>
         @if (Array.isArray(customMessageService.modalMessage)) {
-            @for (message of customMessageService.modalMessage; track message) {
-                <ul>
-                    <li>
-                        <h6>
-                            <i [class]="customMessageService.modalIcon"
-                               [style]="{'color':customMessageService.modalIconColor}">
-                            </i>
-                            {{ message }}
-                        </h6>
-                    </li>
-                </ul>
-            }
-        } @else {
-            <div>
 
-                {{ customMessageService.modalMessage }}
-            </div>
+            @for (group of groupedMessages(); track group.label) {
+
+                <h5>{{ group.label }}</h5>
+
+                <ul>
+                    @for (error of group.errors; track error) {
+                        <li>
+                            <i
+                                [class]="customMessageService.modalIcon"
+                                [style]="{'color': customMessageService.modalIconColor}">
+                            </i>
+
+                            {{ error }}
+                        </li>
+                    }
+                </ul>
+
+                <p-divider />
+            }
         }
     </ng-template>
 
@@ -37,7 +40,7 @@
             <p-button
                 label="Cerrar"
                 [severity]="customMessageService.modalAcceptSeverity"
-                [icon]="FontAwesome.XMARK_SOLID"
+                [icon]="CustomIcons.XMARK_SOLID"
                 (click)="customMessageService.setModalVisible(false)" />
         </div>
     </ng-template>

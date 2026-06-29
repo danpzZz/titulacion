@@ -1,11 +1,10 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '@env/environment';
-import { CustomMessageService } from '@utils/services/custom-message.service';
-import { HttpResponseInterface } from '@modules/auth/work-flows';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { CatalogueInterface, ModelCatalogueInterface } from '@utils/interfaces';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {environment} from '@env/environment';
+import {CustomMessageService} from '@utils/services/custom-message.service';
+import {map} from 'rxjs/operators';
+import {Observable} from 'rxjs';
+import {CatalogueInterface,HttpResponseInterface, ModelCatalogueInterface} from '@utils/interfaces';
 
 @Injectable({
     providedIn: 'root'

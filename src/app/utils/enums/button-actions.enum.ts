@@ -97,7 +97,7 @@ export enum IconButtonActionEnum {
   UPLOAD = 'pi pi-upload',
   EDIT = 'pi pi-pencil',
   COMPLETE = 'pi pi-pencil',
-  CANCEL = 'FontAwesome.XMARK_SOLID',
+  CANCEL = 'CustomIcons.XMARK_SOLID',
   RETURN = 'pi pi-arrow-left',
   DOWNLOAD = 'pi pi-download',
   DOWNLOADS = 'pi pi-download',
@@ -149,3 +149,34 @@ export enum SeverityButtonActionEnum {
   DOWNLOAD = 'info',
 }
 
+
+// ── Additions for secretary/enrollment ───────────────────────────────────────
+export const BreadcrumbEnum = {
+    ENROLLMENTS: 'Matrículas',
+    ENROLLMENT_DETAILS: 'Asignaturas',
+    FORM: 'Formulario',
+};
+
+export enum RolesEnum {
+    SECRETARY = 'secretary',
+    ADMIN = 'admin',
+    STUDENT = 'student',
+    COORDINATOR = 'coordinator',
+}
+
+export enum RoutesEnum {
+    NEW = 'new',
+}
+
+export enum SkeletonEnum {
+    CARD = 'card',
+    LIST = 'list',
+}
+
+export enum CatalogueEnrollmentStateEnum {
+    ENROLLED = 'enrolled',
+    APPROVED = 'approved',
+    REJECTED = 'rejected',
+    REVOKED = 'revoked',
+    REQUESTED = 'requested',
+}

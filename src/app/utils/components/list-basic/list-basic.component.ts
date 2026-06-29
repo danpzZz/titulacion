@@ -6,9 +6,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Table, TableModule } from 'primeng/table';
 import { Tooltip } from 'primeng/tooltip';
 import { CoreService } from '@utils/services';
-import { ColInterface } from '@utils/interfaces/col.interface';
+import { ColInterface } from '@utils/interfaces';
 import { DatePipe } from '@angular/common';
-import { FontAwesome } from '@modules/public/icons/font-awesome';
+import {CustomIcons} from "@utils/icons/custom-icons";
+
 
 @Component({
     selector: 'app-list-basic',
@@ -57,5 +58,5 @@ export class ListBasicComponent implements OnInit {
         this.dt.filterGlobal(value, 'contains');
     }
 
-    protected readonly FontAwesome = FontAwesome;
+    protected readonly CustomIcons = CustomIcons;
 }

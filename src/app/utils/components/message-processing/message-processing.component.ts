@@ -1,8 +1,7 @@
-import { Component, inject } from '@angular/core';
-import { CustomMessageService } from '@utils/services/custom-message.service';
-import { Dialog } from 'primeng/dialog';
-import { Button } from 'primeng/button';
-import { ProgressBar } from 'primeng/progressbar';
+import {Component, inject} from '@angular/core';
+import {CustomMessageService} from '@utils/services/custom-message.service';
+import {Dialog} from 'primeng/dialog';
+import {ProgressBar} from 'primeng/progressbar';
 
 @Component({
     selector: 'app-message-processing',
@@ -12,5 +11,4 @@ import { ProgressBar } from 'primeng/progressbar';
 })
 export class MessageProcessingComponent {
     protected readonly customMessageService = inject(CustomMessageService);
-    protected readonly Array = Array;
 }

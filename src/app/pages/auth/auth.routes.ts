@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
-import { Access } from './access';
-import { Login } from './login';
-import { Error } from './error';
+import { MY_ROUTES } from '@routes';
 
 export default [
-    { path: 'access', component: Access },
-    { path: 'error', component: Error },
-    { path: 'login', component: Login }
+    { path: MY_ROUTES.authPages.signIn.base, title: 'Login', loadComponent: () => import('./components/sign-in/sign-in.component') },
+    { path: MY_ROUTES.authPages.signUp.base, title: 'Registro', loadComponent: () => import('./components/sign-up/sign-up.component') },
+    {
+        path: MY_ROUTES.authPages.passwordReset.base,
+        title: 'Recuperación Cuenta',
+        loadComponent: () => import('./components/password-reset/password-reset.component')
+    }
 ] as Routes;

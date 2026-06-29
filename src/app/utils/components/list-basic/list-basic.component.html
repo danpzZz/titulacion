@@ -15,7 +15,7 @@
                 <!--                <div class="md:col-span-4 custom-form-field">-->
                 <!--                    <p-iconfield>-->
                 <!--                        <p-inputicon>-->
-                <!--                            <i [class]="FontAwesome.MAGNIFYING_GLASS_SOLID"></i>-->
+                <!--                            <i [class]="CustomIcons.MAGNIFYING_GLASS_SOLID"></i>-->
                 <!--                        </p-inputicon>-->
 
                 <!--                        <input-->
@@ -38,7 +38,7 @@
 
             <th>
                 @if (buttonCreated()) {
-                    <p-button pTooltip="Crear" [icon]="FontAwesome.PLUS_SOLID" severity="success"
+                    <p-button pTooltip="Crear" [icon]="CustomIcons.PLUS_SOLID" severity="success"
                               (onClick)="create()" />
                 }
             </th>
@@ -70,7 +70,7 @@
             <td>
                 <p-button
                     [raised]="true"
-                    [icon]="FontAwesome.ELLIPSIS_VERTICAL_SOLID"
+                    [icon]="CustomIcons.ELLIPSIS_VERTICAL_SOLID"
                     (click)="onSelect.emit({item,rowIndex})" />
             </td>
         </tr>

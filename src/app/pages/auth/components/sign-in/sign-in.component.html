@@ -1,0 +1,172 @@
+<div class="custom-form-card">
+    <form
+        [formGroup]="form"
+        class="custom-form-grid md:grid-cols-12"
+        (ngSubmit)="onSubmit()"
+    >
+        <!-- title -->
+        <div class="custom-form-title md:col-span-12 text-center">
+            Ingreso
+        </div>
+
+        <!-- username -->
+        <div class="custom-form-field md:col-span-12">
+            <label
+                appLabel for="username"
+                label="Correo Electrónico"
+                [required]="usernameField"></label>
+
+            <p-inputgroup>
+                <p-inputgroup-addon>
+                    <i [class]="CustomIcons.ENVELOPE_SOLID"></i>
+                </p-inputgroup-addon>
+                <input
+                    pInputText
+                    type="text"
+                    id="username"
+                    formControlName="username" />
+            </p-inputgroup>
+            <small
+                appErrorMessage
+                [errors]="usernameField.errors"
+                [touched]="usernameField.touched"
+                [dirty]="usernameField.dirty">
+            </small>
+        </div>
+
+        <!-- password -->
+        <div class="custom-form-field md:col-span-12">
+            <label
+                appLabel
+                for="password"
+                [required]="passwordField"
+                label="Contraseña">
+            </label>
+            <p-inputgroup>
+                <p-inputgroup-addon>
+                    <i [class]="CustomIcons.KEY_SOLID"></i>
+                </p-inputgroup-addon>
+                <p-password
+                    id="password"
+                    formControlName="password"
+                    inputStyleClass="w-full"
+                    [toggleMask]="true"
+                    [feedback]="false" />
+            </p-inputgroup>
+
+            <small
+                appErrorMessage
+                [errors]="passwordField.errors"
+                [touched]="passwordField.touched"
+                [dirty]="passwordField.dirty">
+            </small>
+        </div>
+
+        <!-- buttonActions -->
+        <div class="custom-form-field md:col-span-12">
+            <p-button
+                type="submit"
+                label="Ingresar"
+                styleClass="w-full"
+                [raised]="true"
+                [icon]="CustomIcons.ARROW_RIGHT_TO_BRACKET_SOLID"
+                [loading]="coreService.loading()">
+            </p-button>
+        </div>
+
+        <div class="custom-form-field md:col-span-6">
+            <p-button
+                label="Crear Cuenta"
+                styleClass="w-full"
+                [icon]="CustomIcons.USER_PLUS_SOLID"
+                severity="success"
+                [outlined]="true"
+                raised="true"
+                [routerLink]="MY_ROUTES.authPages.signUp.absolute" />
+        </div>
+
+        <div class="custom-form-field md:col-span-6">
+            <p-button
+                label="Recuperar Cuenta"
+                styleClass="w-full"
+                [icon]="CustomIcons.UNLOCK_KEYHOLE_SOLID"
+                severity="info"
+                [outlined]="true"
+                [raised]="true"
+                [routerLink]="MY_ROUTES.authPages.passwordReset.absolute" />
+        </div>
+    </form>
+</div>
+
+<p-dialog [(visible)]="isVisibleRoles"
+          [modal]="true"
+          [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+          [style]="{ width: '25vw' }"
+          [draggable]="false"
+          [closable]="false"
+          [dismissableMask]="false"
+          (onHide)="closeRoleSelect()"
+          [resizable]="false">
+    <ng-template #header>
+        <div class="custom-form-title">
+            Seleccione un Rol
+        </div>
+    </ng-template>
+
+    <div class="custom-form-card">
+        <div class="custom-form-grid md:grid-cols-12">
+            <div class="custom-form-field md:col-span-12">
+                <p class="text-muted-color">
+                    Continuar como...
+                </p>
+            </div>
+
+            @for (role of roles; track role.id) {
+                <div class="custom-form-field md:col-span-12">
+                    <p-button
+                        styleClass="w-full"
+                        [icon]="role.icon"
+                        [text]="true"
+                        [raised]="true"
+                        [label]="role.name"
+                        (onClick)="selectRole(role)" />
+                </div>
+            }
+
+            <div class="custom-form-field md:col-span-12">
+                <p-button
+                    label="Cerrar Sesión"
+                    styleClass="w-full"
+                    [text]="true"
+                    severity="danger"
+                    (onClick)="signOut()" />
+            </div>
+        </div>
+    </div>
+</p-dialog>
+
+<p-dialog [(visible)]="requestEmailVerificationModal"
+          [modal]="true"
+          [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+          [style]="{ width: '25vw' }"
+          [draggable]="false"
+          [resizable]="false">
+    <ng-template #header>
+        <div class="custom-form-title">
+            Solicitar enlace de verificación
+        </div>
+    </ng-template>
+
+    <div class="custom-form-card">
+        <div class="custom-form-grid md:grid-cols-12">
+            <div class="custom-form-field md:col-span-12">
+                <p-button
+                    label="Solicitar nuevo enlace"
+                    styleClass="w-full"
+                    [icon]="CustomIcons.ENVELOPE_OPEN_SOLID"
+                    [raised]="true"
+                    (onClick)="resendEmailVerification()" />
+            </div>
+        </div>
+    </div>
+</p-dialog>

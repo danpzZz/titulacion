@@ -14,7 +14,7 @@
                 <div class="md:col-span-4 flex flex-col gap-2">
                     <p-iconfield>
                         <p-inputicon>
-                            <i [class]="FontAwesome.MAGNIFYING_GLASS_SOLID"></i>
+                            <i [class]="CustomIcons.MAGNIFYING_GLASS_SOLID"></i>
                         </p-inputicon>
 
                         <input pInputText [formControl]="searchControl"
@@ -48,7 +48,7 @@
             <td class="justify-center">
                 <p-button
                     [raised]="true"
-                    [icon]="FontAwesome.ELLIPSIS_VERTICAL_SOLID"
+                    [icon]="CustomIcons.ELLIPSIS_VERTICAL_SOLID"
                     (click)="onSelect.emit({item,rowIndex})" />
             </td>
 

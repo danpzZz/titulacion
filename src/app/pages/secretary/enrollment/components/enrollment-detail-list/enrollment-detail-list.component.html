@@ -1,0 +1,145 @@
+<!-- Toolbar -->
+<div class="flex align-items-center gap-2 mb-3">
+  <p-button
+    label="Crear"
+    [icon]="PrimeIcons.PLUS"
+    severity="success"
+    (click)="goToCreate()">
+  </p-button>
+  <p-button
+    label="Refrescar"
+    [icon]="PrimeIcons.REFRESH"
+    severity="info"
+    [loading]="isLoading()"
+    (click)="loadDetails()">
+  </p-button>
+</div>
+
+<!-- Tabla -->
+<p-table
+  #dt1
+  dataKey="id"
+  styleClass="p-datatable-striped p-datatable-gridlines"
+  [value]="items()"
+  [columns]="columns"
+  [paginator]="true"
+  paginatorPosition="top"
+  [rows]="10"
+  [globalFilterFields]="['subject.code','subject.name','academicPeriod.name']"
+  [loading]="isLoading()">
+
+  <ng-template pTemplate="caption">
+    <div class="flex align-items-center justify-content-between">
+      <h2 class="m-0">Asignaturas</h2>
+      <p-inputGroup styleClass="w-20rem">
+        <input
+          #search pInputText type="text"
+          placeholder="Buscar..."
+          (input)="dt1.filterGlobal(search.value, 'contains')"/>
+        <p-inputGroupAddon>
+          <i [class]="PrimeIcons.SEARCH"></i>
+        </p-inputGroupAddon>
+      </p-inputGroup>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="header" let-columns>
+    <tr>
+      <th *ngFor="let col of columns" [pSortableColumn]="col.field" class="text-center">
+        {{ col.header }} <p-sortIcon [field]="col.field"></p-sortIcon>
+      </th>
+      <th class="text-center">Acciones</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-row>
+    <tr>
+      <td class="text-center">{{ row['subject']?.academicPeriod?.name }}</td>
+      <td class="text-center">{{ row['subject']?.code }} {{ row['subject']?.name }}</td>
+      <td class="text-center">{{ row['number'] }}</td>
+      <td class="text-center">{{ row['workday']?.name }}</td>
+      <td class="text-center">{{ row['parallel']?.name }}</td>
+      <td class="text-center">{{ row['type']?.name }}</td>
+      <td class="text-center">
+        @if (row['enrollmentDetailState']?.state) {
+          <p-tag
+            [value]="row['enrollmentDetailState'].state.name"
+            [severity]="row['enrollmentDetailState'].state.code | enrollmentState">
+          </p-tag>
+        }
+      </td>
+      <td class="text-center">{{ row['finalGrade'] }}</td>
+      <td class="text-center">{{ row['finalAttendance'] }}</td>
+      <td class="text-center">
+        @if (row['academicState']) {
+          <p-tag
+            [value]="row['academicState'].name"
+            [severity]="row['academicState'].code | academicStateSeverity">
+          </p-tag>
+        }
+      </td>
+      <td class="text-center">
+        <p-button
+          [icon]="PrimeIcons.ELLIPSIS_V"
+          severity="info"
+          [rounded]="true"
+          (click)="selectItem(row)">
+        </p-button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td [attr.colspan]="columns.length + 1" class="text-center p-4">
+        No se encontraron asignaturas.
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="summary">
+    En total hay {{ items().length }} registros.
+  </ng-template>
+
+</p-table>
+
+<!-- Drawer: acciones por asignatura -->
+<p-drawer
+  [(visible)]="isButtonActions"
+  position="right"
+  [style]="{'width':'280px'}"
+  header="Acciones">
+  @if (selectedItem(); as item) {
+    <div class="flex flex-column gap-2">
+      <p-button label="Editar" [icon]="PrimeIcons.PENCIL"
+        styleClass="w-full text-left" severity="secondary" [text]="true"
+        (click)="goToEdit(item.id); isButtonActions.set(false)">
+      </p-button>
+      <p-divider></p-divider>
+      <p-button label="Matricular" [icon]="PrimeIcons.BOOK"
+        styleClass="w-full text-left" severity="secondary" [text]="true"
+        (click)="enroll(item.id); isButtonActions.set(false)">
+      </p-button>
+      <p-divider></p-divider>
+      <p-button label="Anular" [icon]="PrimeIcons.BAN"
+        styleClass="w-full text-left" severity="secondary" [text]="true"
+        (click)="revoke(item.id); isButtonActions.set(false)">
+      </p-button>
+      <p-divider></p-divider>
+      <p-button label="Aprobar" [icon]="PrimeIcons.CHECK"
+        styleClass="w-full text-left" severity="secondary" [text]="true"
+        (click)="approve(item.id); isButtonActions.set(false)">
+      </p-button>
+      <p-divider></p-divider>
+      <p-button label="Rechazar" [icon]="PrimeIcons.TIMES_CIRCLE"
+        styleClass="w-full text-left" severity="secondary" [text]="true"
+        (click)="reject(item.id); isButtonActions.set(false)">
+      </p-button>
+      <p-divider></p-divider>
+      <p-button label="Eliminar" [icon]="PrimeIcons.TRASH"
+        styleClass="w-full text-left" severity="danger" [text]="true"
+        (click)="remove(item.id); isButtonActions.set(false)">
+      </p-button>
+    </div>
+  }
+</p-drawer>

@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { Drawer } from 'primeng/drawer';
 import { PanelMenu } from 'primeng/panelmenu';
 import { environment } from '@env/environment';
-import { FontAwesome } from '@modules/public/icons/font-awesome';
+import { CustomIcons } from '@modules/public/icons/custom-icons';
 import { Divider } from 'primeng/divider';
 
 @Component({
@@ -32,5 +32,5 @@ export class ButtonActionComponent {
     }
 
     protected readonly environment = environment;
-    protected readonly FontAwesome = FontAwesome;
+    protected readonly CustomIcons = CustomIcons;
 }

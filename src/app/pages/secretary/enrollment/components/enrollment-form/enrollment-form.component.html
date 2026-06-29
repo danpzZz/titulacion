@@ -1,0 +1,139 @@
+@if (isLoading()) {
+  <div class="p-4 text-center"><i class="pi pi-spin pi-spinner" style="font-size:2rem"></i></div>
+} @else {
+  <p-toolbar>
+    <div class="p-toolbar-group-start">
+      <span class="text-xl font-bold">
+        {{ id() === 'new' ? 'Nueva Matrícula' : 'Editar Matrícula' }}
+      </span>
+    </div>
+    <div class="p-toolbar-group-end">
+      <p-button
+        (click)="back()"
+        [icon]="IconButtonActionEnum.CANCEL"
+        [label]="LabelButtonActionEnum.CANCEL"
+        [severity]="SeverityButtonActionEnum.CANCEL">
+      </p-button>
+      <p-divider layout="vertical"></p-divider>
+      <p-button
+        (click)="onSubmit()"
+        [icon]="IconButtonActionEnum.SAVE"
+        [label]="LabelButtonActionEnum.SAVE"
+        [severity]="SeverityButtonActionEnum.SAVE">
+      </p-button>
+    </div>
+  </p-toolbar>
+
+  <p-panel class="p-fluid">
+
+    <!-- Datos del estudiante (solo lectura) -->
+    <div class="formgrid grid">
+      <div class="field xl:col-4 lg:col-4 md:col-4 sm:col-12">
+        <label appLabel label="Número de documento"></label>
+        <input pInputText [value]="form$().student.user.identification ?? ''" readonly/>
+      </div>
+      <div class="field xl:col-4 lg:col-4 md:col-4 sm:col-12">
+        <label appLabel label="Apellidos"></label>
+        <input pInputText [value]="form$().student.user.lastname ?? ''" readonly/>
+      </div>
+      <div class="field xl:col-4 lg:col-4 md:col-4 sm:col-12">
+        <label appLabel label="Nombres"></label>
+        <input pInputText [value]="form$().student.user.name ?? ''" readonly/>
+      </div>
+    </div>
+
+    <div class="formgrid grid">
+      <div class="field xl:col-3 lg:col-3 md:col-3 sm:col-12">
+        <label appLabel label="Correo institucional"></label>
+        <input pInputText [value]="form$().student.user.email ?? ''" readonly/>
+      </div>
+      <div class="field xl:col-3 lg:col-3 md:col-3 sm:col-12">
+        <label appLabel label="Correo personal"></label>
+        <input pInputText [value]="form$().student.user.personalEmail ?? ''" readonly/>
+      </div>
+      <div class="field xl:col-3 lg:col-3 md:col-3 sm:col-12">
+        <label appLabel label="Celular"></label>
+        <input pInputText [value]="form$().student.user.cellPhone ?? ''" readonly/>
+      </div>
+      <div class="field xl:col-3 lg:col-3 md:col-3 sm:col-12">
+        <label appLabel label="Teléfono fijo"></label>
+        <input pInputText [value]="form$().student.user.phone ?? ''" readonly/>
+      </div>
+    </div>
+
+    <!-- Estado y códigos -->
+    <div class="formgrid grid">
+      <div class="field xl:col-4 lg:col-4 md:col-4 sm:col-12">
+        <label appLabel label="Fecha de matrícula"></label>
+        <input pInputText [value]="form$().date ?? ''" readonly/>
+      </div>
+      <div class="field xl:col-4 lg:col-4 md:col-4 sm:col-12">
+        <label appLabel label="Código de matrícula"></label>
+        <input pInputText [value]="form$().code ?? ''" readonly/>
+      </div>
+      <div class="field xl:col-4 lg:col-4 md:col-4 sm:col-12">
+        <label appLabel label="Estado"></label>
+        <div class="mt-1">
+          @if (form$().enrollmentState) {
+            <p-tag
+              [value]="form$().enrollmentState!.state.name"
+              [severity]="form$().enrollmentState!.state.code | enrollmentState">
+            </p-tag>
+          } @else {
+            <p-tag value="Sin estado" severity="warn"></p-tag>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Campos editables -->
+    <div class="formgrid grid">
+      <div class="field xl:col-3 lg:col-3 md:col-3 sm:col-12">
+        <label appLabel label="Tipo" [field]="typeField"></label>
+        <p-select dataKey="id" [formField]="typeField" [options]="types()" optionLabel="name" placeholder="Seleccione"></p-select>
+        <small [appErrorMessage]="$any(typeField)"></small>
+      </div>
+      <div class="field xl:col-3 lg:col-3 md:col-3 sm:col-12">
+        <label appLabel label="Periodo académico" [field]="academicPeriodField"></label>
+        <p-select dataKey="id" [formField]="academicPeriodField" [options]="academicPeriods()" optionLabel="name" placeholder="Seleccione"></p-select>
+        <small [appErrorMessage]="$any(academicPeriodField)"></small>
+      </div>
+      <div class="field xl:col-3 lg:col-3 md:col-3 sm:col-12">
+        <label appLabel label="Horario" [field]="workdayField"></label>
+        <p-select dataKey="id" [formField]="workdayField" [options]="workdays()" optionLabel="name" placeholder="Seleccione"></p-select>
+        <small [appErrorMessage]="$any(workdayField)"></small>
+      </div>
+      <div class="field xl:col-3 lg:col-3 md:col-3 sm:col-12">
+        <label appLabel label="Paralelo" [field]="parallelField"></label>
+        <p-select dataKey="id" [formField]="parallelField" [options]="parallels()" optionLabel="name" placeholder="Seleccione"></p-select>
+        <small [appErrorMessage]="$any(parallelField)"></small>
+      </div>
+    </div>
+
+    <!-- Socioeconómico -->
+    <div class="formgrid grid">
+      <div class="field xl:col-4 lg:col-4 md:col-4 sm:col-12">
+        <label appLabel label="Categoría Socioeconómica"></label>
+        <input pInputText [value]="form$().socioeconomicCategory ?? ''" readonly/>
+      </div>
+      <div class="field xl:col-4 lg:col-4 md:col-4 sm:col-12">
+        <label appLabel label="Porcentaje Socioeconómico"></label>
+        <input pInputText [value]="form$().socioeconomicPercentage ?? ''" readonly/>
+      </div>
+      <div class="field xl:col-4 lg:col-4 md:col-4 sm:col-12">
+        <label appLabel label="Puntaje Socioeconómico"></label>
+        <input pInputText [value]="form$().socioeconomicScore ?? ''" readonly/>
+      </div>
+    </div>
+
+    <!-- Observación -->
+    <div class="formgrid grid">
+      <div class="field xl:col-12">
+        <label appLabel label="Observación" [field]="observationField"></label>
+        <input pInputText [formField]="observationField"/>
+        <small [appErrorMessage]="$any(observationField)"></small>
+      </div>
+    </div>
+
+  </p-panel>
+}

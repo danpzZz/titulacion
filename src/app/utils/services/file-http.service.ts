@@ -1,12 +1,11 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { environment } from '@env/environment';
-import { CustomMessageService } from '@utils/services/custom-message.service';
-import { HttpResponseInterface } from '@modules/auth/work-flows';
-import { map } from 'rxjs/operators';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {environment} from '@env/environment';
+import {CustomMessageService} from '@utils/services/custom-message.service';
+import {map} from 'rxjs/operators';
 
-import { FileInterface } from '@utils/interfaces';
-import { CoreService } from '@utils/services/core.service';
+import {FileInterface, HttpResponseInterface} from '@utils/interfaces';
+import {CoreService} from '@utils/services/core.service';
 
 @Injectable({
     providedIn: 'root'
@@ -22,9 +21,9 @@ export class FileHttpService {
 
         const params = new HttpParams().append('typeId', typeId);
 
-        return this._httpClient.post<HttpResponseInterface>(url, payload, { params }).pipe(
+        return this._httpClient.post<HttpResponseInterface>(url, payload, {params}).pipe(
             map((response) => {
-                this._customMessageService.showSuccess({ summary: response.title, detail: response.message });
+                this._customMessageService.showSuccess({summary: response.title, detail: response.message});
 
                 return response.data;
             })
