@@ -185,12 +185,12 @@ let detailStates: Record<string, any> = {
 
 // ─── Catálogos por tipo ───────────────────────────────────────────────────────
 const CATALOGUES: Record<string, any[]> = {
-  ENROLLMENT_TYPE:          [CAT.typeOrdinaria, CAT.typeEspecial, {id: 'ct000001-0000-0000-0000-000000000003', code: 'extraordinary', name: 'Extraordinaria'}],
-  PARALLEL:                 [CAT.parallelA, CAT.parallelB, {id: IDS.cat.parallelB+'1', code: 'c', name: 'C'}],
-  ENROLLMENTS_WORKDAY:      [CAT.workday0709, CAT.workday0913, {id: 'ct000003-0000-0000-0000-000000000003', code: '2', name: '09:00-11:00'}],
+  enrollment_type:          [CAT.typeOrdinaria, CAT.typeEspecial, {id: 'ct000001-0000-0000-0000-000000000003', code: 'extraordinary', name: 'Extraordinaria'}],
+  parallel:                 [CAT.parallelA, CAT.parallelB, {id: IDS.cat.parallelB+'1', code: 'c', name: 'C'}],
+  enrollments_workday:      [CAT.workday0709, CAT.workday0913, {id: 'ct000003-0000-0000-0000-000000000003', code: '2', name: '09:00-11:00'}],
   ACADEMIC_PERIOD:          [CAT.apStarter, CAT.apPrimero, {id: 'ct000004-0000-0000-0000-000000000004', code: '2', name: 'Segundo'}, CAT.apCuarto],
-  ENROLLMENT_STATE:         [CAT.stRegistered, CAT.stRequested, CAT.stApproved, CAT.stEnrolled, CAT.stRejected, CAT.stRevoked],
-  ENROLLMENTS_ACADEMIC_STATE: [CAT.acAprobado, CAT.acReprobado],
+  enrollment_state:         [CAT.stRegistered, CAT.stRequested, CAT.stApproved, CAT.stEnrolled, CAT.stRejected, CAT.stRevoked],
+  enrollments_academic_state: [CAT.acAprobado, CAT.acReprobado],
 };
 
 // ─── Helper: respuesta OK ─────────────────────────────────────────────────────
@@ -241,9 +241,11 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   // ── Catalogues ──────────────────────────────────────────────────────────────
-  if (url.includes('/catalogues/catalogue')) {
-    const type = new URL(url, 'http://x').searchParams.get('type') ?? '';
+  if (url.includes('/catalogues/catalogue') || url.includes('/catalogues')) {
+    // Try req.params first (HttpParams), then URL string as fallback
+    const type = req.params.get('type') ?? url.match(/[?&]type=([^&]+)/)?.[1] ?? '';
     const result = CATALOGUES[type] ?? [];
+    console.log('[MOCK] catalogue type:', type, '→ results:', result.length);
     return ok(result);
   }
 
@@ -325,9 +327,9 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     const newDetail = {
       id: newId, number: body?.number ?? 1, date: new Date().toISOString(),
       subject: SUBJECTS.find(s => s.id === body?.subjectId) ?? SUBJECTS[0],
-      type: CATALOGUES['ENROLLMENT_TYPE'].find(c => c.id === body?.typeId) ?? CAT.typeOrdinaria,
-      workday: CATALOGUES['ENROLLMENTS_WORKDAY'].find(c => c.id === body?.workdayId) ?? CAT.workday0913,
-      parallel: CATALOGUES['PARALLEL'].find(c => c.id === body?.parallelId) ?? CAT.parallelA,
+      type: CATALOGUES['enrollment_type'].find(c => c.id === body?.typeId) ?? CAT.typeOrdinaria,
+      workday: CATALOGUES['enrollments_workday'].find(c => c.id === body?.workdayId) ?? CAT.workday0913,
+      parallel: CATALOGUES['parallel'].find(c => c.id === body?.parallelId) ?? CAT.parallelA,
       enrollmentDetailState: {state: CAT.stRegistered},
       finalGrade: null, finalAttendance: null, academicState: null, observation: body?.observation ?? '',
     };
@@ -341,6 +343,25 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   }
   if (url.match(/\/enrollment-details\/[^/]+$/) && method === 'PUT') {
     const id = url.split('/enrollment-details/')[1].split('/')[0];
+    const body = req.body as any;
+    // Apply the update to the stored detail
+    for (const enrollmentId of Object.keys(DETAILS)) {
+      const idx = DETAILS[enrollmentId].findIndex((d: any) => d.id === id);
+      if (idx !== -1) {
+        const existing = DETAILS[enrollmentId][idx];
+        // Update editable fields — form sends complete objects
+        DETAILS[enrollmentId][idx] = {
+          ...existing,
+          workday:         body?.workday         ?? existing.workday,
+          parallel:        body?.parallel        ?? existing.parallel,
+          finalGrade:      body?.finalGrade      !== undefined ? body.finalGrade      : existing.finalGrade,
+          finalAttendance: body?.finalAttendance !== undefined ? body.finalAttendance : existing.finalAttendance,
+          academicState:   body?.academicState   ?? existing.academicState,
+          observation:     body?.observation     !== undefined ? body.observation     : existing.observation,
+        };
+        break;
+      }
+    }
     return ok(getDetail(id));
   }
   if (url.match(/\/enrollment-details\/[^/]+$/) && method === 'DELETE') {

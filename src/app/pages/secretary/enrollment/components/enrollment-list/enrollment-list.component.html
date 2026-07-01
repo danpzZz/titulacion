@@ -1,121 +1,60 @@
-<!-- Barra de filtros -->
-<div class="p-fluid mb-3">
-  <div class="grid align-items-center">
+<!-- Barra superior: botones + 4 filtros -->
+<div class="flex align-items-center gap-2 mb-3" style="flex-wrap: wrap;">
 
-    <!-- Botones -->
-    <div class="col-12 xl:col-1 lg:col-1 md:col-2 sm:col-12 flex gap-2">
-      <p-button
-        [icon]="PrimeIcons.REFRESH"
-        severity="info"
-        [rounded]="true"
-        pTooltip="Refrescar"
-        (click)="findEnrollments()">
-      </p-button>
-      <p-button
-        [icon]="PrimeIcons.ELLIPSIS_V"
-        severity="info"
-        [rounded]="true"
-        pTooltip="Más opciones"
-        (click)="isMoreButtonActions.set(true)">
-      </p-button>
-    </div>
+  <p-button [icon]="PrimeIcons.REFRESH" severity="info" [rounded]="true" pTooltip="Refrescar"
+    (click)="findEnrollments()">
+  </p-button>
+  <p-button [icon]="PrimeIcons.ELLIPSIS_V" severity="info" [rounded]="true" pTooltip="Más opciones"
+    (click)="isMoreButtonActions.set(true)">
+  </p-button>
 
-    <!-- Filtro: Periodo Lectivo -->
-    <div class="col-12 xl:col-3 lg:col-3 md:col-5 sm:col-12">
-      <p-select
-        [ngModel]="store.selectedSchoolPeriod()"
-        (ngModelChange)="store.updateFilter('schoolPeriod', $event)"
-        dataKey="id"
-        [options]="schoolPeriods()"
-        optionLabel="name"
-        placeholder="Periodo Lectivo"
-        styleClass="w-full">
-        <ng-template pTemplate="selectedItem">
-          @if (store.selectedSchoolPeriod()) {
-            {{ store.selectedSchoolPeriod()!.shortName }} ({{ store.selectedSchoolPeriod()!.name }})
-          }
-        </ng-template>
-        <ng-template pTemplate="item" let-item>
-          {{ item.shortName }} ({{ item.name }})
-        </ng-template>
-      </p-select>
-    </div>
+  <p-select [ngModel]="store.selectedSchoolPeriod()" (ngModelChange)="store.updateFilter('schoolPeriod', $event)"
+    dataKey="id" [options]="schoolPeriods()" optionLabel="name" placeholder="Periodo Lectivo"
+    [style]="{'min-width':'220px'}">
+    <ng-template pTemplate="selectedItem">
+      @if (store.selectedSchoolPeriod()) {
+      {{ store.selectedSchoolPeriod()!.shortName }} ({{ store.selectedSchoolPeriod()!.name }})
+      }
+    </ng-template>
+    <ng-template pTemplate="item" let-item>
+      {{ item.shortName }} ({{ item.name }})
+    </ng-template>
+  </p-select>
 
-    <!-- Filtro: Carrera -->
-    <div class="col-12 xl:col-3 lg:col-3 md:col-5 sm:col-12">
-      <p-select
-        [ngModel]="store.selectedCareer()"
-        (ngModelChange)="store.updateFilter('career', $event)"
-        dataKey="id"
-        [options]="careers()"
-        optionLabel="name"
-        placeholder="Carrera"
-        styleClass="w-full">
-      </p-select>
-    </div>
+  <p-select [ngModel]="store.selectedCareer()" (ngModelChange)="store.updateFilter('career', $event)" dataKey="id"
+    [options]="careers()" optionLabel="name" placeholder="Carrera" [style]="{'min-width':'140px'}">
+  </p-select>
 
-    <!-- Filtro: Nivel Académico -->
-    <div class="col-12 xl:col-2 lg:col-2 md:col-6 sm:col-12">
-      <p-select
-        [ngModel]="store.selectedAcademicPeriod()"
-        (ngModelChange)="store.updateFilter('academicPeriod', $event)"
-        dataKey="id"
-        [options]="academicPeriods()"
-        optionLabel="name"
-        placeholder="Todos los Niveles"
-        [showClear]="true"
-        styleClass="w-full">
-      </p-select>
-    </div>
+  <p-select [ngModel]="store.selectedAcademicPeriod()" (ngModelChange)="store.updateFilter('academicPeriod', $event)"
+    dataKey="id" [options]="academicPeriods()" optionLabel="name" placeholder="Todos los Niveles" [showClear]="true"
+    [style]="{'min-width':'170px'}">
+  </p-select>
 
-    <!-- Filtro: Estado -->
-    <div class="col-12 xl:col-3 lg:col-3 md:col-6 sm:col-12">
-      <p-select
-        [ngModel]="store.selectedEnrollmentState()"
-        (ngModelChange)="store.updateFilter('enrollmentState', $event)"
-        dataKey="id"
-        [options]="enrollmentStates()"
-        optionLabel="name"
-        placeholder="Todos los estados"
-        [showClear]="true"
-        styleClass="w-full">
-      </p-select>
-    </div>
+  <p-select [ngModel]="store.selectedEnrollmentState()" (ngModelChange)="store.updateFilter('enrollmentState', $event)"
+    dataKey="id" [options]="enrollmentStates()" optionLabel="name" placeholder="Todos los estados" [showClear]="true"
+    [style]="{'min-width':'170px'}">
+  </p-select>
 
-  </div>
 </div>
 
 @if (!store.canSearch()) {
-  <div class="p-3 text-center text-color-secondary">
-    Selecciona un <strong>Periodo Lectivo</strong> y una <strong>Carrera</strong> para buscar matrículas.
-  </div>
+<div style="padding: 0.75rem; text-align: center; color: var(--text-color-secondary)">
+  Selecciona un <strong>Periodo Lectivo</strong> y una <strong>Carrera</strong> para buscar matrículas.
+</div>
 }
 
-<!-- Paginador arriba -->
-<p-paginator
-  [rows]="store.paginator().limit"
-  [totalRecords]="store.paginator().totalItems"
+<p-paginator [rows]="store.paginator().limit" [totalRecords]="store.paginator().totalItems"
   (onPageChange)="paginate($event)">
 </p-paginator>
 
-<!-- Tabla -->
-<p-table
-  #dt1
-  dataKey="id"
-  styleClass="p-datatable-striped p-datatable-gridlines"
-  [value]="store.items()"
-  [columns]="columns"
-  [loading]="store.isLoading()">
+<p-table #dt1 dataKey="id" styleClass="p-datatable-striped p-datatable-gridlines" [value]="store.items()"
+  [columns]="columns" [loading]="store.isLoading()">
 
   <ng-template pTemplate="caption">
     <div class="flex align-items-center justify-content-between">
-      <h2 class="m-0">Lista de Matriculados</h2>
-      <p-inputGroup styleClass="w-20rem">
-        <input
-          type="text"
-          pInputText
-          [ngModel]="store.search()"
-          (ngModelChange)="store.updateFilter('search', $event)"
+      <h2 style="margin: 0">Lista de Matriculados</h2>
+      <p-inputGroup [style]="{'width':'280px'}">
+        <input type="text" pInputText [ngModel]="store.search()" (ngModelChange)="store.updateFilter('search', $event)"
           placeholder="Buscar...">
         <p-inputGroupAddon>
           <i [class]="PrimeIcons.SEARCH"></i>
@@ -126,37 +65,32 @@
 
   <ng-template pTemplate="header" let-columns>
     <tr>
-      <th *ngFor="let col of columns" [pSortableColumn]="col.field" class="text-center">
+      <th *ngFor="let col of columns" [pSortableColumn]="col.field" style="text-align:center; white-space:nowrap">
         {{ col.header }} <p-sortIcon [field]="col.field"></p-sortIcon>
       </th>
-      <th class="text-center">Acciones</th>
+      <th style="text-align:center">Acciones</th>
     </tr>
   </ng-template>
 
   <ng-template pTemplate="body" let-row>
     <tr>
-      <td class="text-center">{{ row['career']?.name }}</td>
-      <td class="text-center">{{ row['student']?.user?.identification }}</td>
-      <td class="text-center">{{ row['student']?.user?.lastname }}</td>
-      <td class="text-center">{{ row['student']?.user?.name }}</td>
-      <td class="text-center">{{ row['type']?.name }}</td>
-      <td class="text-center">{{ row['academicPeriod']?.name }}</td>
-      <td class="text-center">{{ row['workday']?.name }}</td>
-      <td class="text-center">{{ row['parallel']?.name }}</td>
-      <td class="text-center">
+      <td style="text-align:center">{{ row['career']?.name }}</td>
+      <td style="text-align:center">{{ row['student']?.user?.identification }}</td>
+      <td style="text-align:center">{{ row['student']?.user?.lastname }}</td>
+      <td style="text-align:center">{{ row['student']?.user?.name }}</td>
+      <td style="text-align:center">{{ row['type']?.name }}</td>
+      <td style="text-align:center">{{ row['academicPeriod']?.name }}</td>
+      <td style="text-align:center">{{ row['workday']?.name }}</td>
+      <td style="text-align:center">{{ row['parallel']?.name }}</td>
+      <td style="text-align:center">
         @if (row['enrollmentState']?.state) {
-          <p-tag
-            [value]="row['enrollmentState'].state.name"
-            [severity]="row['enrollmentState'].state.code | enrollmentState">
-          </p-tag>
+        <p-tag [value]="row['enrollmentState'].state.name"
+          [severity]="row['enrollmentState'].state.code | enrollmentState">
+        </p-tag>
         }
       </td>
-      <td class="text-center">
-        <p-button
-          [icon]="PrimeIcons.ELLIPSIS_V"
-          severity="info"
-          [rounded]="true"
-          (click)="selectItem(row)">
+      <td style="text-align:center">
+        <p-button [icon]="PrimeIcons.ELLIPSIS_V" severity="info" [rounded]="true" (click)="selectItem(row)">
         </p-button>
       </td>
     </tr>
@@ -164,7 +98,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td [attr.colspan]="columns.length + 1" class="text-center p-4">
+      <td [attr.colspan]="columns.length + 1" style="text-align:center; padding:1.5rem">
         No se encontraron registros.
       </td>
     </tr>
@@ -173,89 +107,40 @@
   <ng-template pTemplate="summary">
     En total hay {{ store.paginator().totalItems }} registros.
   </ng-template>
-
 </p-table>
 
 <!-- Drawer: acciones por fila -->
-<p-drawer
-  [(visible)]="isButtonActions"
-  position="right"
-  [style]="{'width':'280px'}"
-  header="Acciones">
+<p-drawer [(visible)]="isButtonActions" position="right" [style]="{'width':'280px'}" header="Acciones">
   @if (store.selectedItem(); as item) {
-    <div class="flex flex-column gap-2">
-      <p-button
-        label="Editar"
-        [icon]="PrimeIcons.PENCIL"
-        styleClass="w-full text-left"
-        severity="secondary"
-        [text]="true"
-        (click)="goToEdit(item.id); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button
-        label="Asignaturas"
-        [icon]="PrimeIcons.BOOK"
-        styleClass="w-full text-left"
-        severity="secondary"
-        [text]="true"
-        (click)="goToDetails(item.id); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button
-        label="Aprobar"
-        [icon]="PrimeIcons.CHECK"
-        styleClass="w-full text-left"
-        severity="secondary"
-        [text]="true"
-        (click)="approve(item.id); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button
-        label="Matricular"
-        [icon]="PrimeIcons.STAR"
-        styleClass="w-full text-left"
-        severity="secondary"
-        [text]="true"
-        (click)="enroll(item.id); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button
-        label="Rechazar"
-        [icon]="PrimeIcons.TIMES_CIRCLE"
-        styleClass="w-full text-left"
-        severity="secondary"
-        [text]="true"
-        (click)="reject(item.id); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button
-        label="Descargar Certificado"
-        [icon]="PrimeIcons.DOWNLOAD"
-        styleClass="w-full text-left"
-        severity="secondary"
-        [text]="true"
-        (click)="downloadCertificate(item); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button
-        label="Anular Matrícula"
-        [icon]="PrimeIcons.BAN"
-        styleClass="w-full text-left"
-        severity="danger"
-        [text]="true"
-        (click)="revoke(item.id); isButtonActions.set(false)">
-      </p-button>
-    </div>
+  <div class="drawer-actions">
+
+    <p-button label="Editar" icon="pi pi-pencil" [text]="true" styleClass="w-full justify-content-start"
+      (onClick)="edit(item)" />
+
+    <p-button label="Asignaturas" [icon]="PrimeIcons.BOOK" [text]="true" severity="secondary"
+      styleClass="w-full justify-content-start" (click)="goToDetails(item.id); isButtonActions.set(false)" />
+
+    <p-button label="Aprobar" [icon]="PrimeIcons.CHECK" [text]="true" severity="secondary"
+      styleClass="w-full justify-content-start" (click)="approve(item.id); isButtonActions.set(false)" />
+
+    <p-button label="Matricular" [icon]="PrimeIcons.STAR" [text]="true" severity="secondary"
+      styleClass="w-full justify-content-start" (click)="enroll(item.id); isButtonActions.set(false)" />
+
+    <p-button label="Rechazar" [icon]="PrimeIcons.TIMES_CIRCLE" [text]="true" severity="secondary"
+      styleClass="w-full justify-content-start" (click)="reject(item.id); isButtonActions.set(false)" />
+
+    <p-button label="Descargar Certificado" [icon]="PrimeIcons.DOWNLOAD" [text]="true" severity="secondary"
+      styleClass="w-full justify-content-start" (click)="downloadCertificate(item); isButtonActions.set(false)" />
+
+    <p-button label="Anular Matrícula" [icon]="PrimeIcons.BAN" [text]="true" severity="danger"
+      styleClass="w-full justify-content-start" (click)="revoke(item.id); isButtonActions.set(false)" />
+
+  </div>
   }
 </p-drawer>
 
-<!-- Drawer: más opciones globales -->
-<p-drawer
-  [(visible)]="isMoreButtonActions"
-  position="left"
-  [style]="{'width':'300px'}"
-  header="Descargas">
+<!-- Drawer: descargas -->
+<p-drawer [(visible)]="isMoreButtonActions" position="left" [style]="{'width':'300px'}" header="Descargas">
   <div class="flex flex-column gap-2">
     <p-button label="Matriculados por Carrera" [icon]="PrimeIcons.DOWNLOAD" styleClass="w-full"
       (click)="downloadByCareer(); isMoreButtonActions.set(false)"></p-button>

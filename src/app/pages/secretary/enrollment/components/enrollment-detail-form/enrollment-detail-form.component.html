@@ -1,52 +1,39 @@
 @if (isLoading()) {
-  <div class="p-4 text-center">
-    <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i>
+  <div style="padding: 2rem; text-align: center">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
   </div>
 } @else {
 
-  <!-- Header tipo "Editar / Nueva Asignatura" + botones -->
-  <div class="flex align-items-center justify-content-between mb-3 px-2">
+<div style="width:100%; box-sizing:border-box; padding: 0.5rem 0">
+
+  <!-- Header -->
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:0.75rem;">
     <div>
-      <div class="flex align-items-center gap-2 mb-1">
-        <i class="pi pi-pencil text-primary"></i>
-        <span class="text-xl font-semibold text-primary">
+      <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem">
+        <i class="pi pi-pencil" style="color: var(--primary-color)"></i>
+        <span style="font-size:1.25rem; font-weight:600; color: var(--primary-color)">
           {{ isNew() ? 'Nueva Asignatura' : 'Editar' }}
         </span>
       </div>
-      <small class="text-color-secondary">Todos los campos con * son obligatorios.</small>
+      <small style="color: var(--text-color-secondary)">Todos los campos con * son obligatorios.</small>
     </div>
-    <div class="flex gap-2">
-      <p-button
-        label="Cancelar"
-        icon="pi pi-arrow-left"
-        severity="danger"
-        (click)="back()">
-      </p-button>
-      <p-button
-        label="Guardar"
-        icon="pi pi-save"
-        severity="info"
-        (click)="onSubmit()">
-      </p-button>
+    <div style="display:flex; gap:0.5rem">
+      <p-button label="Cancelar" icon="pi pi-arrow-left" severity="danger" (click)="back()"></p-button>
+      <p-button label="Guardar"  icon="pi pi-save"      severity="info"   (click)="onSubmit()"></p-button>
     </div>
   </div>
 
-  <p-panel>
-    <div class="formgrid grid p-fluid">
+  <p-divider styleClass="mt-0 mb-3"></p-divider>
 
-      <!-- Asignatura (solo lectura al editar) -->
-      <div class="field col-12 xl:col-6">
-        <label appLabel label="Asignatura" [field]="subjectField"></label>
-        <p-select
-          dataKey="id"
-          [formField]="subjectField"
-          [options]="subjects()"
-          [filter]="true"
-          filterBy="code,name"
-          optionLabel="name"
-          placeholder="Seleccione"
-          [disabled]="!isNew()"
-          styleClass="w-full">
+  <!-- Fila 1: Asignatura (readonly al editar) + Tipo de matrícula (readonly) -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem 1.5rem; margin-bottom:0.75rem">
+
+    <div style="display:flex; flex-direction:column; gap:0.25rem">
+      <label appLabel label="Asignatura"></label>
+      @if (isNew()) {
+        <p-select dataKey="id" [formField]="subjectField" [options]="subjects()"
+          [filter]="true" filterBy="code,name" optionLabel="name"
+          placeholder="Seleccione" styleClass="w-full">
           <ng-template pTemplate="selectedItem">
             @if (form$().subject) {
               {{ form$().subject.code }} - {{ form$().subject.name }}
@@ -58,117 +45,90 @@
           </ng-template>
         </p-select>
         <small [appErrorMessage]="$any(subjectField)"></small>
-      </div>
-
-      <!-- Tipo de matrícula -->
-      <div class="field col-12 xl:col-6">
-        <label appLabel label="Tipo de matrícula" [field]="typeField"></label>
-        <p-select
-          dataKey="id"
-          [formField]="typeField"
-          [options]="types()"
-          optionLabel="name"
-          placeholder="Seleccione"
-          styleClass="w-full">
-        </p-select>
-        <small [appErrorMessage]="$any(typeField)"></small>
-      </div>
-
-      <!-- Horario -->
-      <div class="field col-12 xl:col-6">
-        <label appLabel label="Horario" [field]="workdayField"></label>
-        <p-select
-          dataKey="id"
-          [formField]="workdayField"
-          [options]="workdays()"
-          optionLabel="name"
-          placeholder="Seleccione"
-          styleClass="w-full">
-        </p-select>
-        <small [appErrorMessage]="$any(workdayField)"></small>
-      </div>
-
-      <!-- Paralelo -->
-      <div class="field col-12 xl:col-6">
-        <label appLabel label="Paralelo" [field]="parallelField"></label>
-        <p-select
-          dataKey="id"
-          [formField]="parallelField"
-          [options]="parallels()"
-          optionLabel="name"
-          placeholder="Seleccione"
-          styleClass="w-full">
-        </p-select>
-        <small [appErrorMessage]="$any(parallelField)"></small>
-      </div>
-
-      <!-- Número de matrícula -->
-      <div class="field col-12 xl:col-6">
-        <label appLabel label="Numero de matrícula" [field]="numberField"></label>
-        <p-inputNumber
-          [formField]="numberField"
-          [min]="1" [max]="3"
-          [showButtons]="true"
-          styleClass="w-full">
-        </p-inputNumber>
-        <small [appErrorMessage]="$any(numberField)"></small>
-      </div>
-
-      <!-- Fecha (solo lectura) -->
-      <div class="field col-12 xl:col-6">
-        <label appLabel label="Fecha de matrícula"></label>
-        <input pInputText [value]="form$().date ?? ''" readonly class="w-full"/>
-      </div>
-
-      <!-- Calificación Final -->
-      <div class="field col-12 xl:col-4">
-        <label appLabel label="Calificación Final" [field]="finalGradeField"></label>
-        <p-inputNumber
-          [formField]="finalGradeField"
-          mode="decimal"
-          [useGrouping]="false"
-          [minFractionDigits]="2"
-          [maxFractionDigits]="2"
-          styleClass="w-full">
-        </p-inputNumber>
-        <small [appErrorMessage]="$any(finalGradeField)"></small>
-      </div>
-
-      <!-- Asistencia -->
-      <div class="field col-12 xl:col-4">
-        <label appLabel label="Asistencia" [field]="finalAttendanceField"></label>
-        <p-inputNumber
-          [formField]="finalAttendanceField"
-          mode="decimal"
-          [useGrouping]="false"
-          [minFractionDigits]="2"
-          [maxFractionDigits]="2"
-          styleClass="w-full">
-        </p-inputNumber>
-        <small [appErrorMessage]="$any(finalAttendanceField)"></small>
-      </div>
-
-      <!-- Estado Académico -->
-      <div class="field col-12 xl:col-4">
-        <label appLabel label="Estado Académico" [field]="academicStateField"></label>
-        <p-select
-          dataKey="id"
-          [formField]="academicStateField"
-          [options]="academicStates()"
-          optionLabel="name"
-          placeholder="Seleccione"
-          styleClass="w-full">
-        </p-select>
-        <small [appErrorMessage]="$any(academicStateField)"></small>
-      </div>
-
-      <!-- Observación -->
-      <div class="field col-12">
-        <label appLabel label="Observación de la matrícula" [field]="observationField"></label>
-        <input pInputText [formField]="observationField" class="w-full"/>
-        <small [appErrorMessage]="$any(observationField)"></small>
-      </div>
-
+      } @else {
+        <input pInputText readonly style="width:100%; background: var(--surface-hover)"
+          [value]="form$().subject ? (form$().subject.code + ' - ' + form$().subject.name + ' (' + (form$().subject.academicPeriod?.name ?? '') + ')') : ''"/>
+      }
     </div>
-  </p-panel>
+
+    <div style="display:flex; flex-direction:column; gap:0.25rem">
+      <label appLabel label="Tipo de matrícula"></label>
+      <input pInputText readonly style="width:100%; background: var(--surface-hover)"
+        [value]="form$().type?.name ?? ''"/>
+    </div>
+
+  </div>
+
+  <!-- Fila 2: Horario (editable) + Paralelo (editable) -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem 1.5rem; margin-bottom:0.75rem">
+
+    <div style="display:flex; flex-direction:column; gap:0.25rem">
+      <label appLabel label="Horario" [field]="workdayField"></label>
+      <p-select dataKey="id" [formField]="workdayField" [options]="workdays()"
+        optionLabel="name" placeholder="Seleccione" styleClass="w-full">
+      </p-select>
+      <small [appErrorMessage]="$any(workdayField)"></small>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:0.25rem">
+      <label appLabel label="Paralelo" [field]="parallelField"></label>
+      <p-select dataKey="id" [formField]="parallelField" [options]="parallels()"
+        optionLabel="name" placeholder="Seleccione" styleClass="w-full">
+      </p-select>
+      <small [appErrorMessage]="$any(parallelField)"></small>
+    </div>
+
+  </div>
+
+  <!-- Fila 3: Número de matrícula (readonly) + Fecha (readonly) -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem 1.5rem; margin-bottom:0.75rem">
+
+    <div style="display:flex; flex-direction:column; gap:0.25rem">
+      <label appLabel label="Numero de matrícula"></label>
+      <input pInputText readonly style="width:100%; background: var(--surface-hover)"
+        [value]="form$().number ?? ''"/>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:0.25rem">
+      <label appLabel label="Fecha de matrícula"></label>
+      <input pInputText readonly style="width:100%; background: var(--surface-hover)"
+        [value]="form$().date ?? ''"/>
+    </div>
+
+  </div>
+
+  <!-- Fila 4: Calificación + Asistencia + Estado Académico (todos editables) -->
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem 1.5rem; margin-bottom:0.75rem">
+
+    <div style="display:flex; flex-direction:column; gap:0.25rem">
+      <label appLabel label="Calificación Final" [field]="finalGradeField"></label>
+      <input pInputText [formField]="finalGradeField" type="number" style="width:100%"/>
+      <small [appErrorMessage]="$any(finalGradeField)"></small>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:0.25rem">
+      <label appLabel label="Asistencia" [field]="finalAttendanceField"></label>
+      <input pInputText [formField]="finalAttendanceField" type="number" style="width:100%"/>
+      <small [appErrorMessage]="$any(finalAttendanceField)"></small>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:0.25rem">
+      <label appLabel label="Estado Académico" [field]="academicStateField"></label>
+      <p-select dataKey="id" [formField]="academicStateField" [options]="academicStates()"
+        optionLabel="name" placeholder="Seleccione" styleClass="w-full">
+      </p-select>
+      <small [appErrorMessage]="$any(academicStateField)"></small>
+    </div>
+
+  </div>
+
+  <!-- Fila 5: Observación (editable, ancho completo) -->
+  <div style="display:flex; flex-direction:column; gap:0.25rem">
+    <label appLabel label="Observación de la matrícula" [field]="observationField"></label>
+    <input pInputText [formField]="observationField" style="width:100%"/>
+    <small [appErrorMessage]="$any(observationField)"></small>
+  </div>
+
+</div>
+
 }

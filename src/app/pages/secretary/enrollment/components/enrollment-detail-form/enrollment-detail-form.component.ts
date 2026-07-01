@@ -27,6 +27,7 @@ import {ButtonModule} from 'primeng/button';
 import {DividerModule} from 'primeng/divider';
 import {Select} from 'primeng/select';
 import {InputNumberModule} from 'primeng/inputnumber';
+
 import {InputTextModule} from 'primeng/inputtext';
 
 import {PanelModule} from 'primeng/panel';
@@ -115,7 +116,10 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
     this.formRegistryService.register('Datos de Asignatura', FORM_KEY, this.formData, this.form$());
     this.loadCatalogues();
     this.loadSubjects();
-    if (!this.isNew()) this.loadDetail(this.id());
+    if (!this.isNew()) {
+      // Load detail after a tick so catalogues populate first
+      setTimeout(() => this.loadDetail(this.id()), 300);
+    }
   }
 
   ngOnDestroy(): void {
@@ -124,10 +128,16 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
   }
 
   private loadCatalogues(): void {
-    this.types.set(this.cataloguesHttpService.findByType(CatalogueTypeEnum.ENROLLMENTS_TYPE));
-    this.workdays.set(this.cataloguesHttpService.findByType(CatalogueTypeEnum.ENROLLMENTS_WORKDAY));
-    this.parallels.set(this.cataloguesHttpService.findByType(CatalogueTypeEnum.PARALLEL));
-    this.academicStates.set(this.cataloguesHttpService.findByType(CatalogueTypeEnum.ENROLLMENTS_ACADEMIC_STATE));
+    const http = this.cataloguesHttpService;
+    // Load all catalogues then optionally load detail
+    http.findByTypeObservable(CatalogueTypeEnum.ENROLLMENTS_TYPE)
+      .subscribe(v => this.types.set(v));
+    http.findByTypeObservable(CatalogueTypeEnum.ENROLLMENTS_WORKDAY)
+      .subscribe(v => this.workdays.set(v));
+    http.findByTypeObservable(CatalogueTypeEnum.PARALLEL)
+      .subscribe(v => this.parallels.set(v));
+    http.findByTypeObservable(CatalogueTypeEnum.ENROLLMENTS_ACADEMIC_STATE)
+      .subscribe(v => this.academicStates.set(v));
   }
 
   private loadSubjects(): void {
@@ -184,8 +194,7 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
         });
     } else {
       this.enrollmentService.updateDetail(this.id(), payload).subscribe(() => {
-        this.store.resetDetailForm();
-        this.back();
+        this.back();  // navigate first, then reset on destroy
       });
     }
   }

@@ -1,41 +1,23 @@
 <!-- Toolbar -->
 <div class="flex align-items-center gap-2 mb-3">
-  <p-button
-    label="Crear"
-    [icon]="PrimeIcons.PLUS"
-    severity="success"
-    (click)="goToCreate()">
+  <p-button label="Crear" [icon]="PrimeIcons.PLUS" severity="success" (click)="goToCreate()">
   </p-button>
-  <p-button
-    label="Refrescar"
-    [icon]="PrimeIcons.REFRESH"
-    severity="info"
-    [loading]="isLoading()"
+  <p-button label="Refrescar" [icon]="PrimeIcons.REFRESH" severity="info" [loading]="isLoading()"
     (click)="loadDetails()">
   </p-button>
 </div>
 
 <!-- Tabla -->
-<p-table
-  #dt1
-  dataKey="id"
-  styleClass="p-datatable-striped p-datatable-gridlines"
-  [value]="items()"
-  [columns]="columns"
-  [paginator]="true"
-  paginatorPosition="top"
-  [rows]="10"
-  [globalFilterFields]="['subject.code','subject.name','academicPeriod.name']"
-  [loading]="isLoading()">
+<p-table #dt1 dataKey="id" styleClass="p-datatable-striped p-datatable-gridlines" [value]="items()" [columns]="columns"
+  [paginator]="true" paginatorPosition="top" [rows]="10"
+  [globalFilterFields]="['subject.code','subject.name','academicPeriod.name']" [loading]="isLoading()">
 
   <ng-template pTemplate="caption">
     <div class="flex align-items-center justify-content-between">
       <h2 class="m-0">Asignaturas</h2>
       <p-inputGroup styleClass="w-20rem">
-        <input
-          #search pInputText type="text"
-          placeholder="Buscar..."
-          (input)="dt1.filterGlobal(search.value, 'contains')"/>
+        <input #search pInputText type="text" placeholder="Buscar..."
+          (input)="dt1.filterGlobal(search.value, 'contains')" />
         <p-inputGroupAddon>
           <i [class]="PrimeIcons.SEARCH"></i>
         </p-inputGroupAddon>
@@ -62,28 +44,21 @@
       <td class="text-center">{{ row['type']?.name }}</td>
       <td class="text-center">
         @if (row['enrollmentDetailState']?.state) {
-          <p-tag
-            [value]="row['enrollmentDetailState'].state.name"
-            [severity]="row['enrollmentDetailState'].state.code | enrollmentState">
-          </p-tag>
+        <p-tag [value]="row['enrollmentDetailState'].state.name"
+          [severity]="row['enrollmentDetailState'].state.code | enrollmentState">
+        </p-tag>
         }
       </td>
       <td class="text-center">{{ row['finalGrade'] }}</td>
       <td class="text-center">{{ row['finalAttendance'] }}</td>
       <td class="text-center">
         @if (row['academicState']) {
-          <p-tag
-            [value]="row['academicState'].name"
-            [severity]="row['academicState'].code | academicStateSeverity">
-          </p-tag>
+        <p-tag [value]="row['academicState'].name" [severity]="row['academicState'].code | academicStateSeverity">
+        </p-tag>
         }
       </td>
       <td class="text-center">
-        <p-button
-          [icon]="PrimeIcons.ELLIPSIS_V"
-          severity="info"
-          [rounded]="true"
-          (click)="selectItem(row)">
+        <p-button [icon]="PrimeIcons.ELLIPSIS_V" severity="info" [rounded]="true" (click)="selectItem(row)">
         </p-button>
       </td>
     </tr>
@@ -104,42 +79,29 @@
 </p-table>
 
 <!-- Drawer: acciones por asignatura -->
-<p-drawer
-  [(visible)]="isButtonActions"
-  position="right"
-  [style]="{'width':'280px'}"
-  header="Acciones">
+<p-drawer [(visible)]="isButtonActions" position="right" [style]="{'width':'280px'}" header="Acciones">
+
   @if (selectedItem(); as item) {
-    <div class="flex flex-column gap-2">
-      <p-button label="Editar" [icon]="PrimeIcons.PENCIL"
-        styleClass="w-full text-left" severity="secondary" [text]="true"
-        (click)="goToEdit(item.id); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button label="Matricular" [icon]="PrimeIcons.BOOK"
-        styleClass="w-full text-left" severity="secondary" [text]="true"
-        (click)="enroll(item.id); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button label="Anular" [icon]="PrimeIcons.BAN"
-        styleClass="w-full text-left" severity="secondary" [text]="true"
-        (click)="revoke(item.id); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button label="Aprobar" [icon]="PrimeIcons.CHECK"
-        styleClass="w-full text-left" severity="secondary" [text]="true"
-        (click)="approve(item.id); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button label="Rechazar" [icon]="PrimeIcons.TIMES_CIRCLE"
-        styleClass="w-full text-left" severity="secondary" [text]="true"
-        (click)="reject(item.id); isButtonActions.set(false)">
-      </p-button>
-      <p-divider></p-divider>
-      <p-button label="Eliminar" [icon]="PrimeIcons.TRASH"
-        styleClass="w-full text-left" severity="danger" [text]="true"
-        (click)="remove(item.id); isButtonActions.set(false)">
-      </p-button>
-    </div>
+  <div class="drawer-actions">
+
+    <p-button label="Editar" [icon]="PrimeIcons.PENCIL" severity="secondary" [text]="true"
+      styleClass="w-full justify-content-start" (click)="goToEdit(item.id); isButtonActions.set(false)" />
+
+    <p-button label="Matricular" [icon]="PrimeIcons.BOOK" severity="secondary" [text]="true"
+      styleClass="w-full justify-content-start" (click)="enroll(item.id); isButtonActions.set(false)" />
+
+    <p-button label="Anular" [icon]="PrimeIcons.BAN" severity="secondary" [text]="true"
+      styleClass="w-full justify-content-start" (click)="revoke(item.id); isButtonActions.set(false)" />
+
+    <p-button label="Aprobar" [icon]="PrimeIcons.CHECK" severity="secondary" [text]="true"
+      styleClass="w-full justify-content-start" (click)="approve(item.id); isButtonActions.set(false)" />
+
+    <p-button label="Rechazar" [icon]="PrimeIcons.TIMES_CIRCLE" severity="secondary" [text]="true"
+      styleClass="w-full justify-content-start" (click)="reject(item.id); isButtonActions.set(false)" />
+
+    <p-button label="Eliminar" [icon]="PrimeIcons.TRASH" severity="danger" [text]="true"
+      styleClass="w-full justify-content-start" (click)="remove(item.id); isButtonActions.set(false)" />
+
+  </div>
   }
 </p-drawer>
