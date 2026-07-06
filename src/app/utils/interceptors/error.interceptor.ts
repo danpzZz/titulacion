@@ -2,11 +2,11 @@ import { inject } from '@angular/core';
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { CoreService } from '@utils/services/core.service';
+import { AppService } from '@utils/services/app.service';
 import { CustomMessageService } from '@utils/services/custom-message.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-    const coreService = inject(CoreService);
+    const coreService = inject(AppService);
     const customMessageService = inject(CustomMessageService);
 
     return next(req).pipe(

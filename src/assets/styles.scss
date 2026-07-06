@@ -23,6 +23,10 @@
         @apply flex flex-col gap-2 col-span-12;
     }
 
+    .custom-form-field-row {
+        @apply flex flex-row gap-2 col-span-12;
+    }
+
     .custom-form-section {
         @apply text-xl font-semibold col-span-12;
     }

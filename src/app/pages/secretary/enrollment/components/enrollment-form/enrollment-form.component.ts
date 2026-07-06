@@ -3,7 +3,10 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {PrimeIcons} from 'primeng/api';
 import {FieldTree, form, FormField, SchemaPathTree} from '@angular/forms/signals';
 
-import {BreadcrumbService, CataloguesHttpService, MessageService, RoutesService} from '@services/core';
+import {BreadcrumbService} from '@utils/services/breadcrumb.service';
+import {CataloguesHttpService} from '@utils/services/catalogues-http.service';
+import {CustomMessageService} from '@utils/services/custom-message.service';
+import {RoutesService} from '@utils/services/routes.service';
 import {CatalogueModel, EnrollmentModel} from '@models/core';
 import {
   BreadcrumbEnum,
@@ -15,6 +18,7 @@ import {
   RoutesEnum,
   SeverityButtonActionEnum,
   SkeletonEnum,
+  EnrollmentCatalogueTypeEnum,
 } from '@utils/enums';
 import {FormRegistryService} from '@utils/services/form-registry.service';
 import {EnrollmentStore} from '../../enrollment.store';
@@ -64,7 +68,7 @@ export class EnrollmentFormComponent implements OnInit, OnDestroy {
   private readonly breadcrumbService     = inject(BreadcrumbService);
   private readonly enrollmentService     = inject(EnrollmentService);
   private readonly cataloguesHttpService = inject(CataloguesHttpService);
-  private readonly messageService        = inject(MessageService);
+  private readonly messageService        = inject(CustomMessageService);
   private readonly formRegistryService   = inject(FormRegistryService);
   protected readonly store               = inject(EnrollmentStore);
 
@@ -116,10 +120,10 @@ export class EnrollmentFormComponent implements OnInit, OnDestroy {
   }
 
   private loadCatalogues(): void {
-    this.types.set(this.cataloguesHttpService.findByType(CatalogueTypeEnum.ENROLLMENTS_TYPE));
-    this.academicPeriods.set(this.cataloguesHttpService.findByType(CatalogueTypeEnum.ACADEMIC_PERIOD));
-    this.workdays.set(this.cataloguesHttpService.findByType(CatalogueTypeEnum.ENROLLMENTS_WORKDAY));
-    this.parallels.set(this.cataloguesHttpService.findByType(CatalogueTypeEnum.PARALLEL));
+    this.types.set(this.cataloguesHttpService.findByType(EnrollmentCatalogueTypeEnum.ENROLLMENTS_TYPE));
+    this.academicPeriods.set(this.cataloguesHttpService.findByType(EnrollmentCatalogueTypeEnum.ACADEMIC_PERIOD));
+    this.workdays.set(this.cataloguesHttpService.findByType(EnrollmentCatalogueTypeEnum.ENROLLMENTS_WORKDAY));
+    this.parallels.set(this.cataloguesHttpService.findByType(EnrollmentCatalogueTypeEnum.PARALLEL));
   }
 
   private loadEnrollment(id: string): void {
@@ -163,7 +167,7 @@ export class EnrollmentFormComponent implements OnInit, OnDestroy {
 
   onSubmit(): void {
     if (this.formRegistryService.hasErrors()) {
-      this.messageService.errorsFields(this.formRegistryService.errors().map(e => e.message));
+      this.messageService.showFormErrors(this.formRegistryService.errors());
       return;
     }
     // cast safely — nulls in state become undefined for the API

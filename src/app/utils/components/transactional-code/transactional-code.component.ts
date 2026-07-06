@@ -1,21 +1,31 @@
-import { Component, forwardRef, inject, input } from '@angular/core';
-import { AbstractControl, AsyncValidator, ControlValueAccessor, FormsModule, NG_ASYNC_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
-import { InputOtp, InputOtpChangeEvent } from 'primeng/inputotp';
-import { AuthHttpService } from '@/pages/auth/auth-http.service';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { Button } from 'primeng/button';
-import { CustomIcons } from '@modules/public/icons/custom-icons';
-import { InputGroup } from 'primeng/inputgroup';
+import {Component, forwardRef, inject, input} from '@angular/core';
+import {
+    AbstractControl,
+    AsyncValidator,
+    ControlValueAccessor,
+    FormsModule,
+    NG_ASYNC_VALIDATORS,
+    NG_VALUE_ACCESSOR,
+    ValidationErrors
+} from '@angular/forms';
+import {InputOtp, InputOtpChangeEvent} from 'primeng/inputotp';
+import {Observable, of} from 'rxjs';
+import {catchError, map} from 'rxjs/operators';
+import {Button} from 'primeng/button';
+import {InputGroup} from 'primeng/inputgroup';
+import {CustomIcons} from "@utils/icons/custom-icons";
+import {AuthHttpService} from "@modules/auth/auth-http.service";
 
 @Component({
     selector: 'app-transactional-code',
     template: `
         <p-inputgroup>
             <div (paste)="onContainerPaste($event)">
-                <p-inputOtp id="transactionalCode" [ngModel]="value" [length]="6" [integerOnly]="true" (onChange)="handleChange($event)" [disabled]="disabled" [mask]="isMask" />
+                <p-inputOtp id="transactionalCode" [ngModel]="value" [length]="6" [integerOnly]="true"
+                            (onChange)="handleChange($event)" [disabled]="disabled" [mask]="isMask"/>
             </div>
-            <p-button class="ml-2" [icon]="isMask ? CustomIcons.EYE_SOLID : CustomIcons.EYE_SLASH_SOLID" (onClick)="isMask = !isMask" [text]="true" [raised]="true" />
+            <p-button class="ml-2" [icon]="isMask ? CustomIcons.EYE_SOLID : CustomIcons.EYE_SLASH_SOLID"
+                      (onClick)="isMask = !isMask" [text]="true" [raised]="true"/>
         </p-inputgroup>
     `,
     imports: [FormsModule, InputOtp, Button, InputGroup],
@@ -38,7 +48,7 @@ export class TransactionalCodeComponent implements ControlValueAccessor, AsyncVa
     disabled = false;
     isMask = true;
 
-    requester = input.required<string>();
+    requester = input.required<string | null>();
     private readonly authHttpService = inject(AuthHttpService);
 
     writeValue(val: string): void {
@@ -70,20 +80,20 @@ export class TransactionalCodeComponent implements ControlValueAccessor, AsyncVa
         const value = control.value;
 
         if (!value) {
-            return of({ required: true });
+            return of({required: true});
         }
 
         if (value.length < 6) {
-            return of({ minlength: { requiredLength: 6, actualLength: value.length } });
+            return of({minlength: {requiredLength: 6, actualLength: value.length}});
         }
 
-        return this.authHttpService.verifyTransactionalCode(value, this.requester()).pipe(
+        return this.authHttpService.verifyTransactionalCode(value, this.requester()!).pipe(
             map((_) => {
                 return null;
             }),
 
             catchError((error) => {
-                return of({ invalidTransactionalCode: true });
+                return of({invalidTransactionalCode: true});
             })
         );
     }
@@ -116,8 +126,10 @@ export class TransactionalCodeComponent implements ControlValueAccessor, AsyncVa
         }
     }
 
-    private onChange: (val: string) => void = () => {};
+    private onChange: (val: string) => void = () => {
+    };
 
-    private onTouched: () => void = () => {};
+    private onTouched: () => void = () => {
+    };
     protected readonly CustomIcons = CustomIcons;
 }

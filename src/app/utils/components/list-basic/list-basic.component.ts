@@ -5,7 +5,7 @@ import { Fluid } from 'primeng/fluid';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Table, TableModule } from 'primeng/table';
 import { Tooltip } from 'primeng/tooltip';
-import { CoreService } from '@utils/services';
+import { AppService } from '@utils/services';
 import { ColInterface } from '@utils/interfaces';
 import { DatePipe } from '@angular/common';
 import {CustomIcons} from "@utils/icons/custom-icons";
@@ -33,7 +33,7 @@ export class ListBasicComponent implements OnInit {
     onDelete = output<any>();
     onSelect = output<any>();
 
-    protected readonly coreService = inject(CoreService);
+    protected readonly coreService = inject(AppService);
     protected selectedItem = new EventEmitter<any>();
     protected globalFilterFields: string[] = [];
 

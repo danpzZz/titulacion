@@ -5,7 +5,7 @@ import {CustomMessageService} from '@utils/services/custom-message.service';
 import {map} from 'rxjs/operators';
 
 import {FileInterface, HttpResponseInterface} from '@utils/interfaces';
-import {CoreService} from '@utils/services/core.service';
+import {AppService} from '@utils/services/app.service';
 
 @Injectable({
     providedIn: 'root'
@@ -14,7 +14,7 @@ export class FileHttpService {
     private readonly _httpClient = inject(HttpClient);
     private readonly _apiUrl = `${environment.API_URL}/common/files`;
     private readonly _customMessageService = inject(CustomMessageService);
-    private readonly _coreService = inject(CoreService);
+    private readonly _coreService = inject(AppService);
 
     upload(payload: FormData, modelId: string, typeId: string) {
         const url = `${this._apiUrl}/${modelId}/upload`;

@@ -1,38 +1,25 @@
-import { inject, Injectable } from '@angular/core';
-import { CustomMessageService } from '@utils/services/custom-message.service';
-import { CatalogueInterface, ModelCatalogueInterface } from '@utils/interfaces';
-import { CatalogueTypeEnum, CoreEnum } from '@utils/enums';
-import { CoreSessionStorageService } from '@utils/services/core-session-storage.service';
+import {Injectable} from '@angular/core';
+import {CatalogueInterface, ModelCatalogueInterface} from '@utils/interfaces';
+import {CoreEnum} from '@utils/enums';
 
 @Injectable({
     providedIn: 'root'
 })
 export class CatalogueService {
-    private readonly _customMessageService = inject(CustomMessageService);
-    private readonly coreSessionStorageService = inject(CoreSessionStorageService);
+    private getCatalogues(): CatalogueInterface[] {
+        const catalogues = sessionStorage.getItem(CoreEnum.catalogues);
 
-    private async getCatalogues(): Promise<CatalogueInterface[]> {
-        if (!sessionStorage.getItem(CoreEnum.catalogues)) {
-            return [];
-        }
-
-        const raw = await this.coreSessionStorageService.getEncryptedValue(CoreEnum.catalogues);
-
-        return Object.values(raw) as CatalogueInterface[];
+        return catalogues ? JSON.parse(catalogues) as CatalogueInterface[] : [];
     }
 
-    private async getModelCatalogues(): Promise<ModelCatalogueInterface[]> {
-        if (!sessionStorage.getItem(CoreEnum.modelCatalogues)) {
-            return [];
-        }
+    private getModelCatalogues(): ModelCatalogueInterface[] {
+        const modelCatalogues = sessionStorage.getItem(CoreEnum.modelCatalogues);
 
-        const raw = await this.coreSessionStorageService.getEncryptedValue(CoreEnum.modelCatalogues);
-
-        return Object.values(raw) as ModelCatalogueInterface[];
+        return modelCatalogues ? JSON.parse(modelCatalogues) as ModelCatalogueInterface[] : [];
     }
 
-    async findByType(type: string): Promise<CatalogueInterface[]> {
-        const catalogues = await this.getCatalogues();
+    findByType(type: string): CatalogueInterface[] {
+        const catalogues = this.getCatalogues();
 
         return catalogues
             .filter((c) => c.type === type)
@@ -46,9 +33,6 @@ export class CatalogueService {
 
     async findByModel(modelId: string): Promise<CatalogueInterface[]> {
         const catalogues = await this.getModelCatalogues();
-
-        console.log(modelId);
-        console.log(catalogues);
 
         return catalogues
             .filter((c) => c.modelId === modelId)

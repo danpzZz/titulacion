@@ -1,5 +1,5 @@
 import { PrimeIcons } from 'primeng/api';
-import { CustomIcons } from '@modules/public/icons/custom-icons';
+import {CustomIcons} from "@utils/icons/custom-icons";
 
 export const viewButtonAction = {
     id: 'view',

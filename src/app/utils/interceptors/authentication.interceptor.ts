@@ -1,16 +1,16 @@
-import { inject } from '@angular/core';
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { switchMap, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { Router } from '@angular/router';
+import {inject} from '@angular/core';
+import {HttpErrorResponse, HttpInterceptorFn} from '@angular/common/http';
+import {switchMap, throwError} from 'rxjs';
+import {catchError} from 'rxjs/operators';
+import {Router} from '@angular/router';
 
-import { CoreService } from '@utils/services/core.service';
-import { AuthService } from '@modules/auth/auth.service';
-import { AuthHttpService } from '@/pages/auth/auth-http.service';
-import { MY_ROUTES } from '@routes';
+import {AppService} from '@utils/services/app.service';
+import {AuthService} from '@modules/auth/auth.service';
+import {AuthHttpService} from '@modules/auth/auth-http.service';
+import {MY_ROUTES} from '@routes';
 
 export const authenticationInterceptor: HttpInterceptorFn = (req, next) => {
-    const coreService = inject(CoreService);
+    const coreService = inject(AppService);
     const authService = inject(AuthService);
     const authHttpService = inject(AuthHttpService);
     const router = inject(Router);
@@ -19,7 +19,10 @@ export const authenticationInterceptor: HttpInterceptorFn = (req, next) => {
 
     const logout = () => {
         authService.removeLogin();
-        authHttpService.signOut().subscribe({ error: () => {} });
+        authHttpService.signOut().subscribe({
+            error: () => {
+            }
+        });
         router.navigate([MY_ROUTES.authPages.signIn.absolute]);
     };
 
@@ -35,7 +38,7 @@ export const authenticationInterceptor: HttpInterceptorFn = (req, next) => {
                 }
 
                 return authHttpService.refreshToken().pipe(
-                    switchMap(({ accessToken,refreshToken }) => {
+                    switchMap(({accessToken, refreshToken}) => {
                         authService.accessToken = accessToken;
                         authService.refreshToken = refreshToken;
 

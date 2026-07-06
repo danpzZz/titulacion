@@ -1,6 +1,5 @@
 import { Component, inject, input, OnInit, output, signal } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { format } from 'date-fns';
 import { Button } from 'primeng/button';
 import { PaginationInterface } from '@utils/interfaces';
 import { Fluid } from 'primeng/fluid';
@@ -10,12 +9,13 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { InputText } from 'primeng/inputtext';
 import { Paginator, PaginatorState } from 'primeng/paginator';
-import { CoreService } from '@utils/services';
+import { AppService } from '@utils/services';
 import { ColInterface } from '@utils/interfaces/col.interface';
 import { DatePipe } from '@angular/common';
 import { debounceTime } from 'rxjs';
 import { Tag } from 'primeng/tag';
-import { CustomIcons } from '@modules/public/icons/custom-icons';
+import {CustomIcons} from "@utils/icons/custom-icons";
+import {format} from "date-fns";
 
 @Component({
     selector: 'app-list',
@@ -40,7 +40,7 @@ export class ListComponent implements OnInit {
     onPagination = output<any>();
     openButtonActions = output<any>();
 
-    protected readonly coreService = inject(CoreService);
+    protected readonly coreService = inject(AppService);
     protected searchControl: FormControl = new FormControl(null);
     protected currentYear: string;
     protected readonly CustomIcons = CustomIcons;

@@ -6,3 +6,5 @@ export interface PaginationInterface {
   lastItem?: number;
   totalItems?: number;
 }
+
+export const INITIAL_PAGINATION: PaginationInterface = { page: 1, limit: 10 };

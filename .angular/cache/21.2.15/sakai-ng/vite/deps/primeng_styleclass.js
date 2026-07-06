@@ -1,10 +1,10 @@
 import {
-  M,
+  M2 as M,
   P,
   U,
   k2 as k,
   p2 as p
-} from "./chunk-INVD3MVZ.js";
+} from "./chunk-TY573M37.js";
 import {
   Directive,
   ElementRef,

@@ -1,64 +1,70 @@
 <!-- Toolbar -->
-<div class="flex align-items-center gap-2 mb-3">
-  <p-button label="Crear" [icon]="PrimeIcons.PLUS" severity="success" (click)="goToCreate()">
-  </p-button>
-  <p-button label="Refrescar" [icon]="PrimeIcons.REFRESH" severity="info" [loading]="isLoading()"
-    (click)="loadDetails()">
-  </p-button>
+<div class="custom-form-card">
+  <div class="custom-form-field-row">
+    <p-button label="Crear" [icon]="CustomIcons.PLUS_SOLID" severity="success" (click)="goToCreate()"></p-button>
+    <p-button label="Refrescar" [icon]="CustomIcons.ARROWS_ROTATE_SOLID" severity="info"
+      [loading]="isLoading()" (click)="loadDetails()">
+    </p-button>
+  </div>
 </div>
 
 <!-- Tabla -->
-<p-table #dt1 dataKey="id" styleClass="p-datatable-striped p-datatable-gridlines" [value]="items()" [columns]="columns"
+<p-table #dt1 dataKey="id"
+  styleClass="p-datatable-striped p-datatable-gridlines"
+  [value]="items()" [columns]="columns"
   [paginator]="true" paginatorPosition="top" [rows]="10"
-  [globalFilterFields]="['subject.code','subject.name','academicPeriod.name']" [loading]="isLoading()">
+  [loading]="isLoading()">
 
   <ng-template pTemplate="caption">
-    <div class="flex align-items-center justify-content-between">
-      <h2 class="m-0">Asignaturas</h2>
-      <p-inputGroup styleClass="w-20rem">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="margin:0">Asignaturas</h2>
+      <p-input-group style="width:280px">
         <input #search pInputText type="text" placeholder="Buscar..."
-          (input)="dt1.filterGlobal(search.value, 'contains')" />
+          (input)="dt1.filterGlobal(search.value, 'contains')">
         <p-inputGroupAddon>
-          <i [class]="PrimeIcons.SEARCH"></i>
+          <i [class]="CustomIcons.MAGNIFYING_GLASS_SOLID"></i>
         </p-inputGroupAddon>
-      </p-inputGroup>
+      </p-input-group>
     </div>
   </ng-template>
 
   <ng-template pTemplate="header" let-columns>
     <tr>
-      <th *ngFor="let col of columns" [pSortableColumn]="col.field" class="text-center">
+      <th *ngFor="let col of columns" [pSortableColumn]="col.field"
+        style="text-align:center;white-space:nowrap">
         {{ col.header }} <p-sortIcon [field]="col.field"></p-sortIcon>
       </th>
-      <th class="text-center">Acciones</th>
+      <th style="text-align:center">Acciones</th>
     </tr>
   </ng-template>
 
   <ng-template pTemplate="body" let-row>
     <tr>
-      <td class="text-center">{{ row['subject']?.academicPeriod?.name }}</td>
-      <td class="text-center">{{ row['subject']?.code }} {{ row['subject']?.name }}</td>
-      <td class="text-center">{{ row['number'] }}</td>
-      <td class="text-center">{{ row['workday']?.name }}</td>
-      <td class="text-center">{{ row['parallel']?.name }}</td>
-      <td class="text-center">{{ row['type']?.name }}</td>
-      <td class="text-center">
+      <td style="text-align:center">{{ row['subject']?.academicPeriod?.name }}</td>
+      <td style="text-align:center">{{ row['subject']?.code }} {{ row['subject']?.name }}</td>
+      <td style="text-align:center">{{ row['number'] }}</td>
+      <td style="text-align:center">{{ row['workday']?.name }}</td>
+      <td style="text-align:center">{{ row['parallel']?.name }}</td>
+      <td style="text-align:center">{{ row['type']?.name }}</td>
+      <td style="text-align:center">
         @if (row['enrollmentDetailState']?.state) {
-        <p-tag [value]="row['enrollmentDetailState'].state.name"
-          [severity]="row['enrollmentDetailState'].state.code | enrollmentState">
-        </p-tag>
+          <p-tag [value]="row['enrollmentDetailState'].state.name"
+            [severity]="row['enrollmentDetailState'].state.code | enrollmentState">
+          </p-tag>
         }
       </td>
-      <td class="text-center">{{ row['finalGrade'] }}</td>
-      <td class="text-center">{{ row['finalAttendance'] }}</td>
-      <td class="text-center">
+      <td style="text-align:center">{{ row['finalGrade'] }}</td>
+      <td style="text-align:center">{{ row['finalAttendance'] }}</td>
+      <td style="text-align:center">
         @if (row['academicState']) {
-        <p-tag [value]="row['academicState'].name" [severity]="row['academicState'].code | academicStateSeverity">
-        </p-tag>
+          <p-tag [value]="row['academicState'].name"
+            [severity]="row['academicState'].code | academicStateSeverity">
+          </p-tag>
         }
       </td>
-      <td class="text-center">
-        <p-button [icon]="PrimeIcons.ELLIPSIS_V" severity="info" [rounded]="true" (click)="selectItem(row)">
+      <td style="text-align:center">
+        <p-button pTooltip="Acciones" [icon]="CustomIcons.ELLIPSIS_VERTICAL_SOLID"
+          (click)="selectItem(row)">
         </p-button>
       </td>
     </tr>
@@ -66,42 +72,21 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td [attr.colspan]="columns.length + 1" class="text-center p-4">
+      <td [attr.colspan]="columns.length + 1" style="text-align:center;padding:1.5rem">
         No se encontraron asignaturas.
       </td>
     </tr>
   </ng-template>
 
-  <ng-template pTemplate="summary">
-    En total hay {{ items().length }} registros.
+  <ng-template pTemplate="footer">
+    <tr>
+      <td [attr.colspan]="columns.length + 1">
+        En total hay {{ items().length }} registros.
+      </td>
+    </tr>
   </ng-template>
-
 </p-table>
 
-<!-- Drawer: acciones por asignatura -->
-<p-drawer [(visible)]="isButtonActions" position="right" [style]="{'width':'280px'}" header="Acciones">
-
-  @if (selectedItem(); as item) {
-  <div class="drawer-actions">
-
-    <p-button label="Editar" [icon]="PrimeIcons.PENCIL" severity="secondary" [text]="true"
-      styleClass="w-full justify-content-start" (click)="goToEdit(item.id); isButtonActions.set(false)" />
-
-    <p-button label="Matricular" [icon]="PrimeIcons.BOOK" severity="secondary" [text]="true"
-      styleClass="w-full justify-content-start" (click)="enroll(item.id); isButtonActions.set(false)" />
-
-    <p-button label="Anular" [icon]="PrimeIcons.BAN" severity="secondary" [text]="true"
-      styleClass="w-full justify-content-start" (click)="revoke(item.id); isButtonActions.set(false)" />
-
-    <p-button label="Aprobar" [icon]="PrimeIcons.CHECK" severity="secondary" [text]="true"
-      styleClass="w-full justify-content-start" (click)="approve(item.id); isButtonActions.set(false)" />
-
-    <p-button label="Rechazar" [icon]="PrimeIcons.TIMES_CIRCLE" severity="secondary" [text]="true"
-      styleClass="w-full justify-content-start" (click)="reject(item.id); isButtonActions.set(false)" />
-
-    <p-button label="Eliminar" [icon]="PrimeIcons.TRASH" severity="danger" [text]="true"
-      styleClass="w-full justify-content-start" (click)="remove(item.id); isButtonActions.set(false)" />
-
-  </div>
-  }
-</p-drawer>
+<app-button-action [buttonActions]="buttonActions()" [enabled]="isButtonActionsEnabled"
+  (isHide)="isButtonActionsEnabled = $event">
+</app-button-action>

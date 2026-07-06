@@ -185,11 +185,27 @@ let detailStates: Record<string, any> = {
 
 // ─── Catálogos por tipo ───────────────────────────────────────────────────────
 const CATALOGUES: Record<string, any[]> = {
-  enrollment_type:          [CAT.typeOrdinaria, CAT.typeEspecial, {id: 'ct000001-0000-0000-0000-000000000003', code: 'extraordinary', name: 'Extraordinaria'}],
-  parallel:                 [CAT.parallelA, CAT.parallelB, {id: IDS.cat.parallelB+'1', code: 'c', name: 'C'}],
-  enrollments_workday:      [CAT.workday0709, CAT.workday0913, {id: 'ct000003-0000-0000-0000-000000000003', code: '2', name: '09:00-11:00'}],
-  ACADEMIC_PERIOD:          [CAT.apStarter, CAT.apPrimero, {id: 'ct000004-0000-0000-0000-000000000004', code: '2', name: 'Segundo'}, CAT.apCuarto],
-  enrollment_state:         [CAT.stRegistered, CAT.stRequested, CAT.stApproved, CAT.stEnrolled, CAT.stRejected, CAT.stRevoked],
+  // Types
+  enrollment_type:            [CAT.typeOrdinaria, CAT.typeEspecial, {id: 'ct000001-0000-0000-0000-000000000003', code: 'extraordinary', name: 'Extraordinaria'}],
+  enrollments_type:           [CAT.typeOrdinaria, CAT.typeEspecial, {id: 'ct000001-0000-0000-0000-000000000003', code: 'extraordinary', name: 'Extraordinaria'}],
+  // Parallels
+  parallel:                   [CAT.parallelA, CAT.parallelB, {id: 'ct000002-0000-0000-0000-000000000003', code: 'c', name: 'C'}],
+  // Workdays
+  enrollments_workday:        [CAT.workday0709, CAT.workday0913, {id: 'ct000003-0000-0000-0000-000000000003', code: '3', name: '09:00-11:00'}],
+  // Academic periods
+  academic_period:            [
+    CAT.apStarter,
+    CAT.apPrimero,
+    {id: 'ct000004-0000-0000-0000-000000000004', code: '2', name: 'Segundo'},
+    {id: 'ct000004-0000-0000-0000-000000000005', code: '3', name: 'Tercero'},
+    CAT.apCuarto,
+    {id: 'ct000004-0000-0000-0000-000000000006', code: '5', name: 'Quinto'},
+    {id: 'ct000004-0000-0000-0000-000000000007', code: '6', name: 'Sexto'},
+  ],
+  // Enrollment states
+  enrollment_state:           [CAT.stRegistered, CAT.stRequested, CAT.stApproved, CAT.stEnrolled, CAT.stRejected, CAT.stRevoked],
+  enrollments_state:          [CAT.stRegistered, CAT.stRequested, CAT.stApproved, CAT.stEnrolled, CAT.stRejected, CAT.stRevoked],
+  // Academic states
   enrollments_academic_state: [CAT.acAprobado, CAT.acReprobado],
 };
 
@@ -229,10 +245,34 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
 
   // ── Careers ─────────────────────────────────────────────────────────────────
   if (url.includes('/careers/') && url.includes('/enrollments')) {
-    const list = ENROLLMENTS.map(e => ({
+    const search           = (req.params.get('search') ?? '').toLowerCase().trim();
+    const academicPeriodId  = req.params.get('academicPeriodId') ?? '';
+    const enrollmentStateId = req.params.get('enrollmentStateId') ?? '';
+
+    let list = ENROLLMENTS.map(e => ({
       ...e,
       enrollmentState: {state: enrollmentStates[e.id] ?? e.enrollmentState.state}
     }));
+
+    if (search) {
+      list = list.filter(e =>
+        e.student.user.identification.toLowerCase().includes(search) ||
+        e.student.user.lastname.toLowerCase().includes(search) ||
+        e.student.user.name.toLowerCase().includes(search)
+      );
+    }
+
+    if (academicPeriodId) {
+      list = list.filter(e => e.academicPeriod?.id === academicPeriodId);
+    }
+
+    if (enrollmentStateId) {
+      list = list.filter(e => {
+        const currentState = enrollmentStates[e.id] ?? e.enrollmentState.state;
+        return currentState.id === enrollmentStateId;
+      });
+    }
+
     return ok(list, {totalItems: list.length, limit: 10, page: 0, offset: 0});
   }
   if (url.includes('/careers') && method === 'GET') {
