@@ -1,0 +1,67 @@
+@if (form.enabled) {
+    <div class="custom-form-card">
+        <form [formGroup]="form" class="custom-form-grid md:grid-cols-12" (ngSubmit)="onSubmit()">
+            <div class="custom-form-field md:col-span-12">
+                <small class="bg-surface-100">
+                    Por favor, responda sus preguntas de seguridad.
+                </small>
+            </div>
+
+            <!-- securityQuestionsField -->
+            <div formArrayName="securityQuestions" class="custom-form-field md:col-span-12">
+                @for (securityQuestion of securityQuestionsField.controls; track securityQuestion.value.code) {
+                    <div [formGroupName]="$index" class="custom-form-field md:col-span-12">
+                        <label
+                            appLabel
+                            [for]="$index"
+                            [required]="securityQuestion.get('answer')">
+                            {{ securityQuestion.get('question')?.value }}
+                        </label>
+
+                        <p-password
+                            [id]="$index"
+                            [formControl]="$any(securityQuestion.get('answer'))"
+                            inputStyleClass="w-full"
+                            [toggleMask]="true"
+                            [feedback]="false" />
+
+                        <small
+                            appErrorMessage
+                            [errors]="securityQuestion.get('answer')?.errors"
+                            [touched]="securityQuestion.get('answer')?.touched"
+                            [dirty]="securityQuestion.get('answer')?.dirty"></small>
+                    </div>
+                }
+            </div>
+
+            <!-- emailField -->
+            <div class="custom-form-field md:col-span-12">
+                <label
+                    appLabel
+                    for="email"
+                    label="Nuevo Correo electrónico"
+                    [required]="emailField"></label>
+
+                <input pInputText type="email" id="email" formControlName="email" />
+
+                <small appErrorMessage
+                       [errors]="emailField.errors"
+                       [touched]="emailField.touched"
+                       [dirty]="emailField.dirty"></small>
+            </div>
+
+            <!-- actions -->
+            <div class="custom-form-field md:col-span-6">
+                <p-button
+                    label="Cambiar preguntas"
+                    severity="info"
+                    [icon]="CustomIcons.ARROWS_ROTATE_SOLID"
+                    (onClick)="generateSecurityQuestions()" />
+            </div>
+
+            <div class="custom-form-field md:col-span-6">
+                <p-button type="submit" label="Validar y Cambiar Correo" [icon]="CustomIcons.ENVELOPE_OPEN_SOLID" />
+            </div>
+        </form>
+    </div>
+}

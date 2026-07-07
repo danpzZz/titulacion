@@ -1,0 +1,120 @@
+@if (form.enabled) {
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="custom-form-card mx-auto max-w-3xl py-20">
+            @if (this.authService.auth.securityQuestionAcceptedAt) {
+                <p-button
+                    pTooltip="Regresar"
+                    [icon]="CustomIcons.CHEVRON_LEFT_SOLID"
+                    severity="warn"
+                    [raised]="true"
+                    [text]="true"
+                    (onClick)="back()" />
+            }
+            <h3 class="mb-4 text-center">Crear preguntas de seguridad</h3>
+            <form [formGroup]="form" class="custom-form-grid md:grid-cols-12" (ngSubmit)="onSubmit()">
+                <div class="custom-form-field md:col-span-12">
+                    <small class="text-gray-500">
+                        Por favor, crea tus preguntas de seguridad.
+                    </small>
+                    <small class="text-gray-500">
+                        Tus respuestas serán cifradas y usadas solo para verificar tu identidad.
+                    </small>
+                </div>
+
+                <!-- securityQuestionsField -->
+                <div formArrayName="securityQuestions" class="custom-form-field md:col-span-12">
+                    @for (securityQuestion of securityQuestionsField.controls; track securityQuestion.value.code) {
+                        <div [formGroupName]="$index" class="custom-form-field md:col-span-12">
+                            <label
+                                appLabel
+                                [for]="$index"
+                                [required]="securityQuestion.get('answer')">
+                                {{ securityQuestion.get('question')?.value }}
+                            </label>
+
+                            <p-password
+                                [id]="$index"
+                                [formControl]="$any(securityQuestion.get('answer'))"
+                                inputStyleClass="w-full"
+                                [toggleMask]="true"
+                                [feedback]="false" />
+
+                            <small
+                                appErrorMessage
+                                [errors]="securityQuestion.get('answer')?.errors"
+                                [touched]="securityQuestion.get('answer')?.touched"
+                                [dirty]="securityQuestion.get('answer')?.dirty" ></small>
+                        </div>
+                    }
+                </div>
+
+                <!-- actions -->
+                <div class="custom-form-field md:col-span-6">
+                    <p-button
+                        label="Elejir otras preguntas"
+                        severity="info"
+                        styleClass="w-full"
+                        [text]="true"
+                        [icon]="CustomIcons.ARROWS_ROTATE_SOLID"
+                        (onClick)="loadSecurityQuestions()" />
+                </div>
+
+                <div class="custom-form-field md:col-span-6">
+                    <p-button type="submit" label="Guardar y Continuar" [icon]="CustomIcons.CHEVRON_RIGHT_SOLID" />
+                </div>
+
+            </form>
+        </div>
+    </div>
+}
+
+<p-dialog
+    header="Por seguridad, ingrese el código enviado a tu correo electrónico"
+    [(visible)]="showOtpModal"
+    [modal]="true"
+    [closable]="false"
+    [dismissableMask]="false"
+    [style]="{ width: '400px' }"
+>
+    <div class="custom-form-card">
+        <div class="custom-form-grid md:grid-cols-12">
+            <!-- transactionalCode -->
+            <div class="custom-form-field md:col-span-12">
+                <label
+                    appLabel
+                    for="transactionalCode"
+                    [required]="transactionalCodeControl"
+                    label="Código de seguridad"></label>
+
+                <app-transactional-code [formControl]="transactionalCodeControl"
+                                        [requester]="authService.auth.username" />
+
+                <small appErrorMessage
+                    [errors]="transactionalCodeControl.errors"
+                    [touched]="transactionalCodeControl.touched"
+                       [dirty]="transactionalCodeControl.dirty" ></small>
+            </div>
+
+            <div class="custom-form-field md:col-span-12">
+                <p-button
+                    label="Reenviar código"
+                    severity="info"
+                    styleClass="w-full"
+                    [icon]="CustomIcons.PAPER_PLANE_SOLID"
+                    [raised]="true"
+                    [text]="true"
+                    (onClick)="requestTransactionalCode()" />
+            </div>
+
+            <div class="custom-form-field md:col-span-12">
+                <p-button
+                    label="Regresar"
+                    severity="secondary"
+                    styleClass="w-full"
+                    [icon]="CustomIcons.CHEVRON_LEFT_SOLID"
+                    [text]="true"
+                    (onClick)="back()" />
+            </div>
+        </div>
+    </div>
+</p-dialog>

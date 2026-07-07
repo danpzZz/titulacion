@@ -1,0 +1,25 @@
+<p>user-form works!</p>
+
+<label>
+    Email
+</label>
+<input pInputText [formField]="form.email"/>
+<br>
+
+<small [appErrorMessage]="$any(form.email)"></small>
+
+<hr>
+<label>
+    Password
+</label>
+<input pPassword [formField]="form.password"/>
+<br>
+<span>
+    @for (error of form.password().errors(); track error) {
+        {{ error |json }}
+    }
+</span>
+
+<p-button label="Save" (onClick)="save()"/>
+
+<app-otro-form/>

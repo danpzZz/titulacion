@@ -1,0 +1,244 @@
+<div class="custom-form-card">
+    <form [formGroup]="form" class="custom-form-grid md:grid-cols-12">
+        <!-- backButton -->
+        <div class="custom-form-field md:col-span-12">
+            <p-button
+                pTooltip="Regresar"
+                [icon]="CustomIcons.CHEVRON_LEFT_SOLID"
+                severity="warn"
+                [raised]="true"
+                [text]="true"
+                [routerLink]="[MY_ROUTES.authPages.signIn.absolute]" />
+        </div>
+
+        <!-- title -->
+        <div class="custom-form-title md:col-span-12  text-center">
+            Creación de la Cuenta
+        </div>
+
+        <!-- identificationField -->
+        <div class="custom-form-field md:col-span-12">
+            <label
+                appLabel for="identification"
+                label="Número de RUC al que pertenece el Establecimiento"
+                [required]="identificationField"></label>
+
+            <input pInputText type="text" id="identification" formControlName="identification" [maxlength]="13"
+                   pKeyFilter="pint" />
+
+            <small
+                appErrorMessage
+                [errors]="identificationField.errors"
+                [touched]="identificationField.touched"
+                [dirty]="identificationField.dirty"></small>
+
+            @if (identificationField.hasError('unavailableUser')) {
+                <p-message severity="error">
+                    <b>El usuario ya existe</b>
+                    <p>Por favor ingrese otro RUC</p>
+                </p-message>
+            }
+
+            @if (identificationField.valid && rucField.value && !rucField.value?.ruc) {
+                <p-message severity="error">
+                    <b>RUC no existe</b>
+                    <p>Por favor ingrese otro RUC</p>
+                </p-message>
+            }
+        </div>
+
+        @if (rucField.value && rucField.value?.ruc) {
+            <div class="custom-form-field md:col-span-12">
+                <p-message>
+                    <p>
+                        <b>Razón Social:</b> {{ rucField.value?.razonSocial }}
+                    </p>
+                    <p>
+                        <b>Estado Contribuyente:</b> {{ rucField.value?.estadoContribuyente }}
+                    </p>
+                    @if (rucField.value?.tipoContribuyente === 'SCD') {
+                        <p>
+                            <b>Representante Legal:</b> {{ rucField.value?.nombreRepresentanteLegal }}
+                        </p>
+                    }
+                </p-message>
+
+                @if (rucField.value?.estadoContribuyente !== 'ACTIVO') {
+                    <p-message severity="warn">
+                        No puede crear la cuenta, el RUC se encuentra
+                        <b>{{ rucField.value?.estadoContribuyente }}</b>
+                    </p-message>
+                }
+            </div>
+        }
+
+        @if (emailField.enabled && identificationField.valid) {
+            <!-- emailField -->
+            <div class="custom-form-field md:col-span-12">
+                <label
+                    appLabel for="email"
+                    label="Correo electrónico"
+                    [required]="emailField"></label>
+
+                <input pInputText type="email" id="email" formControlName="email" />
+
+                <small appErrorMessage
+                       [errors]="emailField.errors"
+                       [touched]="emailField.touched"
+                       [dirty]="emailField.dirty"></small>
+            </div>
+
+            <!-- requestTransactionalCode -->
+            <div class="custom-form-field md:col-span-12">
+                <p-button
+                    severity="info"
+                    styleClass="w-full"
+                    [icon]="CustomIcons.PAPER_PLANE_SOLID"
+                    [label]="transactionalCodeControl.enabled?'Reenviar código':'Solicitar código'"
+                    [outlined]="true"
+                    [raised]="true"
+                    [disabled]="emailField.invalid"
+                    (onClick)="requestTransactionalCode()" />
+            </div>
+        }
+
+        @if (transactionalCodeControl.enabled) {
+            <!-- transactionalCodeControl -->
+            <div class="custom-form-field md:col-span-12">
+                <label
+                    appLabel for="transactionalCode"
+                    label="Código de seguridad"
+                    [required]="transactionalCodeControl"></label>
+
+                <app-transactional-code
+                    [formControl]="transactionalCodeControl"
+                    [requester]="emailField.value"
+                    [pAutoFocus]="true" />
+
+                <small
+                    appErrorMessage
+                    [errors]="transactionalCodeControl.errors"
+                    [touched]="transactionalCodeControl.touched"
+                    [dirty]="transactionalCodeControl.dirty">
+                </small>
+            </div>
+        }
+
+        @if (passwordField.enabled && transactionalCodeControl.valid) {
+            <!-- passwordField -->
+            <div class="custom-form-field md:col-span-12">
+                <label
+                    appLabel
+                    for="password"
+                    label="Contraseña"
+                    [required]="passwordField">
+                </label>
+
+                <p-password
+                    id="password"
+                    type="text"
+                    formControlName="password"
+                    inputStyleClass="w-full"
+                    [toggleMask]="true"
+                    [feedback]="false" />
+
+                <small appErrorMessage
+                       [errors]="passwordField.errors"
+                       [touched]="passwordField.touched"
+                       [dirty]="passwordField.dirty"></small>
+            </div>
+
+            <!-- passwordConfirmField -->
+            <div class="custom-form-field md:col-span-12">
+                <label
+                    appLabel
+                    for="passwordConfirm"
+                    [required]="passwordConfirmField"
+                    label="Confirmar contraseña"></label>
+
+                <p-password
+                    id="passwordConfirm"
+                    formControlName="passwordConfirm"
+                    inputStyleClass="w-full"
+                    [toggleMask]="true"
+                    [feedback]="false" />
+
+                <small
+                    appErrorMessage
+                    [errors]="passwordConfirmField.errors"
+                    [touched]="passwordConfirmField.touched"
+                    [dirty]="passwordConfirmField.dirty"></small>
+            </div>
+
+            <!-- securityQuestions title -->
+            <div class="md:col-span-12">
+                <h4>Preguntas de seguridad:</h4>
+
+                <small class="text-gray-500">
+                    Tus respuestas nos ayudarán a recuperar tu cuenta si alguna vez lo necesitas.
+                </small>
+            </div>
+
+            <!-- securityQuestionsField -->
+            <div formArrayName="securityQuestions" class="custom-form-field md:col-span-12">
+                @for (securityQuestion of securityQuestionsField.controls; track $index) {
+                    <div [formGroupName]="$index" class="custom-form-field md:col-span-12">
+                        <label
+                            appLabel
+                            [for]="$index"
+                            [required]="securityQuestion.get('answer')">
+                            {{ securityQuestion.get('question')?.value }}
+                        </label>
+
+                        <p-password
+                            [id]="$index"
+                            [formControl]="$any(securityQuestion.get('answer'))"
+                            inputStyleClass="w-full"
+                            [toggleMask]="true"
+                            [feedback]="false" />
+
+                        <small
+                            appErrorMessage
+                            [errors]="securityQuestion.get('answer')?.errors"
+                            [touched]="securityQuestion.get('answer')?.touched"
+                            [dirty]="securityQuestion.get('answer')?.dirty"></small>
+                    </div>
+                }
+            </div>
+
+            <!-- termsAcceptedAtField -->
+            <div class="custom-form-field md:col-span-12">
+                <div class="flex items-center">
+                    <p-checkbox
+                        inputId="termsAcceptedAt"
+                        formControlName="termsAcceptedAt"
+                        [binary]="true"
+                        (click)="openTerms()" />
+
+                    <p-button
+                        label="He leído y acepto los Términos y Condiciones"
+                        [link]="true"
+                        (onClick)="openTerms()"
+                    />
+                </div>
+
+                <small appErrorMessage
+                       [errors]="termsAcceptedAtField.errors"
+                       [touched]="termsAcceptedAtField.touched"
+                       [dirty]="termsAcceptedAtField.dirty"></small>
+            </div>
+
+            <!-- saveButton -->
+            <div class="custom-form-field md:col-span-12">
+                <p-button
+                    label="Crear Cuenta"
+                    severity="success"
+                    styleClass="w-full"
+                    [outlined]="true"
+                    [raised]="true"
+                    [icon]="CustomIcons.USER_PLUS_SOLID"
+                    (onClick)="onSubmit()" />
+            </div>
+        }
+    </form>
+</div>
