@@ -9,11 +9,10 @@ export function validateEnrollmentDetailForm(
   required(schema.workday,  {message: 'El horario es requerido'});
   required(schema.parallel, {message: 'El paralelo es requerido'});
 
-  // Requeridos solo al crear
+  // Solo requeridos al crear
   if (isNew) {
     required(schema.subject,     {message: 'La asignatura es requerida'});
     required(schema.type,        {message: 'El tipo de matrícula es requerido'});
-    required(schema.number,      {message: 'El número de matrícula es requerido'});
-    required(schema.observation, {message: 'La observación es requerida al agregar una nueva asignatura'});
+    required(schema.observation, {message: 'La observación es requerida al crear una asignatura'});
   }
 }

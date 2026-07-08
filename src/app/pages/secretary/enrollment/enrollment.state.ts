@@ -12,9 +12,6 @@ export interface EnrollmentStateModel {
   parallel: CatalogueModel | null;
   observation: string | null;
   enrollmentState: EnrollmentStateRefModel | null;
-  socioeconomicCategory: string | null;
-  socioeconomicPercentage: string | null;
-  socioeconomicScore: string | null;
 }
 
 export interface StudentStateModel {
@@ -55,9 +52,6 @@ export const ENROLLMENT_INITIAL_STATE: EnrollmentStateModel = {
   parallel: null,
   observation: null,
   enrollmentState: null,
-  socioeconomicCategory: null,
-  socioeconomicPercentage: null,
-  socioeconomicScore: null,
 };
 
 // ─── Enrollment Detail ────────────────────────────────────────────────────────

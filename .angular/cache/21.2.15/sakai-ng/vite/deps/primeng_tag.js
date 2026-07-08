@@ -1,38 +1,35 @@
 import {
   BaseComponent,
   PARENT_INSTANCE
-} from "./chunk-VJIFSG5O.js";
+} from "./chunk-PZOLH4AB.js";
 import {
   Bind
-} from "./chunk-N7NCFJXG.js";
+} from "./chunk-7TWDOYJO.js";
 import {
   BaseStyle
-} from "./chunk-RHHMDHD7.js";
+} from "./chunk-WBBP6SID.js";
 import {
   PrimeTemplate,
   SharedModule
-} from "./chunk-X27QUODF.js";
+} from "./chunk-UOVZZLKO.js";
 import "./chunk-TY573M37.js";
-import "./chunk-Z4TEE3MD.js";
 import {
   CommonModule,
   NgClass,
   NgIf,
   NgTemplateOutlet
-} from "./chunk-QNRWE5RM.js";
-import "./chunk-6BP5VLDC.js";
+} from "./chunk-SAPP2SJH.js";
+import "./chunk-ZFELSTZA.js";
 import {
   ChangeDetectionStrategy,
   Component,
   ContentChild,
   ContentChildren,
   Injectable,
-  InjectionToken,
   Input,
   NgModule,
   ViewEncapsulation,
   booleanAttribute,
-  inject,
   setClassMetadata,
   ɵɵHostDirectivesFeature,
   ɵɵInheritDefinitionFeature,
@@ -42,8 +39,6 @@ import {
   ɵɵclassMap,
   ɵɵcontentQuery,
   ɵɵdefineComponent,
-  ɵɵdefineInjectable,
-  ɵɵdefineInjector,
   ɵɵdefineNgModule,
   ɵɵelement,
   ɵɵelementContainerEnd,
@@ -60,10 +55,17 @@ import {
   ɵɵtemplate,
   ɵɵtext,
   ɵɵtextInterpolate
-} from "./chunk-XGI5745C.js";
-import "./chunk-HWYXSU2G.js";
+} from "./chunk-OUITE4SL.js";
+import {
+  InjectionToken,
+  inject,
+  ɵɵdefineInjectable,
+  ɵɵdefineInjector
+} from "./chunk-JLDDLJWN.js";
 import "./chunk-JRFR6BLO.js";
+import "./chunk-HWYXSU2G.js";
 import "./chunk-MARUHEWW.js";
+import "./chunk-Z4TEE3MD.js";
 import "./chunk-GOMI4DH3.js";
 
 // node_modules/@primeuix/styles/dist/tag/index.mjs

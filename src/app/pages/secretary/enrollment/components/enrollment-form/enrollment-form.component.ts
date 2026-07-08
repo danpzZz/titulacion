@@ -150,9 +150,6 @@ export class EnrollmentFormComponent implements OnInit, OnDestroy {
           parallel:                e.parallel                ?? null,
           observation:             e.observation             ?? null,
           enrollmentState:         e.enrollmentState         ?? null,
-          socioeconomicCategory:   e.socioeconomicCategory   ?? null,
-          socioeconomicPercentage: e.socioeconomicPercentage ?? null,
-          socioeconomicScore:      e.socioeconomicScore      ?? null,
         });
         const code = e.enrollmentState?.state?.code;
         this.isReadOnly.set(
@@ -170,7 +167,7 @@ export class EnrollmentFormComponent implements OnInit, OnDestroy {
       this.messageService.showFormErrors(this.formRegistryService.errors());
       return;
     }
-    // cast safely — nulls in state become undefined for the API
+    // Realiza una conversión segura, reemplazando los valores null del estado por undefined para la API.
     const payload = this.store.enrollmentFormSection() as unknown as Partial<EnrollmentModel>;
     this.enrollmentService.update(this.id(), payload).subscribe(() => {
       this.store.resetEnrollmentForm();
@@ -186,7 +183,5 @@ export class EnrollmentFormComponent implements OnInit, OnDestroy {
   get parallelField()                { return this.formData.parallel; }
   get observationField()             { return this.formData.observation; }
   get enrollmentStateField()         { return this.formData.enrollmentState; }
-  get socioeconomicCategoryField()   { return this.formData.socioeconomicCategory; }
-  get socioeconomicPercentageField() { return this.formData.socioeconomicPercentage; }
-  get socioeconomicScoreField()      { return this.formData.socioeconomicScore; }
+  
 }

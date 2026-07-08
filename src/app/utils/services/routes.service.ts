@@ -1,14 +1,17 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
+import { MY_ROUTES } from '@routes';
+import { RolesEnum } from '@utils/enums';
 
-@Injectable({providedIn: 'root'})
+/** @deprecated Usar MY_ROUTES directamente en los componentes */
+@Injectable({ providedIn: 'root' })
 export class RoutesService {
-    enrollments(_role?: string): string {
-        return '/main/secretary/enrollments';
+    enrollments(SECRETARY: RolesEnum): string {
+        return MY_ROUTES.secretaryPages.enrollment.absolute;
     }
-    enrollmentsDetailList(enrollmentId: string, _role?: string): string {
-        return `/main/secretary/enrollments/${enrollmentId}/enrollment-details`;
+    enrollmentsDetailList(enrollmentId: string): string {
+        return MY_ROUTES.secretaryPages.enrollment.detail.absoluteFn(enrollmentId);
     }
-    enrollmentsDetailForm(enrollmentId: string, _role?: string): string {
-        return `/main/secretary/enrollments/${enrollmentId}/enrollment-details`;
+    enrollmentsDetailForm(enrollmentId: string, id: string = 'new'): string {
+        return MY_ROUTES.secretaryPages.enrollment.form.absoluteFn(enrollmentId, id);
     }
 }

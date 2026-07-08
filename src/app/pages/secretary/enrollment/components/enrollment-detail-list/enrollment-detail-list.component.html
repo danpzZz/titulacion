@@ -1,14 +1,27 @@
 <!-- Toolbar -->
 <div class="custom-form-card">
-  <div class="custom-form-field-row">
-    <p-button label="Crear" [icon]="CustomIcons.PLUS_SOLID" severity="success" (click)="goToCreate()"></p-button>
-    <p-button label="Refrescar" [icon]="CustomIcons.ARROWS_ROTATE_SOLID" severity="info"
-      [loading]="isLoading()" (click)="loadDetails()">
-    </p-button>
+  <div class="custom-form-grid md:grid-cols-12">
+    <div class="custom-form-field md:col-span-12">
+      @if (canModify()) {
+        <p-button label="Crear" [icon]="CustomIcons.PLUS_SOLID" severity="success"
+          (click)="goToCreate()">
+        </p-button>
+      }
+      <p-button label="Refrescar" [icon]="CustomIcons.ARROWS_ROTATE_SOLID" severity="info"
+        [loading]="isLoading()" (click)="loadDetails()">
+      </p-button>
+    </div>
+
+    @if (!canModify()) {
+      <div class="custom-form-field md:col-span-12">
+        <p-tag value="Matrícula anulada o rechazada — solo lectura" severity="danger"
+          [icon]="CustomIcons.BAN_SOLID">
+        </p-tag>
+      </div>
+    }
   </div>
 </div>
 
-<!-- Tabla -->
 <p-table #dt1 dataKey="id"
   styleClass="p-datatable-striped p-datatable-gridlines"
   [value]="items()" [columns]="columns"
@@ -16,22 +29,17 @@
   [loading]="isLoading()">
 
   <ng-template pTemplate="caption">
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <h2 style="margin:0">Asignaturas</h2>
-      <p-input-group style="width:280px">
-        <input #search pInputText type="text" placeholder="Buscar..."
-          (input)="dt1.filterGlobal(search.value, 'contains')">
-        <p-inputGroupAddon>
-          <i [class]="CustomIcons.MAGNIFYING_GLASS_SOLID"></i>
-        </p-inputGroupAddon>
-      </p-input-group>
+    <div class="custom-form-grid md:grid-cols-12">
+      <div class="custom-form-field md:col-span-12">
+        <h2 style="margin:0">Asignaturas</h2>
+      </div>
     </div>
   </ng-template>
 
   <ng-template pTemplate="header" let-columns>
     <tr>
       <th *ngFor="let col of columns" [pSortableColumn]="col.field"
-        style="text-align:center;white-space:nowrap">
+          style="text-align:center; white-space:nowrap">
         {{ col.header }} <p-sortIcon [field]="col.field"></p-sortIcon>
       </th>
       <th style="text-align:center">Acciones</th>
@@ -72,7 +80,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td [attr.colspan]="columns.length + 1" style="text-align:center;padding:1.5rem">
+      <td [attr.colspan]="columns.length + 1" style="text-align:center; padding:1.5rem">
         No se encontraron asignaturas.
       </td>
     </tr>

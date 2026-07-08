@@ -364,12 +364,25 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   if (url.includes('/enrollment-details') && method === 'POST') {
     const newId = 'de000099-0000-0000-0000-' + Date.now().toString().slice(-12);
     const body = req.body as any;
+    // Auto-calculate number: count how many times this EXACT SUBJECT has been enrolled historically
+    const subjectId = body?.subject?.id ?? '';
+    let subjectCount = 0;
+    if (subjectId) {
+      for (const dets of Object.values(DETAILS)) {
+        subjectCount += (dets as any[]).filter((d: any) => d.subject?.id === subjectId).length;
+      }
+    }
+    const autoNumber = subjectId ? Math.min(subjectCount + 1, 3) : 1;
+    const autoDate   = new Date().toISOString().split('T')[0];
+
     const newDetail = {
-      id: newId, number: body?.number ?? 1, date: new Date().toISOString(),
-      subject: SUBJECTS.find(s => s.id === body?.subjectId) ?? SUBJECTS[0],
-      type: CATALOGUES['enrollment_type'].find(c => c.id === body?.typeId) ?? CAT.typeOrdinaria,
-      workday: CATALOGUES['enrollments_workday'].find(c => c.id === body?.workdayId) ?? CAT.workday0913,
-      parallel: CATALOGUES['parallel'].find(c => c.id === body?.parallelId) ?? CAT.parallelA,
+      id: newId,
+      number: body?.number ?? autoNumber,
+      date: body?.date ?? autoDate,
+      subject: SUBJECTS.find(s => s.id === (body?.subject?.id ?? body?.subjectId)) ?? body?.subject ?? SUBJECTS[0],
+      type: body?.type ?? CATALOGUES['enrollment_type']?.find((c:any) => c.id === body?.typeId) ?? CAT.typeOrdinaria,
+      workday: body?.workday ?? CATALOGUES['enrollments_workday']?.find((c:any) => c.id === body?.workdayId) ?? CAT.workday0913,
+      parallel: body?.parallel ?? CATALOGUES['parallel']?.find((c:any) => c.id === body?.parallelId) ?? CAT.parallelA,
       enrollmentDetailState: {state: CAT.stRegistered},
       finalGrade: null, finalAttendance: null, academicState: null, observation: body?.observation ?? '',
     };

@@ -2,7 +2,6 @@
 <div class="custom-form-card">
   <div class="custom-form-grid md:grid-cols-12">
 
-    <!-- Botones acción -->
     <div class="custom-form-field-row md:col-span-12">
       <p-button [icon]="CustomIcons.ARROWS_ROTATE_SOLID" severity="info" [rounded]="true"
         pTooltip="Refrescar" (click)="findEnrollments()">
@@ -12,7 +11,6 @@
       </p-button>
     </div>
 
-    <!-- Periodo Lectivo -->
     <div class="custom-form-field md:col-span-3">
       <p-select [ngModel]="store.selectedSchoolPeriod()"
         (ngModelChange)="store.updateFilter('schoolPeriod', $event)"
@@ -29,7 +27,6 @@
       </p-select>
     </div>
 
-    <!-- Carrera -->
     <div class="custom-form-field md:col-span-3">
       <p-select [ngModel]="store.selectedCareer()"
         (ngModelChange)="store.updateFilter('career', $event)"
@@ -37,7 +34,6 @@
       </p-select>
     </div>
 
-    <!-- Nivel -->
     <div class="custom-form-field md:col-span-3">
       <p-select [ngModel]="store.selectedAcademicPeriod()"
         (ngModelChange)="store.updateFilter('academicPeriod', $event)"
@@ -46,7 +42,6 @@
       </p-select>
     </div>
 
-    <!-- Estado -->
     <div class="custom-form-field md:col-span-3">
       <p-select [ngModel]="store.selectedEnrollmentState()"
         (ngModelChange)="store.updateFilter('enrollmentState', $event)"
@@ -64,30 +59,30 @@
   </div>
 }
 
-<!-- Tabla -->
 <p-table #dt1 dataKey="id"
   styleClass="p-datatable-striped p-datatable-gridlines"
-  [value]="store.items()" [columns]="columns" [loading]="store.isLoading()"
-  sortMode="single" [defaultSortOrder]="1">
+  [value]="store.items()" [columns]="columns"
+  [loading]="store.isLoading()" sortMode="single">
 
   <ng-template pTemplate="caption">
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <h2 style="margin:0">Lista de Matriculados</h2>
-      <p-input-group style="width:280px">
-        <input type="text" pInputText
-          [ngModel]="store.search()"
-          (ngModelChange)="store.updateFilter('search', $event)"
-          placeholder="Buscar...">
-        <p-inputGroupAddon>
-          <i [class]="CustomIcons.MAGNIFYING_GLASS_SOLID"></i>
-        </p-inputGroupAddon>
-      </p-input-group>
+    <div class="custom-form-grid md:grid-cols-12">
+      <div class="custom-form-field md:col-span-8">
+        <h2 style="margin:0">Lista de Matriculados</h2>
+      </div>
+      <div class="custom-form-field md:col-span-4">
+        <p-input-group>
+          <input pInputText type="text" [value]="search()"
+            (input)="onSearchInput($event)" placeholder="Buscar..."/>
+          <p-button [icon]="CustomIcons.MAGNIFYING_GLASS_SOLID"></p-button>
+        </p-input-group>
+      </div>
     </div>
   </ng-template>
 
   <ng-template pTemplate="header" let-columns>
     <tr>
-      <th *ngFor="let col of columns" [pSortableColumn]="col.sortField ?? col.field" style="text-align:center;white-space:nowrap">
+      <th *ngFor="let col of columns" [pSortableColumn]="col.sortField ?? col.field"
+          style="text-align:center; white-space:nowrap">
         {{ col.header }} <p-sortIcon [field]="col.sortField ?? col.field"></p-sortIcon>
       </th>
       <th style="text-align:center">Acciones</th>
@@ -121,7 +116,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td [attr.colspan]="columns.length + 1" style="text-align:center;padding:1.5rem">
+      <td [attr.colspan]="columns.length + 1" style="text-align:center; padding:1.5rem">
         No se encontraron registros.
       </td>
     </tr>
