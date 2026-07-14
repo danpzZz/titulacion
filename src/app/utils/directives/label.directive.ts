@@ -1,97 +1,56 @@
 import {
-    AfterViewInit,
-    computed,
     Directive,
-    effect,
     ElementRef,
-    HostBinding,
-    inject,
-    Input,
-    OnChanges,
     Renderer2,
-    signal,
-    SimpleChanges,
-    afterNextRender,
+    inject,
+    input,
+    computed,
+    effect,
 } from '@angular/core';
-import {FieldState} from '@angular/forms/signals';
-
-type SignalField = () => FieldState<unknown>;
+import type { FieldTree } from '@angular/forms/signals';
 
 @Directive({
     selector: '[appLabel]',
+    standalone: true,
 })
-export class LabelDirective implements OnChanges {
-    @HostBinding('style.display') display = 'block';
-    @HostBinding('style.width') width = '100%';
-    @HostBinding('style.whiteSpace') whiteSpace = 'normal';
-
-    @Input() label: string | null = null;
-    @Input() appendColon = false;
-
-    @Input() set field(f: SignalField | null) {
-        this._field.set(f);
-    }
-
-    private readonly el = inject(ElementRef<HTMLElement>);
+export class LabelDirective<T = unknown> {
+    private readonly el = inject(ElementRef<HTMLLabelElement>);
     private readonly renderer = inject(Renderer2);
 
-    private readonly _field = signal<SignalField | null>(null);
-    private readonly _viewReady = signal(false); // signal en lugar de boolean
+    // Texto base del label
+    readonly label = input.required<string>();
 
-    private readonly _required = computed(() => {
-        const f = this._field();
-        if (!f) return false;
-        const state = f() as any;
-        const errors = state?.validationState?.errors?.() ?? [];
-        return errors.some(
-            (e: any) => e.kind === 'required' || e.message?.toLowerCase().includes('required')
-        );
-    });
+    // El FieldTree que le pasas desde el template, ej: [field]="formData.shortName"
+    readonly field = input<FieldTree<T> | undefined>();
+
+    // FieldState reactivo -> se recalcula cada vez que cambia el árbol de validación
+    private readonly fieldState = computed(() => this.field()?.());
+
+    // Señal directa de "requerido" que expone Signal Forms
+    protected readonly isRequired = computed(() => this.fieldState()?.required() ?? false);
+
     constructor() {
-        // Marca el view como listo después del primer render
-        afterNextRender(() => {
-            this._viewReady.set(true);
-            if (this.label != null && this.label !== '') {
-                this.setInnerHTML(this.appendColon ? `${this.label}:` : this.label);
-            }
-        });
-
-        // El effect lee _viewReady() y _required() — se re-ejecuta cuando cualquiera cambia
-        effect(() => {
-            if (!this._viewReady()) return; // espera al render
-            this.updateRequiredIcon();
-        });
+        // effect() en el constructor => siempre dentro del injection context (evita NG0203)
+        effect(() => this.render(this.isRequired()));
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (!this._viewReady()) return;
-        if ('label' in changes || 'appendColon' in changes) {
-            if (this.label != null && this.label !== '') {
-                this.setInnerHTML(this.appendColon ? `${this.label}:` : this.label);
-                this.updateRequiredIcon();
-            }
+    private render(required: boolean): void {
+        // Limpiamos el contenido actual del <label>
+        this.renderer.setProperty(this.el.nativeElement, 'textContent', '');
+
+        if (required) {
+            const icon = this.renderer.createElement('span');
+            // this.renderer.setStyle(asterisk, 'color', 'red');
+            // this.renderer.setProperty(asterisk, 'textContent', '* ');
+            this.renderer.addClass(icon, 'pi');
+            this.renderer.addClass(icon, 'pi-asterisk');
+            this.renderer.addClass(icon, 'text-red-500');
+            this.renderer.addClass(icon, 'mr-1');
+            this.renderer.setStyle(icon, 'font-size', '0.6rem');
+            this.renderer.appendChild(this.el.nativeElement, icon);
         }
-    }
 
-    private setInnerHTML(html: string): void {
-        this.renderer.setProperty(this.el.nativeElement, 'innerHTML', html + ':');
-    }
-
-    private updateRequiredIcon(): void {
-        const host = this.el.nativeElement;
-        const existing = host.querySelector('[data-app-label-icon="true"]');
-        if (this._required()) {
-            if (!existing) {
-                const icon = this.renderer.createElement('i');
-                this.renderer.setAttribute(icon, 'data-app-label-icon', 'true');
-                this.renderer.addClass(icon, 'pi');
-                this.renderer.addClass(icon, 'pi-asterisk');
-                this.renderer.addClass(icon, 'text-red-500');
-                this.renderer.addClass(icon, 'mr-1');
-                this.renderer.setStyle(icon, 'font-size', '0.6rem');
-                this.renderer.setAttribute(icon, 'aria-hidden', 'true');
-                this.renderer.insertBefore(host, icon, host.firstChild);
-            }
-        }
+        const textNode = this.renderer.createText(this.label());
+        this.renderer.appendChild(this.el.nativeElement, textNode);
     }
 }

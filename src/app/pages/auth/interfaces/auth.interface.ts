@@ -1,6 +1,5 @@
-import { RoleInterface } from '@modules/auth/interfaces';
-import { CatalogueInterface } from '@utils/interfaces';
-import { RucInterface } from '@/pages/core/shared/interfaces';
+import {RoleInterface} from '@modules/auth/interfaces';
+import {CatalogueInterface} from '@utils/interfaces';
 
 export interface AuthInterface {
     id: string;
@@ -13,7 +12,6 @@ export interface AuthInterface {
     identification?: string;
     username: string;
     termsAcceptedAt?: Date;
-    ruc?: RucInterface;
     securityQuestionAcceptedAt?: Date;
     passwordChanged: boolean;
     nationality: CatalogueInterface;

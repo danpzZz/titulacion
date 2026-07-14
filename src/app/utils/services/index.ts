@@ -5,13 +5,9 @@ export { CustomMessageService } from './custom-message.service';
 export { DpaHttpService } from './dpa-http.service';
 export { FileHttpService } from './file-http.service';
 export { FormRegistryService } from './form-registry.service';
-export { BreadcrumbService } from './breadcrumb.service';
-export { RoutesService } from './routes.service';
+
 export { CareersService } from './careers.service';
 export { CareersHttpService } from './careers-http.service';
 export { CataloguesHttpService } from './catalogues-http.service';
-export { SchoolPeriodsHttpService } from './school-periods-http.service';
 export { SchoolPeriodsService } from './school-periods.service';
-export { CurriculumsHttpService } from './curriculums-http.service';
-export { MessageService } from './message.service';
-export { CoreService } from './core.service';
+export { SchoolPeriodsHttpService } from './school-periods-http.service';

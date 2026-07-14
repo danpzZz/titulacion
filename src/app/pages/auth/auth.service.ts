@@ -6,13 +6,13 @@ import { AuthInterface } from '@modules/auth/interfaces/auth.interface';
 import { RoleInterface } from '@modules/auth/interfaces/role.interface';
 import { Router } from '@angular/router';
 import { CustomMessageService } from '@utils/services/custom-message.service';
-import { CoreService } from '@utils/services/core.service';
+import { AppService } from '@utils/services/app.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
-    private readonly coreService = inject(CoreService);
+    private readonly coreService = inject(AppService);
     private readonly router = inject(Router);
     private readonly customMessageService = inject(CustomMessageService);
 

@@ -1,5 +1,3 @@
-// Minimal model stubs so the secretary/enrollment module compiles
-
 export interface CatalogueModel {
     id: string;
     name: string;
@@ -8,93 +6,93 @@ export interface CatalogueModel {
     [key: string]: any;
 }
 
-export interface CareerModel {
+export interface UserModel {
     id: string;
+    identification: string;
+    lastname: string;
     name: string;
-    curriculums?: CurriculumModel[];
+    email?: string;
+    cellPhone?: string;
+    phone?: string;
+    personalEmail?: string;
     [key: string]: any;
 }
 
-export interface CurriculumModel {
+export interface StudentModel {
+    id: string;
+    user: UserModel;
+    [key: string]: any;
+}
+
+export interface CareerModel {
     id: string;
     name: string;
+    code?: string;
+    acronym?: string;
+    curriculums?: Array<{id: string; [key: string]: any}>;
     [key: string]: any;
 }
 
 export interface SchoolPeriodModel {
     id: string;
     name: string;
-    shortName?: string;
+    shortName: string;
     [key: string]: any;
 }
 
 export interface SubjectModel {
     id: string;
-    name: string;
     code: string;
+    name: string;
     academicPeriod?: CatalogueModel;
     [key: string]: any;
 }
 
 export interface EnrollmentModel {
     id: string;
-    student: StudentModel;
-    date?: string;
     code?: string;
+    date?: string;
+    student: StudentModel;
+    career?: CareerModel;
     type?: CatalogueModel;
     academicPeriod?: CatalogueModel;
     workday?: CatalogueModel;
     parallel?: CatalogueModel;
+    enrollmentState?: {state: CatalogueModel};
     observation?: string;
-    enrollmentState?: { state: CatalogueModel };
     socioeconomicCategory?: string;
-    socioeconomicPercentage?: string;
-    socioeconomicScore?: string;
-    career?: CareerModel;
-    [key: string]: any;
-}
-
-export interface StudentModel {
-    user: UserModel;
-    [key: string]: any;
-}
-
-export interface UserModel {
-    identification: string;
-    lastname: string;
-    name: string;
-    email?: string;
-    personalEmail?: string;
-    cellPhone?: string;
-    phone?: string;
+    socioeconomicPercentage?: string | number;
+    socioeconomicScore?: string | number;
     [key: string]: any;
 }
 
 export interface EnrollmentDetailModel {
     id: string;
+    number?: number | string;
+    date?: string;
     subject?: SubjectModel;
     type?: CatalogueModel;
     workday?: CatalogueModel;
     parallel?: CatalogueModel;
-    number?: number;
-    date?: string;
-    finalGrade?: number;
-    finalAttendance?: number;
-    academicState?: CatalogueModel;
-    observation?: string;
-    enrollmentDetailState?: { state: CatalogueModel };
+    enrollmentDetailState?: {state: CatalogueModel};
+    finalGrade?: number | null;
+    finalAttendance?: number | null;
+    academicState?: CatalogueModel | null;
+    observation?: string | null;
     [key: string]: any;
+}
+
+export interface PaginatorModel {
+    totalItems: number;
+    limit: number;
+    page: number;
+    offset: number;
 }
 
 export interface HttpResponseModel<T> {
     data: T;
     pagination?: PaginatorModel;
+    message?: string;
+    title?: string;
     [key: string]: any;
-}
-
-export interface PaginatorModel {
-    limit: number;
-    offset: number;
-    page: number;
-    totalItems: number;
 }

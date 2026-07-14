@@ -1,10 +1,11 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {RouterModule} from '@angular/router';
-import {CoreService, CustomMessageService} from "@utils/services";
+import {AppService, CustomMessageService} from "@utils/services";
 import {MessageModalComponent} from "@utils/components/message-modal/message-modal.component";
 import {Toast} from "primeng/toast";
 import {ConfirmDialog} from "primeng/confirmdialog";
 import {MessageProcessingComponent} from "@utils/components/message-processing/message-processing.component";
+import {AuthService} from "@modules/auth/auth.service";
 
 @Component({
     selector: 'app-root',
@@ -32,8 +33,13 @@ import {MessageProcessingComponent} from "@utils/components/message-processing/m
             <router-outlet/>
         }`
 })
-export class AppComponent {
-    protected readonly coreService = inject(CoreService);
+export class AppComponent implements OnInit {
+    protected readonly authService = inject(AuthService);
+    protected readonly coreService = inject(AppService);
     protected readonly customMessageService = inject(CustomMessageService);
     protected loading = signal(true);
+
+    ngOnInit() {
+        this.authService.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgyOGE2ZWY4LTNlOGYtNDNiYS1hYmZjLTAwY2QxY2EyMDljMiIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3ODM0Njc1NDgsImV4cCI6MTc4MzU1Mzk0OH0.05D-qtR9pO5j9LXoQ0C2wNfRr-pRjp8utT-GvMbS8Bs';
+    }
 }

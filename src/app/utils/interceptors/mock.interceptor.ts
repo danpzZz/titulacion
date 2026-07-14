@@ -243,6 +243,11 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
               {totalItems: 1, limit: 10, page: 0, offset: 0});
   }
 
+  // ── Careers: subjects by career ──────────────────────────────────────────────
+  if (url.match(/\/careers\/[^/]+\/subjects/) && method === 'GET') {
+    return ok(SUBJECTS);
+  }
+
   // ── Careers ─────────────────────────────────────────────────────────────────
   if (url.includes('/careers/') && url.includes('/enrollments')) {
     const search           = (req.params.get('search') ?? '').toLowerCase().trim();

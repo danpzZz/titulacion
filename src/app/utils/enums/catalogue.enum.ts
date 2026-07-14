@@ -138,24 +138,14 @@ export enum CatalogueProcessFoodDrinksClassificationEnum {
     servicio_catering = 'servicio_catering'
 }
 
-// ── Enrollment catalogue types ────────────────────────────────────────────────
-export const CatalogueEnrollmentTypeEnum = {
-    ACADEMIC_PERIOD:           'academic_period',
-    ENROLLMENTS_TYPE:          'enrollments_type',
-    ENROLLMENTS_STATE:         'enrollments_state',
-    ENROLLMENTS_WORKDAY:       'enrollments_workday',
-    ENROLLMENTS_ACADEMIC_STATE:'enrollments_academic_state',
-    PARALLEL:                  'parallel',
-};
-
-// Extend CatalogueTypeEnum values as constants for enrollment
+// ── Enrollment module additions ───────────────────────────────────────────────
 export const EnrollmentCatalogueTypeEnum = {
-    ACADEMIC_PERIOD:            'academic_period',
-    ENROLLMENTS_TYPE:           'enrollments_type',
-    ENROLLMENTS_STATE:          'enrollments_state',
-    ENROLLMENTS_WORKDAY:        'enrollments_workday',
-    ENROLLMENTS_ACADEMIC_STATE: 'enrollments_academic_state',
-    PARALLEL:                   'parallel',
+    ACADEMIC_PERIOD:             'academic_period',
+    ENROLLMENTS_TYPE:            'enrollments_type',
+    ENROLLMENTS_STATE:           'enrollments_state',
+    ENROLLMENTS_WORKDAY:         'enrollments_workday',
+    ENROLLMENTS_ACADEMIC_STATE:  'enrollments_academic_state',
+    PARALLEL:                    'parallel',
 };
 
 export const CatalogueEnrollmentStateEnum = {

@@ -6,18 +6,14 @@ import {environment} from '@env/environment';
 
 @Injectable({providedIn: 'root'})
 export class SchoolPeriodsHttpService {
-  private readonly http = inject(HttpClient);
-  private readonly API  = environment.API_URL;
+    private readonly http = inject(HttpClient);
+    private readonly API  = environment.API_URL;
 
-  findAll(): Observable<any[]> {
-    return this.http
-      .get<any>(`${this.API}/school-periods`)
-      .pipe(map(r => r.data ?? []));
-  }
+    findAll(): Observable<any[]> {
+        return this.http.get<any>(`${this.API}/school-periods`).pipe(map(r => r.data ?? []));
+    }
 
-  findOpenSchoolPeriod(): Observable<any> {
-    return this.http
-      .get<any>(`${this.API}/school-periods/states/open`)
-      .pipe(map(r => r.data));
-  }
+    findOpenSchoolPeriod(): Observable<any> {
+        return this.http.get<any>(`${this.API}/school-periods/states/open`).pipe(map(r => r.data));
+    }
 }

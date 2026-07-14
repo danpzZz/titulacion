@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -8,17 +8,17 @@ import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MY_ROUTES } from '@routes';
-import { AuthHttpService } from '@/pages/auth/auth-http.service';
-import { CustomIcons } from '@modules/public/icons/custom-icons';
-import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { CustomIcons } from "@utils/icons/custom-icons";
 import { ConfirmationService } from 'primeng/api';
 import { environment } from '@env/environment';
+import { AuthHttpService } from "@modules/auth/auth-http.service";
 
 @Component({
     selector: 'app-terms',
     templateUrl: './terms.component.html',
     standalone: true,
-    imports: [PdfViewerModule, ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, ReactiveFormsModule, DatePickerModule]
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, ReactiveFormsModule, DatePickerModule]
 })
 export default class TermsComponent implements OnInit {
     protected readonly CustomIcons = CustomIcons;
@@ -28,9 +28,9 @@ export default class TermsComponent implements OnInit {
     private readonly authHttpService = inject(AuthHttpService);
     private readonly confirmationService = inject(ConfirmationService);
 
-    constructor() {}
+    constructor() { }
 
-    async ngOnInit() {}
+    async ngOnInit() { }
 
     protected onSubmit() {
         this.acceptTerms();

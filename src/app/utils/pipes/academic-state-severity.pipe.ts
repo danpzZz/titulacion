@@ -1,14 +1,17 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
-/** Convierte el código de estado académico en la severidad de p-tag */
+type PrimeSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null | undefined;
+
 @Pipe({name: 'academicStateSeverity', standalone: true})
 export class AcademicStateSeverityPipe implements PipeTransform {
-    transform(code: string | undefined): string {
+    transform(code: string | undefined): PrimeSeverity {
         switch (code) {
-            case 'approved':    return 'success';
-            case 'failed':      return 'danger';
-            case 'withdrawn':   return 'warning';
-            default:            return 'secondary';
+            case 'a':          return 'success';
+            case 'approved':   return 'success';
+            case 'r':          return 'danger';
+            case 'failed':     return 'danger';
+            case 'withdrawn':  return 'warn';
+            default:           return 'secondary';
         }
     }
 }

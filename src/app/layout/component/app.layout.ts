@@ -1,30 +1,26 @@
-import {Component, computed, effect, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {RouterModule} from '@angular/router';
-import {AppTopbar} from './app.topbar';
-import {AppSidebar} from './app.sidebar';
-import {AppFooter} from './app.footer';
-import {AppBreadcrumb} from './app.breadcrumb';
-import {LayoutService} from '@layout/service/layout.service';
+import { Component, computed, effect, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { AppTopbar } from './app.topbar';
+import { AppSidebar } from './app.sidebar';
+import { AppFooter } from './app.footer';
+import { LayoutService } from '@layout/service/layout.service';
 
 @Component({
     selector: 'app-layout',
     standalone: true,
-    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter, AppBreadcrumb],
-    template: `
-        <div class="layout-wrapper" [ngClass]="containerClass()">
-            <app-topbar></app-topbar>
-            <app-sidebar></app-sidebar>
-            <div class="layout-main-container">
-                <app-breadcrumb/>
-                <div class="layout-main">
-                    <router-outlet></router-outlet>
-                </div>
-                <app-footer></app-footer>
+    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter],
+    template: `<div class="layout-wrapper" [ngClass]="containerClass()">
+        <app-topbar></app-topbar>
+        <app-sidebar></app-sidebar>
+        <div class="layout-main-container">
+            <div class="layout-main">
+                <router-outlet></router-outlet>
             </div>
-            <div class="layout-mask"></div>
+            <app-footer></app-footer>
         </div>
-    `
+        <div class="layout-mask"></div>
+    </div> `
 })
 export class AppLayout {
     layoutService = inject(LayoutService);
@@ -42,13 +38,13 @@ export class AppLayout {
 
     containerClass = computed(() => {
         const config = this.layoutService.layoutConfig();
-        const state  = this.layoutService.layoutState();
+        const state = this.layoutService.layoutState();
         return {
-            'layout-overlay':          config.menuMode === 'overlay',
-            'layout-static':           config.menuMode === 'static',
-            'layout-static-inactive':  state.staticMenuDesktopInactive && config.menuMode === 'static',
-            'layout-overlay-active':   state.overlayMenuActive,
-            'layout-mobile-active':    state.mobileMenuActive,
+            'layout-overlay': config.menuMode === 'overlay',
+            'layout-static': config.menuMode === 'static',
+            'layout-static-inactive': state.staticMenuDesktopInactive && config.menuMode === 'static',
+            'layout-overlay-active': state.overlayMenuActive,
+            'layout-mobile-active': state.mobileMenuActive
         };
-    });
+    })
 }

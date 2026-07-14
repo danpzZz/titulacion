@@ -6,12 +6,14 @@ import {environment} from '@env/environment';
 
 @Injectable({providedIn: 'root'})
 export class CareersHttpService {
-  private readonly http = inject(HttpClient);
-  private readonly API  = environment.API_URL;
+    private readonly http = inject(HttpClient);
+    private readonly API  = environment.API_URL;
 
-  findAll(): Observable<any[]> {
-    return this.http
-      .get<any>(`${this.API}/careers`)
-      .pipe(map(r => r.data ?? []));
-  }
+    findAll(): Observable<any[]> {
+        return this.http.get<any>(`${this.API}/careers`).pipe(map(r => r.data ?? []));
+    }
+
+    findSubjectsByCareer(careerId: string): Observable<any[]> {
+        return this.http.get<any>(`${this.API}/careers/${careerId}/subjects`).pipe(map(r => r.data ?? []));
+    }
 }

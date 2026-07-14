@@ -150,25 +150,13 @@ export enum SeverityButtonActionEnum {
 }
 
 
-// ── Secretary / Enrollment additions ─────────────────────────────────────────
+// ── Enrollment module additions ───────────────────────────────────────────────
 export const BreadcrumbEnum = {
     ENROLLMENTS:        'Matrículas',
     ENROLLMENT_DETAILS: 'Asignaturas',
     FORM:               'Formulario',
 };
 
-export enum RolesEnum {
-    SECRETARY    = 'secretary',
-    ADMIN        = 'admin',
-    STUDENT      = 'student',
-    COORDINATOR  = 'coordinator',
-}
-
 export enum RoutesEnum {
     NEW = 'new',
-}
-
-export enum SkeletonEnum {
-    CARD = 'card',
-    LIST = 'list',
 }

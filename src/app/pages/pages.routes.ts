@@ -5,7 +5,7 @@ export default [
     {
         path: MY_ROUTES.adminPages.user.base,
         title: 'Users',
-        loadChildren: () => import('@/pages/admin/admin.routes')
+        loadChildren: () => import('@modules/admin/admin.routes')
     },
     {path: '**', redirectTo: '/notfound'}
 ] as Routes;

@@ -4,7 +4,7 @@
         "outDir": "./dist/out-tsc",
         "strict": true,
         "noImplicitOverride": true,
-        "noPropertyAccessFromIndexSignature": true,
+        "noPropertyAccessFromIndexSignature": false,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "skipLibCheck": true,
@@ -19,6 +19,9 @@
         "paths": {
             "@routes": [
                 "./src/my-routes"
+            ],
+            "@errorRoutes": [
+                "./src/app/layout/errors/*"
             ],
             "@assets/*": [
                 "./src/assets/*"
@@ -35,35 +38,17 @@
             "@utils/*": [
                 "./src/app/utils/*"
             ],
-            "@utils/services/form-registry.service": [
-                "./src/app/utils/services/form-registry.service"
-            ],
-            "@utils/directives/label.directive": [
-                "./src/app/utils/directives/label.directive"
-            ],
-            "@utils/directives/error-message.directive": [
-                "./src/app/utils/directives/error-message.directive"
-            ],
-            "@utils/pipes/core/enrollment-state.pipe": [
-                "./src/app/utils/pipes/enrollment-state.pipe"
-            ],
-            "@utils/pipes/core/academic-state-severity.pipe": [
-                "./src/app/utils/pipes/academic-state-severity.pipe"
-            ],
-            "@utils/enums": [
-                "./src/app/utils/enums/index"
-            ],
-            "@services/core": [
-                "./src/app/utils/services/index"
+            "@adminModule": [
+                "./src/app/pages/admin"
             ],
             "@models/core": [
                 "./src/app/utils/interfaces/index"
             ],
-            "@services/auth": [
-                "./src/app/utils/services/auth.service"
+            "@utils/pipes/enrollment-state.pipe": [
+                "./src/app/utils/pipes/enrollment-state.pipe"
             ],
-            "@utils/helpers": [
-                "./src/app/utils/helpers/index"
+            "@utils/pipes/academic-state-severity.pipe": [
+                "./src/app/utils/pipes/academic-state-severity.pipe"
             ]
         }
     },
@@ -71,6 +56,6 @@
         "enableI18nLegacyMessageIdFormat": false,
         "strictInjectionParameters": true,
         "strictInputAccessModifiers": true,
-        "strictTemplates": false
+        "strictTemplates": true
     }
 }
