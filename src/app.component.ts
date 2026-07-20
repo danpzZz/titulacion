@@ -1,11 +1,11 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
-import {RouterModule} from '@angular/router';
-import {AppService, CustomMessageService} from "@utils/services";
-import {MessageModalComponent} from "@utils/components/message-modal/message-modal.component";
-import {Toast} from "primeng/toast";
-import {ConfirmDialog} from "primeng/confirmdialog";
-import {MessageProcessingComponent} from "@utils/components/message-processing/message-processing.component";
-import {AuthService} from "@modules/auth/auth.service";
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { AppService, CustomMessageService } from "@utils/services";
+import { MessageModalComponent } from "@utils/components/message-modal/message-modal.component";
+import { Toast } from "primeng/toast";
+import { ConfirmDialog } from "primeng/confirmdialog";
+import { MessageProcessingComponent } from "@utils/components/message-processing/message-processing.component";
+import { AuthService } from "@modules/auth/auth.service";
 
 @Component({
     selector: 'app-root',
@@ -40,6 +40,6 @@ export class AppComponent implements OnInit {
     protected loading = signal(true);
 
     ngOnInit() {
-        this.authService.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgyOGE2ZWY4LTNlOGYtNDNiYS1hYmZjLTAwY2QxY2EyMDljMiIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3ODM0Njc1NDgsImV4cCI6MTc4MzU1Mzk0OH0.05D-qtR9pO5j9LXoQ0C2wNfRr-pRjp8utT-GvMbS8Bs';
+        // this.authService.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgyOGE2ZWY4LTNlOGYtNDNiYS1hYmZjLTAwY2QxY2EyMDljMiIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3ODM0Njc1NDgsImV4cCI6MTc4MzU1Mzk0OH0.05D-qtR9pO5j9LXoQ0C2wNfRr-pRjp8utT-GvMbS8Bs';
     }
 }

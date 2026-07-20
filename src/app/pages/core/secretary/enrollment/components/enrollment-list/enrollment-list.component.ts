@@ -117,6 +117,21 @@ export class EnrollmentListComponent implements OnInit {
         this.loadCareers();
         this.loadAcademicPeriods();
         this.loadEnrollmentStates();
+
+        // quitar en cuanto /careers y /school-periods respondan bien para
+        // el rol secretary (ver MIGRACION-SECRETARIA.md). Mientras tanto, loadCareers()
+        // y loadSchoolPeriods() fallan en silencio (403/404) y los combos nunca se llenan,
+        // IDs reales que probados en Postman, solo para
+        // validar que el componente consume bien el backend de Secretaría.
+        this.store.updateFilter('career', {
+            id: '13553607-4b71-40c9-8032-913fc37e139f',
+            name: 'YAVIRAC ENGLISH CENTER',
+            code: 'YEC',
+        } as CareerModel);
+        this.store.updateFilter('schoolPeriod', {
+            id: '64712a47-6566-4ec2-a3bc-8f82a3720d65',
+            name: 'JULIO 2026 - SEPTIEMBRE 2026',
+        } as SchoolPeriodModel);
     }
 
     protected onSearchInput(event: Event): void {

@@ -1,12 +1,12 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { LabelButtonActionEnum } from '@utils/enums';
-import { MenuItem } from 'primeng/api';
-import { format } from 'date-fns';
-import { Drawer } from 'primeng/drawer';
-import { PanelMenu } from 'primeng/panelmenu';
-import { environment } from '@env/environment';
-import { CustomIcons } from '@utils/icons/custom-icons';
-import { Divider } from 'primeng/divider';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {LabelButtonActionEnum} from '@utils/enums';
+import {MenuItem} from 'primeng/api';
+import {format} from 'date-fns';
+import {Drawer} from 'primeng/drawer';
+import {PanelMenu} from 'primeng/panelmenu';
+import {environment} from '@env/environment';
+import {CustomIcons} from '@utils/icons/custom-icons';
+import {Divider} from 'primeng/divider';
 
 @Component({
     selector: 'app-button-action',
