@@ -14,8 +14,7 @@
     <div class="custom-form-field md:col-span-3">
       <p-select [ngModel]="store.selectedSchoolPeriod()"
         (ngModelChange)="store.updateFilter('schoolPeriod', $event)"
-        dataKey="id" [options]="schoolPeriods()" optionLabel="name"
-        placeholder="Periodo Lectivo">
+        dataKey="id" [options]="schoolPeriods()" optionLabel="name" placeholder="Periodo Lectivo">
         <ng-template pTemplate="selectedItem">
           @if (store.selectedSchoolPeriod()) {
             {{ store.selectedSchoolPeriod()!.shortName }} ({{ store.selectedSchoolPeriod()!.name }})
@@ -61,8 +60,9 @@
 
 <p-table #dt1 dataKey="id"
   styleClass="p-datatable-striped p-datatable-gridlines"
-  [value]="store.items()" [columns]="columns"
-  [loading]="store.isLoading()" sortMode="single">
+  [value]="store.items()"
+  [loading]="appService.loading()"
+  sortMode="single">
 
   <ng-template pTemplate="caption">
     <div class="custom-form-grid md:grid-cols-12">
@@ -79,30 +79,42 @@
     </div>
   </ng-template>
 
-  <ng-template pTemplate="header" let-columns>
+  <ng-template pTemplate="header">
     <tr>
-      <th *ngFor="let col of columns" [pSortableColumn]="col.sortField ?? col.field"
-          style="text-align:center; white-space:nowrap">
-        {{ col.header }} <p-sortIcon [field]="col.sortField ?? col.field"></p-sortIcon>
-      </th>
+      <th pSortableColumn="career.name"                style="text-align:center; white-space:nowrap">Carrera             <p-sortIcon field="career.name"></p-sortIcon></th>
+      <th pSortableColumn="student.user.identification" style="text-align:center; white-space:nowrap">Nº Documento        <p-sortIcon field="student.user.identification"></p-sortIcon></th>
+      <th pSortableColumn="student.user.lastname"       style="text-align:center; white-space:nowrap">Apellidos           <p-sortIcon field="student.user.lastname"></p-sortIcon></th>
+      <th pSortableColumn="student.user.name"           style="text-align:center; white-space:nowrap">Nombres             <p-sortIcon field="student.user.name"></p-sortIcon></th>
+      <th pSortableColumn="type.name"                   style="text-align:center; white-space:nowrap">Tipo de Matrícula   <p-sortIcon field="type.name"></p-sortIcon></th>
+      <th pSortableColumn="academicPeriod.name"         style="text-align:center; white-space:nowrap">Periodo académico   <p-sortIcon field="academicPeriod.name"></p-sortIcon></th>
+      <th pSortableColumn="workday.name"                style="text-align:center; white-space:nowrap">Horario             <p-sortIcon field="workday.name"></p-sortIcon></th>
+      <th pSortableColumn="parallel.name"               style="text-align:center; white-space:nowrap">Paralelo            <p-sortIcon field="parallel.name"></p-sortIcon></th>
+      <!-- Columna Periodo Lectivo: solo visible cuando hay búsqueda global activa -->
+      @if (search()) {
+        <th pSortableColumn="schoolPeriod.name"         style="text-align:center; white-space:nowrap">Periodo Lectivo     <p-sortIcon field="schoolPeriod.name"></p-sortIcon></th>
+      }
+      <th pSortableColumn="enrollmentState.state.name"  style="text-align:center; white-space:nowrap">Estado              <p-sortIcon field="enrollmentState.state.name"></p-sortIcon></th>
       <th style="text-align:center">Acciones</th>
     </tr>
   </ng-template>
 
   <ng-template pTemplate="body" let-row>
     <tr>
-      <td style="text-align:center">{{ row['career']?.name }}</td>
-      <td style="text-align:center">{{ row['student']?.user?.identification }}</td>
-      <td style="text-align:center">{{ row['student']?.user?.lastname }}</td>
-      <td style="text-align:center">{{ row['student']?.user?.name }}</td>
-      <td style="text-align:center">{{ row['type']?.name }}</td>
-      <td style="text-align:center">{{ row['academicPeriod']?.name }}</td>
-      <td style="text-align:center">{{ row['workday']?.name }}</td>
-      <td style="text-align:center">{{ row['parallel']?.name }}</td>
+      <td style="text-align:center">{{ row.career?.name }}</td>
+      <td style="text-align:center">{{ row.student?.user?.identification }}</td>
+      <td style="text-align:center">{{ row.student?.user?.lastname }}</td>
+      <td style="text-align:center">{{ row.student?.user?.name }}</td>
+      <td style="text-align:center">{{ row.type?.name }}</td>
+      <td style="text-align:center">{{ row.academicPeriod?.name }}</td>
+      <td style="text-align:center">{{ row.workday?.name }}</td>
+      <td style="text-align:center">{{ row.parallel?.name }}</td>
+      @if (search()) {
+        <td style="text-align:center">{{ row.schoolPeriod?.name }}</td>
+      }
       <td style="text-align:center">
-        @if (row['enrollmentState']?.state) {
-          <p-tag [value]="row['enrollmentState'].state.name"
-            [severity]="$any(row['enrollmentState'].state.code | enrollmentState)">
+        @if (row.enrollmentState?.state) {
+          <p-tag [value]="row.enrollmentState.state.name"
+            [severity]="$any(row.enrollmentState.state.code | enrollmentState)">
           </p-tag>
         }
       </td>
@@ -116,7 +128,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td [attr.colspan]="columns.length + 1" style="text-align:center; padding:1.5rem">
+      <td colspan="11" style="text-align:center; padding:1.5rem">
         No se encontraron registros.
       </td>
     </tr>
@@ -124,7 +136,7 @@
 
   <ng-template pTemplate="footer">
     <tr>
-      <td [attr.colspan]="columns.length + 1">
+      <td colspan="11">
         En total hay {{ store.paginator().totalItems }} registros.
       </td>
     </tr>

@@ -1,71 +1,74 @@
-import { Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FieldTree, form, FormField, SchemaPathTree } from '@angular/forms/signals';
+import {Component, computed, effect, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {FieldTree, form, FormField, SchemaPathTree} from '@angular/forms/signals';
 
-import { BreadcrumbService } from '@layout/service/breadcrumb.service';
-import { CustomMessageService } from '@utils/services/custom-message.service';
-import { CataloguesHttpService } from '@utils/services/catalogues-http.service';
-import { CareersService } from '@utils/services/careers.service';
-import { CareersHttpService } from '@utils/services/careers-http.service';
-import { FormRegistryService } from '@utils/services/form-registry.service';
-import { CustomIcons } from '@utils/icons/custom-icons';
-import { SECRETARY_ROUTES } from '@routes';
+import {BreadcrumbService} from '@layout/service/breadcrumb.service';
+import {CustomMessageService} from '@utils/services/custom-message.service';
+import {CataloguesHttpService} from '@utils/services/catalogues-http.service';
+import {CareersService} from '@utils/services/careers.service';
+import {CareersHttpService} from '@utils/services/careers-http.service';
+import {FormRegistryService} from '@utils/services/form-registry.service';
+import {AppService} from '@utils/services';
+import {CustomIcons} from '@utils/icons/custom-icons';
+import {SECRETARY_ROUTES} from '@routes';
 
-import { CatalogueModel, EnrollmentDetailModel, SubjectModel } from '@utils/interfaces';
-import { BreadcrumbEnum, EnrollmentCatalogueTypeEnum, RoutesEnum } from '@utils/enums';
-import { EnrollmentStore } from '../../enrollment.store';
-import { EnrollmentService } from '../../enrollment.service';
-import { EnrollmentDetailStateModel } from '../../enrollment.state';
-import { validateEnrollmentDetailForm } from './enrollment-detail-form.validation';
+import {CatalogueModel, EnrollmentDetailModel, SubjectModel} from '@utils/interfaces';
+import {BreadcrumbEnum, EnrollmentCatalogueTypeEnum, RoutesEnum} from '@utils/enums';
+import {EnrollmentStore} from '../../enrollment.store';
+import {EnrollmentService} from '../../enrollment.service';
+import {EnrollmentDetailStateModel} from '../../enrollment.state';
+import {validateEnrollmentDetailForm} from './enrollment-detail-form.validation';
 
-import { ButtonModule } from 'primeng/button';
-import { DividerModule } from 'primeng/divider';
-import { Select } from 'primeng/select';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { InputTextModule } from 'primeng/inputtext';
-import { CommonModule } from '@angular/common';
-import { LabelDirective } from '@utils/directives/label.directive';
-import { ErrorMessageDirective } from '@utils/directives/error-message.directive';
+import {ButtonModule} from 'primeng/button';
+import {DividerModule} from 'primeng/divider';
+import {Select} from 'primeng/select';
+import {InputNumberModule} from 'primeng/inputnumber';
+import {InputTextModule} from 'primeng/inputtext';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {LabelDirective} from '@utils/directives/label.directive';
+import {ErrorMessageDirective} from '@utils/directives/error-message.directive';
 
 const FORM_KEY = 'enrollmentDetailForm';
-const SESSION_FORM_KEY = 'enrollmentDetailForm';
 
 @Component({
     selector: 'app-enrollment-detail-form',
     standalone: true,
     imports: [
-        CommonModule, FormField,
+        CommonModule, FormsModule, FormField,
         ButtonModule, DividerModule, Select, InputNumberModule,
         InputTextModule, LabelDirective, ErrorMessageDirective,
     ],
     templateUrl: './enrollment-detail-form.component.html',
 })
 export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
-    private readonly route = inject(ActivatedRoute);
-    private readonly router = inject(Router);
-    private readonly breadcrumbService = inject(BreadcrumbService);
-    protected readonly enrollmentService = inject(EnrollmentService);
-    private readonly careersService = inject(CareersService);
-    private readonly careersHttpService = inject(CareersHttpService);
+    private readonly route                 = inject(ActivatedRoute);
+    private readonly router                = inject(Router);
+    private readonly breadcrumbService     = inject(BreadcrumbService);
+    protected readonly enrollmentService   = inject(EnrollmentService);
+    private readonly careersService        = inject(CareersService);
+    private readonly careersHttpService    = inject(CareersHttpService);
     private readonly cataloguesHttpService = inject(CataloguesHttpService);
-    private readonly messageService = inject(CustomMessageService);
-    private readonly formRegistryService = inject(FormRegistryService);
-    protected readonly store = inject(EnrollmentStore);
+    private readonly messageService        = inject(CustomMessageService);
+    private readonly formRegistryService   = inject(FormRegistryService);
+    protected readonly appService          = inject(AppService);
+    protected readonly store               = inject(EnrollmentStore);
 
     protected readonly CustomIcons = CustomIcons;
 
-    protected enrollmentId = signal<string>('');
-    protected id = signal<string>(RoutesEnum.NEW);
-    protected isNew = computed(() => this.id() === RoutesEnum.NEW);
-    protected isLoading = signal(false);
-    protected enrolledSubjectIds = signal<string[]>([]);
-    protected autoNumber = signal<number>(1);
+    // Leídos de la ruta en ngOnInit
+    protected readonly id           = signal<string>(RoutesEnum.NEW);
+    protected readonly enrollmentId = signal<string>('');
 
-    protected types = signal<CatalogueModel[]>([]);
-    protected workdays = signal<CatalogueModel[]>([]);
-    protected parallels = signal<CatalogueModel[]>([]);
+    protected isNew              = computed(() => this.id() === RoutesEnum.NEW);
+    protected enrolledSubjectIds = signal<string[]>([]);
+    protected autoNumber         = signal<number>(1);
+
+    protected types          = signal<CatalogueModel[]>([]);
+    protected workdays       = signal<CatalogueModel[]>([]);
+    protected parallels      = signal<CatalogueModel[]>([]);
     protected academicStates = signal<CatalogueModel[]>([]);
-    protected subjects = signal<SubjectModel[]>([]);
+    protected subjects       = signal<SubjectModel[]>([]);
 
     protected readonly form$ = signal<EnrollmentDetailStateModel>(this.store.detailFormSection());
 
@@ -77,27 +80,32 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
         );
 
     constructor() {
-        effect(() => { this.store.updateDetailForm(this.form$()); });
+        effect(() => {this.store.updateSection('detailForm', this.form$());});
 
         effect(() => {
             const selectedSubject = this.form$().subject;
             if (this.isNew() && selectedSubject?.id) {
                 this.enrollmentService.findDetailsByEnrollment(this.enrollmentId())
-                    .subscribe((details: any[]) => {
-                        const sameSubjectCount = details.filter(
-                            (d: any) => d.subject?.id === selectedSubject.id
-                        ).length;
-                        this.autoNumber.set(Math.min(sameSubjectCount + 1, 3));
+                    .subscribe({
+                        next: (details: EnrollmentDetailModel[]) => {
+                            const sameSubjectCount = details.filter(
+                                d => d.subject?.id === selectedSubject.id
+                            ).length;
+                            this.autoNumber.set(Math.min(sameSubjectCount + 1, 3));
+                        }
                     });
             }
         });
     }
 
     ngOnInit(): void {
-        const snap = this.route.snapshot;
-        this.enrollmentId.set(snap.params['enrollmentId']);
-        const paramId = snap.params['id'];
-        if (paramId !== RoutesEnum.NEW) this.id.set(paramId);
+        // Leer parámetros de ruta — disponibles en ngOnInit
+        const params = this.route.snapshot.params;
+        this.enrollmentId.set(params['enrollmentId'] ?? '');
+        const paramId = params['id'];
+        if (paramId && paramId !== RoutesEnum.NEW) {
+            this.id.set(paramId);
+        }
 
         this.breadcrumbService.setItems([
             {
@@ -108,23 +116,15 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
                 label: BreadcrumbEnum.ENROLLMENT_DETAILS,
                 routerLink: SECRETARY_ROUTES.enrollment.detail.absoluteFn(this.enrollmentId()),
             },
-            { label: BreadcrumbEnum.FORM },
+            {label: BreadcrumbEnum.FORM},
         ]);
 
         this.formRegistryService.register('Datos de Asignatura', FORM_KEY, this.formData, this.form$());
         this.loadCatalogues();
         this.loadSubjects();
 
-        if (!this.isNew()) {
-            const hasStoredData = !!sessionStorage.getItem(SESSION_FORM_KEY);
-            if (hasStoredData) {
-                // Hay datos guardados — cargar solo los campos readonly del servidor
-                // para que se muestren aunque el usuario haya recargado la página
-                setTimeout(() => this.loadReadonlyFields(this.id()), 300);
-            } else {
-                // Sin datos guardados — cargar todo del servidor normalmente
-                setTimeout(() => this.loadDetail(this.id()), 300);
-            }
+        if (this.id() !== RoutesEnum.NEW) {
+            this.loadData();
         }
     }
 
@@ -136,70 +136,69 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
     private loadCatalogues(): void {
         const http = this.cataloguesHttpService;
         http.findByTypeObservable(EnrollmentCatalogueTypeEnum.ENROLLMENTS_TYPE)
-            .subscribe((v: any[]) => this.types.set(v));
+            .subscribe({next: (v: CatalogueModel[]) => this.types.set(v)});
         http.findByTypeObservable(EnrollmentCatalogueTypeEnum.ENROLLMENTS_WORKDAY)
-            .subscribe((v: any[]) => this.workdays.set(v));
+            .subscribe({next: (v: CatalogueModel[]) => this.workdays.set(v)});
         http.findByTypeObservable(EnrollmentCatalogueTypeEnum.PARALLEL)
-            .subscribe((v: any[]) => this.parallels.set(v));
+            .subscribe({next: (v: CatalogueModel[]) => this.parallels.set(v)});
         http.findByTypeObservable(EnrollmentCatalogueTypeEnum.ENROLLMENTS_ACADEMIC_STATE)
-            .subscribe((v: any[]) => this.academicStates.set(v));
+            .subscribe({next: (v: CatalogueModel[]) => this.academicStates.set(v)});
     }
 
     private loadSubjects(): void {
         const careerId = this.careersService.career?.id ?? 'career00-0000-0000-0000-000000000001';
-        this.careersHttpService
-            .findSubjectsByCareer(careerId)
-            .subscribe((items: any[]) => {
-                this.subjects.set(items as SubjectModel[]);
-                this.enrollmentService.findDetailsByEnrollment(this.enrollmentId())
-                    .subscribe((details: any[]) => {
+        this.careersHttpService.findSubjectsByCareer(careerId).subscribe({
+            next: (items: SubjectModel[]) => {
+                this.subjects.set(items);
+                this.enrollmentService.findDetailsByEnrollment(this.enrollmentId()).subscribe({
+                    next: (details: EnrollmentDetailModel[]) => {
                         this.enrolledSubjectIds.set(
-                            details.map((d: any) => d.subject?.id).filter(Boolean)
+                            details.map(d => d.subject?.id).filter((id): id is string => !!id)
                         );
                         if (this.isNew()) {
                             this.autoNumber.set(Math.min(details.length + 1, 3));
                         }
-                    });
-            });
-    }
-
-    /** Carga todos los campos del servidor — se usa cuando NO hay datos en sessionStorage */
-    private loadDetail(id: string): void {
-        this.isLoading.set(true);
-        this.enrollmentService.findOneDetail(id).subscribe({
-            next: (d) => {
-                this.form$.set({
-                    subject: d.subject ?? null,
-                    type: d.type ?? null,
-                    workday: d.workday ?? null,
-                    parallel: d.parallel ?? null,
-                    number: d.number ?? null,
-                    date: d.date ?? null,
-                    finalGrade: d.finalGrade ?? null,
-                    finalAttendance: d.finalAttendance ?? null,
-                    academicState: d.academicState ?? null,
-                    observation: d.observation ?? null,
+                    }
                 });
-                this.isLoading.set(false);
-            },
-            error: () => this.isLoading.set(false),
+            }
         });
     }
 
-    /** Carga solo los campos readonly — se usa cuando YA hay datos en sessionStorage */
-    private loadReadonlyFields(id: string): void {
-        this.enrollmentService.findOneDetail(id).subscribe({
-            next: (d) => {
-                this.form$.update(current => ({
-                    ...current,            // mantiene los campos editables del sessionStorage
-                    subject: d.subject ?? null,
-                    type: d.type ?? null,
-                    number: d.number ?? null,
-                    date: d.date ?? null,
-                }));
-            },
-            error: () => { },
-        });
+    private loadData(): void {
+        if (this.store.hasDetailFormData()) {
+            this.enrollmentService.findOneDetail(this.id()).subscribe({
+                next: (d: EnrollmentDetailModel) => {
+                    this.store.updateSection('detailForm', {
+                        subject: d.subject ?? null,
+                        type:    d.type    ?? null,
+                        number:  d.number  ?? null,
+                        date:    d.date    ?? null,
+                    });
+                    this.form$.set(this.store.detailFormSection());
+                }
+            });
+        } else {
+            this.appService.showLoading();
+            this.enrollmentService.findOneDetail(this.id()).subscribe({
+                next: (d: EnrollmentDetailModel) => {
+                    this.store.updateSection('detailForm', {
+                        subject:         d.subject         ?? null,
+                        type:            d.type            ?? null,
+                        workday:         d.workday         ?? null,
+                        parallel:        d.parallel        ?? null,
+                        number:          d.number          ?? null,
+                        date:            d.date            ?? null,
+                        finalGrade:      d.finalGrade      ?? null,
+                        finalAttendance: d.finalAttendance ?? null,
+                        academicState:   d.academicState   ?? null,
+                        observation:     d.observation     ?? null,
+                    });
+                    this.form$.set(this.store.detailFormSection());
+                    this.appService.hideLoading();
+                },
+                error: () => this.appService.hideLoading(),
+            });
+        }
     }
 
     onSubmit(): void {
@@ -225,24 +224,30 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
             const newPayload = {
                 ...payload,
                 enrollmentId: this.enrollmentId(),
-                date: new Date().toISOString().split('T')[0],
+                date:   new Date().toISOString().split('T')[0],
                 number: this.autoNumber(),
             };
-            this.enrollmentService.createDetail(newPayload).subscribe(created => {
-                this.enrollmentService.sendDetailRequest(created.id, newPayload).subscribe(() => {
-                    this.store.resetDetailForm();
-                    this.back();
-                });
+            this.enrollmentService.createDetail(newPayload).subscribe({
+                next: created => {
+                    this.enrollmentService.sendDetailRequest(created.id, newPayload).subscribe({
+                        next: () => {
+                            this.store.resetDetailForm();
+                            this.back();
+                        }
+                    });
+                }
             });
         } else {
-            this.enrollmentService.updateDetail(this.id(), payload).subscribe(() => this.back());
+            this.enrollmentService.updateDetail(this.id(), payload).subscribe({
+                next: () => this.back()
+            });
         }
     }
 
     back(): void {
-        this.router.navigate([
+        this.router.navigateByUrl(
             SECRETARY_ROUTES.enrollment.detail.absoluteFn(this.enrollmentId())
-        ]);
+        );
     }
 
     isSubjectDisabled(subject: SubjectModel): boolean {

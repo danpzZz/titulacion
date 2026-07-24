@@ -1,4 +1,4 @@
-@if (isLoading()) {
+@if (appService.loading()) {
   <div class="custom-form-card" style="text-align:center">
     <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i>
   </div>
@@ -35,7 +35,9 @@
       <div class="custom-form-field md:col-span-6">
         <label appLabel label="Asignatura" [field]="$any(formData.subject)"></label>
         @if (isNew()) {
-          <p-select dataKey="id" [formField]="$any(formData.subject)"
+          <p-select dataKey="id"
+            [ngModel]="form$().subject" (ngModelChange)="form$.update(s => ({...s, subject: $any($event)}))"
+            name="subject"
             [options]="subjects()" [filter]="true" filterBy="code,name"
             optionLabel="name" placeholder="Seleccione" styleClass="w-full"
             [optionDisabled]="$any(isSubjectDisabled.bind(this))">
@@ -65,8 +67,10 @@
       <div class="custom-form-field md:col-span-6">
         <label appLabel label="Tipo de matrícula" [field]="isNew() ? $any(formData.type) : undefined"></label>
         @if (isNew()) {
-          <p-select dataKey="id" [formField]="$any(formData.type)" [options]="types()"
-            optionLabel="name" placeholder="Seleccione" styleClass="w-full">
+          <p-select dataKey="id"
+            [ngModel]="form$().type" (ngModelChange)="form$.update(s => ({...s, type: $any($event)}))"
+            name="type"
+            [options]="types()" optionLabel="name" placeholder="Seleccione" styleClass="w-full">
           </p-select>
           <small [appErrorMessage]="$any(formData.type)"></small>
         } @else {
@@ -75,25 +79,29 @@
         }
       </div>
 
-      <!-- Horario (editable) -->
+      <!-- Horario -->
       <div class="custom-form-field md:col-span-6">
         <label appLabel label="Horario" [field]="$any(formData.workday)"></label>
-        <p-select dataKey="id" [formField]="$any(formData.workday)" [options]="workdays()"
-          optionLabel="name" placeholder="Seleccione" styleClass="w-full">
+        <p-select dataKey="id"
+          [ngModel]="form$().workday" (ngModelChange)="form$.update(s => ({...s, workday: $any($event)}))"
+          name="workday"
+          [options]="workdays()" optionLabel="name" placeholder="Seleccione" styleClass="w-full">
         </p-select>
         <small [appErrorMessage]="$any(formData.workday)"></small>
       </div>
 
-      <!-- Paralelo (editable) -->
+      <!-- Paralelo -->
       <div class="custom-form-field md:col-span-6">
         <label appLabel label="Paralelo" [field]="$any(formData.parallel)"></label>
-        <p-select dataKey="id" [formField]="$any(formData.parallel)" [options]="parallels()"
-          optionLabel="name" placeholder="Seleccione" styleClass="w-full">
+        <p-select dataKey="id"
+          [ngModel]="form$().parallel" (ngModelChange)="form$.update(s => ({...s, parallel: $any($event)}))"
+          name="parallel"
+          [options]="parallels()" optionLabel="name" placeholder="Seleccione" styleClass="w-full">
         </p-select>
         <small [appErrorMessage]="$any(formData.parallel)"></small>
       </div>
 
-      <!-- Número de matrícula (calculado automáticamente) -->
+      <!-- Número de matrícula -->
       <div class="custom-form-field md:col-span-6">
         <label appLabel label="Número de matrícula"></label>
         <input pInputText readonly style="background:var(--surface-hover)"
@@ -103,7 +111,7 @@
         }
       </div>
 
-      <!-- Fecha de matrícula (auto al crear, readonly al editar) -->
+      <!-- Fecha de matrícula -->
       <div class="custom-form-field md:col-span-6">
         <label appLabel label="Fecha de matrícula"></label>
         <input pInputText readonly style="background:var(--surface-hover)"
@@ -126,8 +134,10 @@
 
         <div class="custom-form-field md:col-span-4">
           <label appLabel label="Estado Académico" [field]="$any(formData.academicState)"></label>
-          <p-select dataKey="id" [formField]="$any(formData.academicState)" [options]="academicStates()"
-            optionLabel="name" placeholder="Seleccione" styleClass="w-full">
+          <p-select dataKey="id"
+            [ngModel]="form$().academicState" (ngModelChange)="form$.update(s => ({...s, academicState: $any($event)}))"
+            name="academicState"
+            [options]="academicStates()" optionLabel="name" placeholder="Seleccione" styleClass="w-full">
           </p-select>
           <small [appErrorMessage]="$any(formData.academicState)"></small>
         </div>

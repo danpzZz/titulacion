@@ -1,4 +1,5 @@
 import { computed, effect, Injectable, signal } from '@angular/core';
+import { pickKeys } from '@utils/helpers/pickKeys.helper';
 import {
     EnrollmentDetailStateModel,
     EnrollmentFiltersState,
@@ -11,6 +12,17 @@ import { EnrollmentModel, PaginatorModel } from '@utils/interfaces';
 
 const DETAIL_FORM_KEY = 'enrollmentDetailForm';
 const ENROLLMENT_FORM_KEY = 'enrollmentForm';
+
+// Keys válidas por sección — permite updateSection tipado
+const DETAIL_FORM_KEYS: Array<keyof EnrollmentDetailStateModel> = [
+    'subject', 'type', 'workday', 'parallel', 'number',
+    'date', 'finalGrade', 'finalAttendance', 'academicState', 'observation',
+];
+
+const ENROLLMENT_FORM_KEYS: Array<keyof EnrollmentStateModel> = [
+    'student', 'date', 'code', 'type', 'academicPeriod',
+    'workday', 'parallel', 'observation', 'enrollmentState',
+];
 
 const PAGINATOR_INITIAL: PaginatorModel = {
     totalItems: 0, limit: 10, page: 0, offset: 0,
@@ -31,16 +43,13 @@ export class EnrollmentStore {
     readonly selectedEnrollmentState = computed(() => this.filters().enrollmentState);
     readonly search = computed(() => this.filters().search);
 
-    updateFilter<K extends keyof EnrollmentFiltersState>(
-        key: K, value: EnrollmentFiltersState[K]
-    ): void {
+    updateFilter<K extends keyof EnrollmentFiltersState>(key: K, value: EnrollmentFiltersState[K]): void {
         this.filters.update(s => ({ ...s, [key]: value }));
     }
 
     // ─── Lista de matrículas ───────────────────────────────────────────────────
     readonly items = signal<EnrollmentModel[]>([]);
     readonly paginator = signal<PaginatorModel>(PAGINATOR_INITIAL);
-    readonly isLoading = signal(false);
 
     setItems(items: EnrollmentModel[], paginator: PaginatorModel): void {
         this.items.set(items);
@@ -58,12 +67,7 @@ export class EnrollmentStore {
     readonly enrollmentForm = signal<EnrollmentStateModel>(
         this.loadFromStorage<EnrollmentStateModel>(ENROLLMENT_FORM_KEY, ENROLLMENT_INITIAL_STATE)
     );
-
     readonly enrollmentFormSection = computed(() => this.enrollmentForm());
-
-    updateEnrollmentForm(data: Partial<EnrollmentStateModel>): void {
-        this.enrollmentForm.update(s => ({ ...s, ...data }));
-    }
 
     resetEnrollmentForm(): void {
         this.enrollmentForm.set(ENROLLMENT_INITIAL_STATE);
@@ -74,16 +78,28 @@ export class EnrollmentStore {
     readonly detailForm = signal<EnrollmentDetailStateModel>(
         this.loadFromStorage<EnrollmentDetailStateModel>(DETAIL_FORM_KEY, ENROLLMENT_DETAIL_INITIAL_STATE)
     );
-
     readonly detailFormSection = computed(() => this.detailForm());
 
-    updateDetailForm(data: Partial<EnrollmentDetailStateModel>): void {
-        this.detailForm.update(s => ({ ...s, ...data }));
+    hasDetailFormData(): boolean {
+        return !!sessionStorage.getItem(DETAIL_FORM_KEY);
     }
 
     resetDetailForm(): void {
         this.detailForm.set(ENROLLMENT_DETAIL_INITIAL_STATE);
         sessionStorage.removeItem(DETAIL_FORM_KEY);
+    }
+
+    // ─── updateSection ─────────────────────────────────────
+    updateSection(section: 'enrollmentForm', data: Partial<EnrollmentStateModel>): void;
+    updateSection(section: 'detailForm', data: Partial<EnrollmentDetailStateModel>): void;
+    updateSection(section: 'enrollmentForm' | 'detailForm', data: any): void {
+        if (section === 'enrollmentForm') {
+            const filtered = pickKeys(data, ENROLLMENT_FORM_KEYS);
+            this.enrollmentForm.update(s => ({ ...s, ...filtered }));
+        } else {
+            const filtered = pickKeys(data, DETAIL_FORM_KEYS);
+            this.detailForm.update(s => ({ ...s, ...filtered }));
+        }
     }
 
     // ─── Constructor — effect guarda automáticamente en sessionStorage ─────────
