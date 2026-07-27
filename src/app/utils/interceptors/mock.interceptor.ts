@@ -238,6 +238,7 @@ const getDetail = (id: string) => {
 export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   const url = req.url;
   const method = req.method;
+  console.log('[MOCK] →', method, url);
 
   // ── School periods ──────────────────────────────────────────────────────────
   if (url.includes('/school-periods/states/open')) {
@@ -249,12 +250,12 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   // ── Careers: subjects by career ──────────────────────────────────────────────
-  if (url.match(/\/careers\/[^/]+\/subjects/) && method === 'GET') {
+  if (url.includes('/careers/') && url.includes('/subjects') && method === 'GET') {
     return ok(SUBJECTS);
   }
 
   // ── Careers ─────────────────────────────────────────────────────────────────
-  if (url.includes('/careers/') && url.includes('/enrollments')) {
+  if ((url.includes('/careers/') && url.includes('/enrollments')) || url.includes('/enrollments/careers/')) {
     const search = (req.params.get('search') ?? '').toLowerCase().trim();
     const academicPeriodId = req.params.get('academicPeriodId') ?? '';
     const enrollmentStateId = req.params.get('enrollmentStateId') ?? '';
@@ -285,13 +286,13 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
 
     return ok(list, { totalItems: list.length, limit: 10, page: 0, offset: 0 });
   }
-  if (url.includes('/careers') && method === 'GET') {
+  if (url.includes('/careers') && !url.includes('/subjects') && !url.includes('/enrollments') && method === 'GET') {
     return ok([{ id: IDS.career, name: 'YEC', code: 'YEC', curriculums: [{ id: IDS.curriculum }] }],
       { totalItems: 1, limit: 10, page: 0, offset: 0 });
   }
 
   // ── Catalogues ──────────────────────────────────────────────────────────────
-  if (url.includes('/catalogues/catalogue') || url.includes('/catalogues')) {
+  if (url.includes('/catalogues/catalogue') || url.includes('/catalogues') || url.includes('/shared/catalogues')) {
     // Try req.params first (HttpParams), then URL string as fallback
     const type = req.params.get('type') ?? url.match(/[?&]type=([^&]+)/)?.[1] ?? '';
     const result = CATALOGUES[type] ?? [];
@@ -305,7 +306,7 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   // ── Enrollments ─────────────────────────────────────────────────────────────
-  if (url.match(/\/enrollments\/[^/]+\/enrollment-details/) && method === 'GET') {
+  if ((url.includes('/enrollments/') && url.includes('/enrollment-details') && !url.includes('/enrollment-details/')) && method === 'GET') {
     const enrollmentId = url.split('/enrollments/')[1].split('/')[0];
     const details = (DETAILS[enrollmentId] ?? []).map(d => ({
       ...d,
@@ -313,31 +314,31 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     }));
     return ok(details);
   }
-  if (url.match(/\/enrollments\/[^/]+\/approve/) && method === 'PATCH') {
+  if (url.includes('/enrollments/') && url.includes('/approve') && !url.includes('/enrollment-detail') && method === 'PATCH') {
     const id = url.split('/enrollments/')[1].split('/')[0];
     enrollmentStates[id] = CAT.stApproved;
     return ok(getEnrollment(id));
   }
-  if (url.match(/\/enrollments\/[^/]+\/enroll/) && method === 'PATCH') {
+  if (url.includes('/enrollments/') && url.includes('/enroll') && !url.includes('/enrollment-detail') && method === 'PATCH') {
     const id = url.split('/enrollments/')[1].split('/')[0];
     enrollmentStates[id] = CAT.stEnrolled;
     return ok(getEnrollment(id));
   }
-  if (url.match(/\/enrollments\/[^/]+\/reject/) && method === 'PATCH') {
+  if (url.includes('/enrollments/') && url.includes('/reject') && !url.includes('/enrollment-detail') && method === 'PATCH') {
     const id = url.split('/enrollments/')[1].split('/')[0];
     enrollmentStates[id] = CAT.stRejected;
     return ok(getEnrollment(id));
   }
-  if (url.match(/\/enrollments\/[^/]+\/revoke/) && method === 'PATCH') {
+  if (url.includes('/enrollments/') && url.includes('/revoke') && !url.includes('/enrollment-detail') && method === 'PATCH') {
     const id = url.split('/enrollments/')[1].split('/')[0];
     enrollmentStates[id] = CAT.stRevoked;
     return ok(getEnrollment(id));
   }
-  if (url.match(/\/enrollments\/[^/]+$/) && method === 'GET') {
+  if (url.includes('/secretary/enrollments/') && !url.includes('/enrollment-details') && !url.includes('/careers') && !url.includes('/approve') && !url.includes('/reject') && !url.includes('/enroll') && !url.includes('/revoke') && method === 'GET') {
     const id = url.split('/enrollments/')[1];
     return ok(getEnrollment(id));
   }
-  if (url.match(/\/enrollments\/[^/]+$/) && (method === 'PUT' || method === 'PATCH')) {
+  if (url.includes('/secretary/enrollments/') && !url.includes('/enrollment-details') && !url.includes('/careers') && !url.includes('/approve') && !url.includes('/reject') && !url.includes('/enroll') && !url.includes('/revoke') && (method === 'PUT' || method === 'PATCH')) {
     const id = url.split('/enrollments/')[1].split('/')[0];
     return ok(getEnrollment(id));
   }
@@ -367,11 +368,18 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     const id = url.split('/enrollment-details/')[1].split('/')[0];
     return ok(getDetail(id));
   }
-  if (url.match(/\/enrollment-details\/[^/]+$/) && method === 'GET') {
-    const id = url.split('/enrollment-details/')[1];
-    return ok(getDetail(id));
+  if (url.includes('/enrollment-details/') && method === 'GET') {
+    console.log('[MOCK] enrollment-details GET matched, id extraction:', url.split('/enrollment-details/')[1]);
+    const id = url.split('/enrollment-details/')[1].split('?')[0].split('/')[0];
+    const detail = getDetail(id);
+    console.log('[MOCK] detail found:', !!detail, 'for id:', id);
+    if (!detail) {
+      console.warn('[MOCK] detail not found, returning 200 with null to avoid crash');
+      return ok(null);
+    }
+    return ok(detail);
   }
-  if (url.includes('/enrollment-details') && method === 'POST') {
+  if (url.includes('/enrollment-details') && !url.includes('/send-request') && method === 'POST') {
     const newId = 'de000099-0000-0000-0000-' + Date.now().toString().slice(-12);
     const body = req.body as any;
     // Auto-calculate number: count how many times this EXACT SUBJECT has been enrolled historically
@@ -404,30 +412,34 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     detailStates[newId] = CAT.stRegistered;
     return ok(newDetail);
   }
-  if (url.match(/\/enrollment-details\/[^/]+$/) && method === 'PUT') {
-    const id = url.split('/enrollment-details/')[1].split('/')[0];
-    const body = req.body as any;
-    // Apply the update to the stored detail
-    for (const enrollmentId of Object.keys(DETAILS)) {
-      const idx = DETAILS[enrollmentId].findIndex((d: any) => d.id === id);
-      if (idx !== -1) {
-        const existing = DETAILS[enrollmentId][idx];
-        // Update editable fields — form sends complete objects
-        DETAILS[enrollmentId][idx] = {
-          ...existing,
-          workday: body?.workday ?? existing.workday,
-          parallel: body?.parallel ?? existing.parallel,
-          finalGrade: body?.finalGrade !== undefined ? body.finalGrade : existing.finalGrade,
-          finalAttendance: body?.finalAttendance !== undefined ? body.finalAttendance : existing.finalAttendance,
-          academicState: body?.academicState ?? existing.academicState,
-          observation: body?.observation !== undefined ? body.observation : existing.observation,
-        };
-        break;
+  if (url.includes('/enrollment-details/') && method === 'PUT') {
+    console.log('[MOCK] PUT enrollment-details matched');
+    try {
+      const id = url.split('/enrollment-details/')[1].split('/')[0];
+      const body = req.body as any;
+      for (const enrollmentId of Object.keys(DETAILS)) {
+        const idx = DETAILS[enrollmentId].findIndex((d: any) => d.id === id);
+        if (idx !== -1) {
+          const existing = DETAILS[enrollmentId][idx];
+          DETAILS[enrollmentId][idx] = {
+            ...existing,
+            workday: body?.workday ?? existing.workday,
+            parallel: body?.parallel ?? existing.parallel,
+            finalGrade: body?.finalGrade !== undefined ? body.finalGrade : existing.finalGrade,
+            finalAttendance: body?.finalAttendance !== undefined ? body.finalAttendance : existing.finalAttendance,
+            academicState: body?.academicState ?? existing.academicState,
+            observation: body?.observation !== undefined ? body.observation : existing.observation,
+          };
+          break;
+        }
       }
+      return ok(getDetail(id) ?? {id});
+    } catch(e) {
+      console.error('[MOCK] PUT error:', e);
+      return ok({});
     }
-    return ok(getDetail(id));
   }
-  if (url.match(/\/enrollment-details\/[^/]+$/) && method === 'DELETE') {
+  if (url.includes('/enrollment-details/') && method === 'DELETE') {
     const id = url.split('/enrollment-details/')[1].split('/')[0];
     for (const key of Object.keys(DETAILS)) {
       DETAILS[key] = DETAILS[key].filter((d: any) => d.id !== id);
@@ -441,5 +453,6 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   // Cualquier otra petición: pasa al backend real
+  console.warn('[MOCK] ⚠ NOT INTERCEPTED:', method, url);
   return next(req);
 };

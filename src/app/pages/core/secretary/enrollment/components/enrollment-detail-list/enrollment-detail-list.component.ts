@@ -52,6 +52,7 @@ export class EnrollmentDetailListComponent implements OnInit {
     protected isButtonActionsEnabled = false;
     protected buttonActions          = signal<MenuItem[]>([]);
     protected canModify              = signal(true);
+    protected isLoading              = signal(false);
 
     ngOnInit(): void {
         this.enrollmentId.set(this.route.snapshot.params['enrollmentId'] ?? '');
@@ -70,13 +71,13 @@ export class EnrollmentDetailListComponent implements OnInit {
     }
 
     loadDetails(): void {
-        this.appService.showLoading();
+        this.isLoading.set(true);
         this.enrollmentService.findDetailsByEnrollment(this.enrollmentId()).subscribe({
             next: (items: EnrollmentDetailModel[]) => {
                 this.items.set(items);
-                this.appService.hideLoading();
+                this.isLoading.set(false);
             },
-            error: () => this.appService.hideLoading(),
+            error: () => this.isLoading.set(false),
         });
     }
 

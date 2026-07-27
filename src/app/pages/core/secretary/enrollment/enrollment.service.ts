@@ -1,202 +1,214 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {map} from 'rxjs/operators';
+import {Observable} from 'rxjs';
 import {
-  EnrollmentModel,
-  EnrollmentDetailModel,
-  HttpResponseModel,
-  CareerModel,
-  SchoolPeriodModel,
+    EnrollmentModel,
+    EnrollmentDetailModel,
+    HttpResponseModel,
+    CareerModel,
+    SchoolPeriodModel,
+    SubjectModel,
 } from '@utils/interfaces';
-import { environment } from '@env/environment';
+import {environment} from '@env/environment';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class EnrollmentService {
-  private readonly http = inject(HttpClient);
-  private readonly API = environment.API_URL;
+    private readonly http = inject(HttpClient);
 
-  // ─── Enrollments ────────────────────────────────────────────────────────────
-  // GET /careers/:careerId/enrollments?schoolPeriodId=&academicPeriodId=&enrollmentStateId=&page=&search=
+    // ─── URL bases por grupo de endpoints ────────────────────────────────────
+    private readonly apiUrlEnrollments     = `${environment.API_URL}/core/secretary/enrollments`;
+    private readonly apiUrlEnrollmentDetails = `${environment.API_URL}/core/secretary/enrollment-details`;
+    private readonly apiUrlEnrollmentReports = `${environment.API_URL}/core/secretary/enrollment-reports`;
+    private readonly apiUrlSchoolPeriods   = `${environment.API_URL}/core/shared/school-periods`;
+    private readonly apiUrlCareers         = `${environment.API_URL}/core/shared/careers`;
 
-  findEnrollmentsByCareer(
-    careerId: string,
-    schoolPeriodId: string,
-    academicPeriodId?: string,
-    enrollmentStateId?: string,
-    page: number = 0,
-    search: string = ''
-  ): Observable<HttpResponseModel<EnrollmentModel[]>> {
-    let params = new HttpParams()
-      .set('schoolPeriodId', schoolPeriodId)
-      .set('page', page)
-      .set('search', search);
+    // ─── School Periods ───────────────────────────────────────────────────────
+    findAllSchoolPeriods(): Observable<SchoolPeriodModel[]> {
+        return this.http
+            .get<HttpResponseModel<SchoolPeriodModel[]>>(this.apiUrlSchoolPeriods)
+            .pipe(map(r => r.data ?? []));
+    }
 
-    if (academicPeriodId) params = params.set('academicPeriodId', academicPeriodId);
-    if (enrollmentStateId) params = params.set('enrollmentStateId', enrollmentStateId);
+    findOpenSchoolPeriod(): Observable<SchoolPeriodModel> {
+        return this.http
+            .get<HttpResponseModel<SchoolPeriodModel>>(`${this.apiUrlSchoolPeriods}/states/open`)
+            .pipe(map(r => r.data));
+    }
 
-    return this.http.get<HttpResponseModel<EnrollmentModel[]>>(
-      `${this.API}/core/secretary/enrollments/careers/${careerId}`, { params }
-    );
-  }
+    // ─── Careers ──────────────────────────────────────────────────────────────
+    findAllCareers(): Observable<CareerModel[]> {
+        return this.http
+            .get<HttpResponseModel<CareerModel[]>>(this.apiUrlCareers)
+            .pipe(map(r => r.data ?? []));
+    }
 
-  // GET /enrollments/:id
-  findOne(id: string): Observable<EnrollmentModel> {
-    return this.http
-      .get<HttpResponseModel<EnrollmentModel>>(`${this.API}/core/secretary/enrollments/${id}`)
-      .pipe(map(r => r.data));
-  }
+    findSubjectsByCareer(careerId: string): Observable<SubjectModel[]> {
+        return this.http
+            .get<HttpResponseModel<SubjectModel[]>>(`${this.apiUrlCareers}/${careerId}/subjects`)
+            .pipe(map(r => r.data ?? []));
+    }
 
-  // PUT /enrollments/:id
-  update(id: string, payload: any): Observable<EnrollmentModel> {
-    return this.http
-      .put<HttpResponseModel<EnrollmentModel>>(`${this.API}/core/secretary/enrollments/${id}`, payload)
-      .pipe(map(r => r.data));
-  }
+    // ─── Enrollments ──────────────────────────────────────────────────────────
+    findEnrollmentsByCareer(
+        careerId: string,
+        schoolPeriodId: string,
+        academicPeriodId?: string,
+        enrollmentStateId?: string,
+        page: number = 0,
+        search: string = ''
+    ): Observable<HttpResponseModel<EnrollmentModel[]>> {
+        let params = new HttpParams()
+            .set('schoolPeriodId', schoolPeriodId)
+            .set('page', page)
+            .set('search', search);
 
-  // PATCH /enrollments/:id/enroll
-  enroll(id: string): Observable<EnrollmentModel> {
-    return this.http
-      .patch<HttpResponseModel<EnrollmentModel>>(`${this.API}/core/secretary/enrollments/${id}/enroll`, {})
-      .pipe(map(r => r.data));
-  }
+        if (academicPeriodId)  params = params.set('academicPeriodId', academicPeriodId);
+        if (enrollmentStateId) params = params.set('enrollmentStateId', enrollmentStateId);
 
-  // PATCH /enrollments/:id/approve
-  approve(id: string): Observable<EnrollmentModel> {
-    return this.http
-      .patch<HttpResponseModel<EnrollmentModel>>(`${this.API}/core/secretary/enrollments/${id}/approve`, {})
-      .pipe(map(r => r.data));
-  }
+        return this.http.get<HttpResponseModel<EnrollmentModel[]>>(
+            `${this.apiUrlEnrollments}/careers/${careerId}`, {params}
+        );
+    }
 
-  // PATCH /enrollments/:id/reject
-  reject(id: string): Observable<EnrollmentModel> {
-    return this.http
-      .patch<HttpResponseModel<EnrollmentModel>>(`${this.API}/core/secretary/enrollments/${id}/reject`, {})
-      .pipe(map(r => r.data));
-  }
+    findEnrollment(id: string): Observable<EnrollmentModel> {
+        return this.http
+            .get<HttpResponseModel<EnrollmentModel>>(`${this.apiUrlEnrollments}/${id}`)
+            .pipe(map(r => r.data));
+    }
 
-  // PATCH /enrollments/:id/revoke
-  revoke(id: string): Observable<EnrollmentModel> {
-    return this.http
-      .patch<HttpResponseModel<EnrollmentModel>>(`${this.API}/core/secretary/enrollments/${id}/revoke`, {})
-      .pipe(map(r => r.data));
-  }
+    createEnrollment(payload: any): Observable<EnrollmentModel> {
+        return this.http
+            .post<HttpResponseModel<EnrollmentModel>>(this.apiUrlEnrollments, payload)
+            .pipe(map(r => r.data));
+    }
 
-  // ─── Reports ────────────────────────────────────────────────────────────────
-  // GET /enrollment-reports/:id/certificate
-  downloadEnrollmentCertificate(id: string, identification: string): void {
-    this.http
-      .get(`${this.API}/core/secretary/enrollment-reports/${id}/certificate`, { responseType: 'blob' })
-      .subscribe(blob => this.triggerDownload(blob, `Certificado_Matricula_${identification}.pdf`));
-  }
+    updateEnrollment(id: string, payload: any): Observable<EnrollmentModel> {
+        return this.http
+            .put<HttpResponseModel<EnrollmentModel>>(`${this.apiUrlEnrollments}/${id}`, payload)
+            .pipe(map(r => r.data));
+    }
 
-  // GET /enrollment-reports/careers/:careerId?schoolPeriodId=
-  downloadEnrollmentsByCareer(career: CareerModel, schoolPeriodId: string): void {
-    const params = new HttpParams().set('schoolPeriodId', schoolPeriodId);
-    this.http
-      .get(`${this.API}/core/secretary/enrollment-reports/careers/${career.id}`, { params, responseType: 'blob' })
-      .subscribe(blob => this.triggerDownload(blob, `Matriculados_${career.name}.xlsx`));
-  }
+    enroll(id: string): Observable<EnrollmentModel> {
+        return this.http
+            .patch<HttpResponseModel<EnrollmentModel>>(`${this.apiUrlEnrollments}/${id}/enroll`, {})
+            .pipe(map(r => r.data));
+    }
 
-  // GET /enrollment-reports/school-periods/:schoolPeriodId
-  downloadEnrollmentsBySchoolPeriod(schoolPeriod: SchoolPeriodModel): void {
-    this.http
-      .get(`${this.API}/core/secretary/enrollment-reports/school-periods/${schoolPeriod.id}`, { responseType: 'blob' })
-      .subscribe(blob => this.triggerDownload(blob, `Matriculados_${schoolPeriod.name}.xlsx`));
-  }
+    approve(id: string): Observable<EnrollmentModel> {
+        return this.http
+            .patch<HttpResponseModel<EnrollmentModel>>(`${this.apiUrlEnrollments}/${id}/approve`, {})
+            .pipe(map(r => r.data));
+    }
 
-  // GET /enrollment-reports/enrollment-details/:schoolPeriodId
-  downloadEnrollmentDetailsBySchoolPeriod(schoolPeriod: SchoolPeriodModel): void {
-    this.http
-      .get(`${this.API}/core/secretary/enrollment-reports/enrollment-details/${schoolPeriod.id}`, { responseType: 'blob' })
-      .subscribe(blob => this.triggerDownload(blob, `Asignaturas_${schoolPeriod.name}.xlsx`));
-  }
+    reject(id: string): Observable<EnrollmentModel> {
+        return this.http
+            .patch<HttpResponseModel<EnrollmentModel>>(`${this.apiUrlEnrollments}/${id}/reject`, {})
+            .pipe(map(r => r.data));
+    }
 
-  // No existe endpoint para fichas socioeconómicas en reports — queda como stub
-  downloadSocioeconomicFormsBySchoolPeriod(schoolPeriod: SchoolPeriodModel): void {
-    console.warn('Endpoint de fichas socioeconómicas no disponible en el backend actual');
-  }
+    revoke(id: string): Observable<EnrollmentModel> {
+        return this.http
+            .patch<HttpResponseModel<EnrollmentModel>>(`${this.apiUrlEnrollments}/${id}/revoke`, {})
+            .pipe(map(r => r.data));
+    }
 
-  // ─── Enrollment Details ──────────────────────────────────────────────────────
-  // GET /enrollments/:enrollmentId/enrollment-details
-  findDetailsByEnrollment(enrollmentId: string): Observable<EnrollmentDetailModel[]> {
-    return this.http
-      .get<HttpResponseModel<EnrollmentDetailModel[]>>(
-        `${this.API}/core/secretary/enrollments/${enrollmentId}/enrollment-details`
-      )
-      .pipe(map(r => r.data));
-  }
+    // ─── Enrollment Details ───────────────────────────────────────────────────
+    findDetailsByEnrollment(enrollmentId: string): Observable<EnrollmentDetailModel[]> {
+        return this.http
+            .get<HttpResponseModel<EnrollmentDetailModel[]>>(
+                `${this.apiUrlEnrollments}/${enrollmentId}/enrollment-details`
+            )
+            .pipe(map(r => r.data));
+    }
 
-  // GET /enrollment-details/:id
-  findOneDetail(id: string): Observable<EnrollmentDetailModel> {
-    return this.http
-      .get<HttpResponseModel<EnrollmentDetailModel>>(`${this.API}/core/secretary/enrollment-details/${id}`)
-      .pipe(map(r => r.data));
-  }
+    findOneDetail(id: string): Observable<EnrollmentDetailModel> {
+        return this.http
+            .get<HttpResponseModel<EnrollmentDetailModel>>(`${this.apiUrlEnrollmentDetails}/${id}`)
+            .pipe(map(r => r.data));
+    }
 
-  // POST /enrollment-details
-  createDetail(payload: any): Observable<EnrollmentDetailModel> {
-    return this.http
-      .post<HttpResponseModel<EnrollmentDetailModel>>(`${this.API}/core/secretary/enrollment-details`, payload)
-      .pipe(map(r => r.data));
-  }
+    createDetail(payload: any): Observable<EnrollmentDetailModel> {
+        return this.http
+            .post<HttpResponseModel<EnrollmentDetailModel>>(this.apiUrlEnrollmentDetails, payload)
+            .pipe(map(r => r.data));
+    }
 
-  // PUT /enrollment-details/:id
-  updateDetail(id: string, payload: any): Observable<EnrollmentDetailModel> {
-    return this.http
-      .put<HttpResponseModel<EnrollmentDetailModel>>(`${this.API}/core/secretary/enrollment-details/${id}`, payload)
-      .pipe(map(r => r.data));
-  }
+    updateDetail(id: string, payload: any): Observable<EnrollmentDetailModel> {
+        return this.http
+            .put<HttpResponseModel<EnrollmentDetailModel>>(`${this.apiUrlEnrollmentDetails}/${id}`, payload)
+            .pipe(map(r => r.data));
+    }
 
-  // DELETE /enrollment-details/:id
-  removeDetail(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.API}/core/secretary/enrollment-details/${id}`);
-  }
+    removeDetail(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrlEnrollmentDetails}/${id}`);
+    }
 
-  // PATCH /enrollment-details/:id/enroll
-  enrollDetail(id: string): Observable<EnrollmentDetailModel> {
-    return this.http
-      .patch<HttpResponseModel<EnrollmentDetailModel>>(`${this.API}/core/secretary/enrollment-details/${id}/enroll`, {})
-      .pipe(map(r => r.data));
-  }
+    enrollDetail(id: string): Observable<EnrollmentDetailModel> {
+        return this.http
+            .patch<HttpResponseModel<EnrollmentDetailModel>>(`${this.apiUrlEnrollmentDetails}/${id}/enroll`, {})
+            .pipe(map(r => r.data));
+    }
 
-  // PATCH /enrollment-details/:id/approve
-  approveDetail(id: string): Observable<EnrollmentDetailModel> {
-    return this.http
-      .patch<HttpResponseModel<EnrollmentDetailModel>>(`${this.API}/core/secretary/enrollment-details/${id}/approve`, {})
-      .pipe(map(r => r.data));
-  }
+    approveDetail(id: string): Observable<EnrollmentDetailModel> {
+        return this.http
+            .patch<HttpResponseModel<EnrollmentDetailModel>>(`${this.apiUrlEnrollmentDetails}/${id}/approve`, {})
+            .pipe(map(r => r.data));
+    }
 
-  // PATCH /enrollment-details/:id/reject
-  rejectDetail(id: string): Observable<EnrollmentDetailModel> {
-    return this.http
-      .patch<HttpResponseModel<EnrollmentDetailModel>>(`${this.API}/core/secretary/enrollment-details/${id}/reject`, {})
-      .pipe(map(r => r.data));
-  }
+    rejectDetail(id: string): Observable<EnrollmentDetailModel> {
+        return this.http
+            .patch<HttpResponseModel<EnrollmentDetailModel>>(`${this.apiUrlEnrollmentDetails}/${id}/reject`, {})
+            .pipe(map(r => r.data));
+    }
 
-  // PATCH /enrollment-details/:id/revoke
-  revokeDetail(id: string): Observable<EnrollmentDetailModel> {
-    return this.http
-      .patch<HttpResponseModel<EnrollmentDetailModel>>(`${this.API}/core/secretary/enrollment-details/${id}/revoke`, {})
-      .pipe(map(r => r.data));
-  }
+    revokeDetail(id: string): Observable<EnrollmentDetailModel> {
+        return this.http
+            .patch<HttpResponseModel<EnrollmentDetailModel>>(`${this.apiUrlEnrollmentDetails}/${id}/revoke`, {})
+            .pipe(map(r => r.data));
+    }
 
-  // POST /enrollment-details/:id/send-request
-  sendDetailRequest(id: string, payload: any): Observable<EnrollmentDetailModel> {
-    return this.http
-      .post<HttpResponseModel<EnrollmentDetailModel>>(
-        `${this.API}/core/secretary/enrollment-details/${id}/send-request`, payload
-      )
-      .pipe(map(r => r.data));
-  }
+    sendDetailRequest(id: string, payload: any): Observable<EnrollmentDetailModel> {
+        return this.http
+            .post<HttpResponseModel<EnrollmentDetailModel>>(
+                `${this.apiUrlEnrollmentDetails}/${id}/send-request`, payload
+            )
+            .pipe(map(r => r.data));
+    }
 
-  // ─── Helper ──────────────────────────────────────────────────────────────────
-  private triggerDownload(blob: Blob, filename: string): void {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }
+    // ─── Reports ──────────────────────────────────────────────────────────────
+    downloadEnrollmentCertificate(id: string, identification: string): void {
+        this.http
+            .get(`${this.apiUrlEnrollmentReports}/${id}/certificate`, {responseType: 'blob'})
+            .subscribe(blob => this.triggerDownload(blob, `Certificado_Matricula_${identification}.pdf`));
+    }
+
+    downloadEnrollmentsByCareer(career: CareerModel, schoolPeriodId: string): void {
+        const params = new HttpParams().set('schoolPeriodId', schoolPeriodId);
+        this.http
+            .get(`${this.apiUrlEnrollmentReports}/careers/${career.id}`, {params, responseType: 'blob'})
+            .subscribe(blob => this.triggerDownload(blob, `Matriculados_${career.name}.xlsx`));
+    }
+
+    downloadEnrollmentsBySchoolPeriod(schoolPeriod: SchoolPeriodModel): void {
+        this.http
+            .get(`${this.apiUrlEnrollmentReports}/school-periods/${schoolPeriod.id}`, {responseType: 'blob'})
+            .subscribe(blob => this.triggerDownload(blob, `Matriculados_${schoolPeriod.name}.xlsx`));
+    }
+
+    downloadEnrollmentDetailsBySchoolPeriod(schoolPeriod: SchoolPeriodModel): void {
+        this.http
+            .get(`${this.apiUrlEnrollmentReports}/enrollment-details/${schoolPeriod.id}`, {responseType: 'blob'})
+            .subscribe(blob => this.triggerDownload(blob, `Asignaturas_${schoolPeriod.name}.xlsx`));
+    }
+
+    // ─── Helper ───────────────────────────────────────────────────────────────
+    private triggerDownload(blob: Blob, filename: string): void {
+        const url = window.URL.createObjectURL(blob);
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
 }

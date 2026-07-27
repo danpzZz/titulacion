@@ -3,22 +3,13 @@ import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem } from 'primeng/api';
 
 import { BreadcrumbService } from '@layout/service/breadcrumb.service';
-import { CustomMessageService } from '@utils/services/custom-message.service';
-import { CataloguesHttpService } from '@utils/services/catalogues-http.service';
-import { CareersHttpService } from '@utils/services/careers-http.service';
-import { CareersService } from '@utils/services/careers.service';
-import { SchoolPeriodsHttpService } from '@utils/services/school-periods-http.service';
-import { SchoolPeriodsService } from '@utils/services/school-periods.service';
-import { AppService } from '@utils/services';
+import { AppService, CatalogueService, CataloguesHttpService, CustomMessageService } from '@utils/services';
 import { CustomIcons } from '@utils/icons/custom-icons';
 import { debouncedSignal } from '@utils/helpers';
 import { SECRETARY_ROUTES } from '@routes';
 
-import {
-    CatalogueModel, CareerModel,
-    EnrollmentModel, SchoolPeriodModel,
-} from '@utils/interfaces';
-import { BreadcrumbEnum, CatalogueEnrollmentStateEnum, EnrollmentCatalogueTypeEnum } from '@utils/enums';
+import { CatalogueInterface, CareerModel, EnrollmentModel, SchoolPeriodModel } from '@utils/interfaces';
+import { BreadcrumbEnum, CatalogueEnrollmentStateEnum, CatalogueTypeEnum } from '@utils/enums';
 import { ButtonActionComponent } from '@utils/components/button-action/button-action.component';
 import { EnrollmentStore } from '../../enrollment.store';
 import { EnrollmentService } from '../../enrollment.service';
@@ -48,25 +39,28 @@ import { EnrollmentStatePipe } from '@utils/pipes/enrollment-state.pipe';
     templateUrl: './enrollment-list.component.html',
 })
 export class EnrollmentListComponent implements OnInit {
+
+
+    private readonly cataloguesHttpService = inject(CataloguesHttpService);
+
     protected readonly appService = inject(AppService);
     private readonly router = inject(Router);
     private readonly breadcrumbService = inject(BreadcrumbService);
     private readonly enrollmentService = inject(EnrollmentService);
-    private readonly careersService = inject(CareersService);
-    private readonly careersHttpService = inject(CareersHttpService);
-    private readonly cataloguesHttpService = inject(CataloguesHttpService);
-    private readonly schoolPeriodsHttpService = inject(SchoolPeriodsHttpService);
-    private readonly schoolPeriodsService = inject(SchoolPeriodsService);
     private readonly messageService = inject(CustomMessageService);
     private readonly confirmationService = inject(ConfirmationService);
+    private readonly catalogueService = inject(CatalogueService);
 
     protected readonly store = inject(EnrollmentStore);
     protected readonly CustomIcons = CustomIcons;
 
+    // Career para guardar la seleccionada al navegar a asignaturas
+    private selectedCareerForDetail: CareerModel | null = null;
+
     protected schoolPeriods = signal<SchoolPeriodModel[]>([]);
     protected careers = signal<CareerModel[]>([]);
-    protected academicPeriods = signal<CatalogueModel[]>([]);
-    protected enrollmentStates = signal<CatalogueModel[]>([]);
+    protected academicPeriods = signal<CatalogueInterface[]>([]);
+    protected enrollmentStates = signal<CatalogueInterface[]>([]);
 
     protected isButtonActionsEnabled = false;
     protected isMoreActionsEnabled = false;
@@ -112,15 +106,12 @@ export class EnrollmentListComponent implements OnInit {
     }
 
     private loadSchoolPeriods(): void {
-        this.schoolPeriodsHttpService.findAll().subscribe({
+        this.enrollmentService.findAllSchoolPeriods().subscribe({
             next: (periods: SchoolPeriodModel[]) => {
                 this.schoolPeriods.set(periods);
-                this.schoolPeriodsHttpService.findOpenSchoolPeriod().subscribe({
+                this.enrollmentService.findOpenSchoolPeriod().subscribe({
                     next: (open: SchoolPeriodModel) => {
-                        if (open) {
-                            this.schoolPeriodsService.openSchoolPeriod = open;
-                            this.store.updateFilter('schoolPeriod', open);
-                        }
+                        if (open) this.store.updateFilter('schoolPeriod', open);
                     }
                 });
             }
@@ -128,30 +119,41 @@ export class EnrollmentListComponent implements OnInit {
     }
 
     private loadCareers(): void {
-        this.careersHttpService.findAll().subscribe({
+        this.enrollmentService.findAllCareers().subscribe({
             next: (list: CareerModel[]) => {
                 this.careers.set(list);
-                this.careersService.careers = list;
                 if (list.length === 1) {
-                    this.careersService.career = list[0];
+                    this.selectedCareerForDetail = list[0];
                     this.store.updateFilter('career', list[0]);
                 }
             }
         });
     }
 
+    // Catálogos con CatalogueService — síncrono, sin subscribe
+    // private loadAcademicPeriods(): void {
+    //     this.academicPeriods.set(
+    //         this.catalogueService.findByType(CatalogueTypeEnum.enrollment_academic_period)
+    //     );
+    // }
+
+    // private loadEnrollmentStates(): void {
+    //     this.enrollmentStates.set(
+    //         [...this.catalogueService.findByType(CatalogueTypeEnum.enrollment_state)]
+    //             .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')));
+    // }
+
+
     private loadAcademicPeriods(): void {
-        this.cataloguesHttpService
-            .findByTypeObservable(EnrollmentCatalogueTypeEnum.ACADEMIC_PERIOD)
-            .subscribe({ next: (v: CatalogueModel[]) => this.academicPeriods.set(v) });
+        this.cataloguesHttpService.findByTypeObservable(CatalogueTypeEnum.enrollment_academic_period)
+            .subscribe({ next: v => this.academicPeriods.set(v as CatalogueInterface[]) });
     }
 
     private loadEnrollmentStates(): void {
-        this.cataloguesHttpService
-            .findByTypeObservable(EnrollmentCatalogueTypeEnum.ENROLLMENTS_STATE)
+        this.cataloguesHttpService.findByTypeObservable(CatalogueTypeEnum.enrollment_state)
             .subscribe({
-                next: (v: CatalogueModel[]) => this.enrollmentStates.set(
-                    [...v].sort((a, b) => a.name.localeCompare(b.name))
+                next: v => this.enrollmentStates.set(
+                    [...v as CatalogueInterface[]].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
                 )
             });
     }
@@ -163,8 +165,8 @@ export class EnrollmentListComponent implements OnInit {
         this.enrollmentService
             .findEnrollmentsByCareer(career!.id, schoolPeriod!.id, academicPeriod?.id, enrollmentState?.id, page, search)
             .subscribe({
-                next: r => {
-                    this.store.setItems(r.data, r.pagination!);
+                next: response => {
+                    this.store.setItems(response.data, response.pagination!);
                     this.appService.hideLoading();
                 },
                 error: () => this.appService.hideLoading(),
@@ -254,8 +256,9 @@ export class EnrollmentListComponent implements OnInit {
 
     selectItem(item: EnrollmentModel): void {
         this.store.selectItem(item);
+        // Guardar la carrera del item seleccionado para usarla al navegar a asignaturas
         if (item.career) {
-            this.careersService.career = this.careersService.careers.find(c => c.id === item.career!.id);
+            this.selectedCareerForDetail = item.career;
         }
 
         const code = item.enrollmentState?.state?.code ?? '';
@@ -297,9 +300,8 @@ export class EnrollmentListComponent implements OnInit {
         this.isButtonActionsEnabled = true;
     }
 
-    paginate(event: { page?: number }): void {
-        this.findEnrollments(event.page ?? 0);
-    }
+    paginate(event: { page?: number }): void { this.findEnrollments(event.page ?? 0); }
+
     goToDetails(enrollmentId: string): void {
         this.router.navigateByUrl(SECRETARY_ROUTES.enrollment.detail.absoluteFn(enrollmentId));
     }

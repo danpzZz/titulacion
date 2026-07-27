@@ -11,10 +11,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(req).pipe(
         catchError((error: HttpErrorResponse) => {
-            if (error.error.error !== 'EXPIRED_TOKEN') {
+            const errorBody = error?.error;
+            if (errorBody?.error !== 'EXPIRED_TOKEN') {
                 coreService.hideLoading();
                 coreService.hideProcessing();
-                customMessageService.showHttpError(error.error);
+                if (errorBody) customMessageService.showHttpError(errorBody);
             }
 
             return throwError(() => error);

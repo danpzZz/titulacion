@@ -3,21 +3,20 @@
   <div class="custom-form-grid md:grid-cols-12">
 
     <div class="custom-form-field-row md:col-span-12">
-      <p-button [icon]="CustomIcons.ARROWS_ROTATE_SOLID" severity="info" [rounded]="true"
-        pTooltip="Refrescar" (click)="findEnrollments()">
+      <p-button [icon]="CustomIcons.ARROWS_ROTATE_SOLID" severity="info" [rounded]="true" pTooltip="Refrescar"
+        (click)="findEnrollments()">
       </p-button>
-      <p-button [icon]="CustomIcons.ELLIPSIS_SOLID" severity="info" [rounded]="true"
-        pTooltip="Descargas" (click)="isMoreActionsEnabled = true">
+      <p-button [icon]="CustomIcons.ELLIPSIS_SOLID" severity="info" [rounded]="true" pTooltip="Descargas"
+        (click)="isMoreActionsEnabled = true">
       </p-button>
     </div>
 
     <div class="custom-form-field md:col-span-3">
-      <p-select [ngModel]="store.selectedSchoolPeriod()"
-        (ngModelChange)="store.updateFilter('schoolPeriod', $event)"
+      <p-select [ngModel]="store.selectedSchoolPeriod()" (ngModelChange)="store.updateFilter('schoolPeriod', $event)"
         dataKey="id" [options]="schoolPeriods()" optionLabel="name" placeholder="Periodo Lectivo">
         <ng-template pTemplate="selectedItem">
           @if (store.selectedSchoolPeriod()) {
-            {{ store.selectedSchoolPeriod()!.shortName }} ({{ store.selectedSchoolPeriod()!.name }})
+          {{ store.selectedSchoolPeriod()!.shortName }} ({{ store.selectedSchoolPeriod()!.name }})
           }
         </ng-template>
         <ng-template pTemplate="item" let-item>
@@ -27,25 +26,22 @@
     </div>
 
     <div class="custom-form-field md:col-span-3">
-      <p-select [ngModel]="store.selectedCareer()"
-        (ngModelChange)="store.updateFilter('career', $event)"
-        dataKey="id" [options]="careers()" optionLabel="name" placeholder="Carrera">
+      <p-select [ngModel]="store.selectedCareer()" (ngModelChange)="store.updateFilter('career', $event)" dataKey="id"
+        [options]="careers()" optionLabel="name" placeholder="Carrera">
       </p-select>
     </div>
 
     <div class="custom-form-field md:col-span-3">
       <p-select [ngModel]="store.selectedAcademicPeriod()"
-        (ngModelChange)="store.updateFilter('academicPeriod', $event)"
-        dataKey="id" [options]="academicPeriods()" optionLabel="name"
-        placeholder="Todos los Niveles" [showClear]="true">
+        (ngModelChange)="store.updateFilter('academicPeriod', $event)" dataKey="id" [options]="academicPeriods()"
+        optionLabel="name" placeholder="Todos los Niveles" [showClear]="true">
       </p-select>
     </div>
 
     <div class="custom-form-field md:col-span-3">
       <p-select [ngModel]="store.selectedEnrollmentState()"
-        (ngModelChange)="store.updateFilter('enrollmentState', $event)"
-        dataKey="id" [options]="enrollmentStates()" optionLabel="name"
-        placeholder="Todos los estados" [showClear]="true">
+        (ngModelChange)="store.updateFilter('enrollmentState', $event)" dataKey="id" [options]="enrollmentStates()"
+        optionLabel="name" placeholder="Todos los estados" [showClear]="true">
       </p-select>
     </div>
 
@@ -53,16 +49,13 @@
 </div>
 
 @if (!store.canSearch()) {
-  <div class="custom-form-card" style="text-align:center; color:var(--text-color-secondary)">
-    Selecciona un <strong>Periodo Lectivo</strong> y una <strong>Carrera</strong> para buscar matrículas.
-  </div>
+<div class="custom-form-card" style="text-align:center; color:var(--text-color-secondary)">
+  Selecciona un <strong>Periodo Lectivo</strong> y una <strong>Carrera</strong> para buscar matrículas.
+</div>
 }
 
-<p-table #dt1 dataKey="id"
-  styleClass="p-datatable-striped p-datatable-gridlines"
-  [value]="store.items()"
-  [loading]="appService.loading()"
-  sortMode="single">
+<p-table #dt1 dataKey="id" styleClass="p-datatable-striped p-datatable-gridlines" [value]="store.items()"
+  [loading]="appService.loading()" sortMode="single">
 
   <ng-template pTemplate="caption">
     <div class="custom-form-grid md:grid-cols-12">
@@ -71,8 +64,7 @@
       </div>
       <div class="custom-form-field md:col-span-4">
         <p-input-group>
-          <input pInputText type="text" [value]="search()"
-            (input)="onSearchInput($event)" placeholder="Buscar..."/>
+          <input pInputText type="text" [value]="search()" (input)="onSearchInput($event)" placeholder="Buscar..." />
           <p-button [icon]="CustomIcons.MAGNIFYING_GLASS_SOLID"></p-button>
         </p-input-group>
       </div>
@@ -81,25 +73,39 @@
 
   <ng-template pTemplate="header">
     <tr>
-      <th pSortableColumn="career.name"                style="text-align:center; white-space:nowrap">Carrera             <p-sortIcon field="career.name"></p-sortIcon></th>
-      <th pSortableColumn="student.user.identification" style="text-align:center; white-space:nowrap">Nº Documento        <p-sortIcon field="student.user.identification"></p-sortIcon></th>
-      <th pSortableColumn="student.user.lastname"       style="text-align:center; white-space:nowrap">Apellidos           <p-sortIcon field="student.user.lastname"></p-sortIcon></th>
-      <th pSortableColumn="student.user.name"           style="text-align:center; white-space:nowrap">Nombres             <p-sortIcon field="student.user.name"></p-sortIcon></th>
-      <th pSortableColumn="type.name"                   style="text-align:center; white-space:nowrap">Tipo de Matrícula   <p-sortIcon field="type.name"></p-sortIcon></th>
-      <th pSortableColumn="academicPeriod.name"         style="text-align:center; white-space:nowrap">Periodo académico   <p-sortIcon field="academicPeriod.name"></p-sortIcon></th>
-      <th pSortableColumn="workday.name"                style="text-align:center; white-space:nowrap">Horario             <p-sortIcon field="workday.name"></p-sortIcon></th>
-      <th pSortableColumn="parallel.name"               style="text-align:center; white-space:nowrap">Paralelo            <p-sortIcon field="parallel.name"></p-sortIcon></th>
+      <th pSortableColumn="career.name" style="text-align:center; white-space:nowrap">Carrera <p-sortIcon
+          field="career.name"></p-sortIcon></th>
+      <th pSortableColumn="student.user.identification" style="text-align:center; white-space:nowrap">Nº Documento
+        <p-sortIcon field="student.user.identification"></p-sortIcon></th>
+      <th pSortableColumn="student.user.lastname" style="text-align:center; white-space:nowrap">Apellidos <p-sortIcon
+          field="student.user.lastname"></p-sortIcon></th>
+      <th pSortableColumn="student.user.name" style="text-align:center; white-space:nowrap">Nombres <p-sortIcon
+          field="student.user.name"></p-sortIcon></th>
+      <th pSortableColumn="type.name" style="text-align:center; white-space:nowrap">Tipo de Matrícula <p-sortIcon
+          field="type.name"></p-sortIcon></th>
+      <th pSortableColumn="academicPeriod.name" style="text-align:center; white-space:nowrap">Periodo académico
+        <p-sortIcon field="academicPeriod.name"></p-sortIcon></th>
+      <th pSortableColumn="workday.name" style="text-align:center; white-space:nowrap">Horario <p-sortIcon
+          field="workday.name"></p-sortIcon></th>
+      <th pSortableColumn="parallel.name" style="text-align:center; white-space:nowrap">Paralelo <p-sortIcon
+          field="parallel.name"></p-sortIcon></th>
       <!-- Columna Periodo Lectivo: solo visible cuando hay búsqueda global activa -->
       @if (search()) {
-        <th pSortableColumn="schoolPeriod.name"         style="text-align:center; white-space:nowrap">Periodo Lectivo     <p-sortIcon field="schoolPeriod.name"></p-sortIcon></th>
+      <th pSortableColumn="schoolPeriod.name" style="text-align:center; white-space:nowrap">Periodo Lectivo <p-sortIcon
+          field="schoolPeriod.name"></p-sortIcon></th>
       }
-      <th pSortableColumn="enrollmentState.state.name"  style="text-align:center; white-space:nowrap">Estado              <p-sortIcon field="enrollmentState.state.name"></p-sortIcon></th>
+      <th pSortableColumn="enrollmentState.state.name" style="text-align:center; white-space:nowrap">Estado <p-sortIcon
+          field="enrollmentState.state.name"></p-sortIcon></th>
       <th style="text-align:center">Acciones</th>
     </tr>
   </ng-template>
 
   <ng-template pTemplate="body" let-row>
+
     <tr>
+      @if (search()) {
+      <td style="text-align:center">{{ row.schoolPeriod?.name }}</td>
+      }
       <td style="text-align:center">{{ row.career?.name }}</td>
       <td style="text-align:center">{{ row.student?.user?.identification }}</td>
       <td style="text-align:center">{{ row.student?.user?.lastname }}</td>
@@ -108,19 +114,15 @@
       <td style="text-align:center">{{ row.academicPeriod?.name }}</td>
       <td style="text-align:center">{{ row.workday?.name }}</td>
       <td style="text-align:center">{{ row.parallel?.name }}</td>
-      @if (search()) {
-        <td style="text-align:center">{{ row.schoolPeriod?.name }}</td>
-      }
       <td style="text-align:center">
         @if (row.enrollmentState?.state) {
-          <p-tag [value]="row.enrollmentState.state.name"
-            [severity]="$any(row.enrollmentState.state.code | enrollmentState)">
-          </p-tag>
+        <p-tag [value]="row.enrollmentState.state.name"
+          [severity]="$any(row.enrollmentState.state.code | enrollmentState)">
+        </p-tag>
         }
       </td>
       <td style="text-align:center">
-        <p-button pTooltip="Acciones" [icon]="CustomIcons.ELLIPSIS_VERTICAL_SOLID"
-          (click)="selectItem(row)">
+        <p-button pTooltip="Acciones" [icon]="CustomIcons.ELLIPSIS_VERTICAL_SOLID" (click)="selectItem(row)">
         </p-button>
       </td>
     </tr>
@@ -143,8 +145,7 @@
   </ng-template>
 </p-table>
 
-<p-paginator [rows]="store.paginator().limit"
-  [totalRecords]="store.paginator().totalItems"
+<p-paginator [rows]="store.paginator().limit" [totalRecords]="store.paginator().totalItems"
   (onPageChange)="paginate($event)">
 </p-paginator>
 
