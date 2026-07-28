@@ -1,7 +1,7 @@
-import {inject, Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
-import {map} from 'rxjs/operators';
-import {Observable} from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import {
     EnrollmentModel,
     EnrollmentDetailModel,
@@ -10,18 +10,21 @@ import {
     SchoolPeriodModel,
     SubjectModel,
 } from '@utils/interfaces';
-import {environment} from '@env/environment';
+import { environment } from '@env/environment';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class EnrollmentService {
     private readonly http = inject(HttpClient);
 
     // ─── URL bases por grupo de endpoints ────────────────────────────────────
-    private readonly apiUrlEnrollments     = `${environment.API_URL}/core/secretary/enrollments`;
+    private readonly apiUrlEnrollments = `${environment.API_URL}/core/secretary/enrollments`;
     private readonly apiUrlEnrollmentDetails = `${environment.API_URL}/core/secretary/enrollment-details`;
     private readonly apiUrlEnrollmentReports = `${environment.API_URL}/core/secretary/enrollment-reports`;
-    private readonly apiUrlSchoolPeriods   = `${environment.API_URL}/core/shared/school-periods`;
-    private readonly apiUrlCareers         = `${environment.API_URL}/core/shared/careers`;
+    // TEMPORAL: el backend real de careers vive en 'core/career-coordinator/careers',
+    // no en 'core/shared/careers' (que todavía no existe). Cuando el equipo decida/cree
+    // la ruta compartida definitiva, revertir esto.
+    private readonly apiUrlSchoolPeriods = `${environment.API_URL}/core/shared/school-periods`; // ⚠️ sigue sin existir en el backend, ver nota en el chat
+    private readonly apiUrlCareers = `${environment.API_URL}/core/career-coordinator/careers`;
 
     // ─── School Periods ───────────────────────────────────────────────────────
     findAllSchoolPeriods(): Observable<SchoolPeriodModel[]> {
@@ -63,11 +66,11 @@ export class EnrollmentService {
             .set('page', page)
             .set('search', search);
 
-        if (academicPeriodId)  params = params.set('academicPeriodId', academicPeriodId);
+        if (academicPeriodId) params = params.set('academicPeriodId', academicPeriodId);
         if (enrollmentStateId) params = params.set('enrollmentStateId', enrollmentStateId);
 
         return this.http.get<HttpResponseModel<EnrollmentModel[]>>(
-            `${this.apiUrlEnrollments}/careers/${careerId}`, {params}
+            `${this.apiUrlEnrollments}/careers/${careerId}`, { params }
         );
     }
 
@@ -179,34 +182,34 @@ export class EnrollmentService {
     // ─── Reports ──────────────────────────────────────────────────────────────
     downloadEnrollmentCertificate(id: string, identification: string): void {
         this.http
-            .get(`${this.apiUrlEnrollmentReports}/${id}/certificate`, {responseType: 'blob'})
+            .get(`${this.apiUrlEnrollmentReports}/${id}/certificate`, { responseType: 'blob' })
             .subscribe(blob => this.triggerDownload(blob, `Certificado_Matricula_${identification}.pdf`));
     }
 
     downloadEnrollmentsByCareer(career: CareerModel, schoolPeriodId: string): void {
         const params = new HttpParams().set('schoolPeriodId', schoolPeriodId);
         this.http
-            .get(`${this.apiUrlEnrollmentReports}/careers/${career.id}`, {params, responseType: 'blob'})
+            .get(`${this.apiUrlEnrollmentReports}/careers/${career.id}`, { params, responseType: 'blob' })
             .subscribe(blob => this.triggerDownload(blob, `Matriculados_${career.name}.xlsx`));
     }
 
     downloadEnrollmentsBySchoolPeriod(schoolPeriod: SchoolPeriodModel): void {
         this.http
-            .get(`${this.apiUrlEnrollmentReports}/school-periods/${schoolPeriod.id}`, {responseType: 'blob'})
+            .get(`${this.apiUrlEnrollmentReports}/school-periods/${schoolPeriod.id}`, { responseType: 'blob' })
             .subscribe(blob => this.triggerDownload(blob, `Matriculados_${schoolPeriod.name}.xlsx`));
     }
 
     downloadEnrollmentDetailsBySchoolPeriod(schoolPeriod: SchoolPeriodModel): void {
         this.http
-            .get(`${this.apiUrlEnrollmentReports}/enrollment-details/${schoolPeriod.id}`, {responseType: 'blob'})
+            .get(`${this.apiUrlEnrollmentReports}/enrollment-details/${schoolPeriod.id}`, { responseType: 'blob' })
             .subscribe(blob => this.triggerDownload(blob, `Asignaturas_${schoolPeriod.name}.xlsx`));
     }
 
     // ─── Helper ───────────────────────────────────────────────────────────────
     private triggerDownload(blob: Blob, filename: string): void {
         const url = window.URL.createObjectURL(blob);
-        const a   = document.createElement('a');
-        a.href     = url;
+        const a = document.createElement('a');
+        a.href = url;
         a.download = filename;
         a.click();
         window.URL.revokeObjectURL(url);

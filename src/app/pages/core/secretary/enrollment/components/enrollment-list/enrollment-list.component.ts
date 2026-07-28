@@ -1,3 +1,4 @@
+
 import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem } from 'primeng/api';
@@ -114,6 +115,17 @@ export class EnrollmentListComponent implements OnInit {
                         if (open) this.store.updateFilter('schoolPeriod', open);
                     }
                 });
+            },
+            error: () => {
+                // TEMPORAL: 'core/shared/school-periods' todavía no existe en el
+                // backend (nadie lo ha implementado). Mientras tanto, forzamos un
+                // período lectivo real (el mismo usado en las pruebas de Postman) para
+                // poder seguir probando el resto del flujo. Quitar en cuanto el
+                // endpoint real exista.
+                this.store.updateFilter('schoolPeriod', {
+                    id: '64712a47-6566-4ec2-a3bc-8f82a3720d65',
+                    name: 'JULIO 2026 - SEPTIEMBRE 2026',
+                } as SchoolPeriodModel);
             }
         });
     }
@@ -276,7 +288,7 @@ export class EnrollmentListComponent implements OnInit {
                 label: 'Asignaturas', icon: CustomIcons.BOOK_SOLID,
                 command: () => {
                     this.isButtonActionsEnabled = false;
-                    setTimeout(() => this.goToDetails(item.id), 300);
+                    this.goToDetails(item.id);
                 }
             });
         }

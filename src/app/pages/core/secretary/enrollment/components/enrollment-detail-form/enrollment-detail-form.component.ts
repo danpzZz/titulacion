@@ -42,8 +42,8 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly breadcrumbService = inject(BreadcrumbService);
     protected readonly enrollmentService = inject(EnrollmentService);
-    private readonly catalogueService       = inject(CatalogueService);
-    private readonly cataloguesHttpService  = inject(CataloguesHttpService);
+    private readonly catalogueService = inject(CatalogueService);
+    private readonly cataloguesHttpService = inject(CataloguesHttpService);
     private readonly messageService = inject(CustomMessageService);
     private readonly formRegistryService = inject(FormRegistryService);
     protected readonly appService = inject(AppService);
@@ -51,7 +51,19 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
 
     protected readonly CustomIcons = CustomIcons;
 
-    protected readonly id = signal<string>(RoutesEnum.NEW);
+    // FIX: antes 'id' arrancaba siempre en RoutesEnum.NEW y recién se corregía en
+    // ngOnInit() — pero 'formData' (más abajo) se construye como campo de clase,
+    // ANTES de que ngOnInit() corra. Eso hacía que isNew() capturara "true" para
+    // siempre en la validación del formulario, incluso editando un registro
+    // existente (el 'tipo de matrícula' quedaba exigido aunque no debía). Se lee el
+    // id real de la ruta de forma síncrona acá mismo (route.snapshot SÍ está
+    // disponible en este punto), para que isNew() ya arranque correcto.
+    private readonly initialRouteId = (() => {
+        const paramId = this.route.snapshot.params['id'];
+        return paramId && paramId !== RoutesEnum.NEW ? paramId : RoutesEnum.NEW;
+    })();
+
+    protected readonly id = signal<string>(this.initialRouteId);
     protected readonly enrollmentId = signal<string>('');
 
     protected isNew = computed(() => this.id() === RoutesEnum.NEW);
@@ -110,7 +122,7 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
 
         this.formRegistryService.register('Datos de Asignatura', FORM_KEY, this.formData, this.form$());
 
-        // Catálogos síncronos — patrón del tutor
+        // Catálogos síncronos 
         this.loadCatalogues();
         this.loadSubjects();
 
@@ -132,16 +144,44 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
 
     private loadCatalogues(): void {
         this.cataloguesHttpService.findByTypeObservable(CatalogueTypeEnum.enrollment_type)
-            .subscribe({next: v => this.types.set(v as CatalogueInterface[])});
+            .subscribe({ next: v => this.types.set(v as CatalogueInterface[]) });
         this.cataloguesHttpService.findByTypeObservable(CatalogueTypeEnum.enrollment_workday)
-            .subscribe({next: v => this.workdays.set(v as CatalogueInterface[])});
+            .subscribe({ next: v => this.workdays.set(v as CatalogueInterface[]) });
         this.cataloguesHttpService.findByTypeObservable(CatalogueTypeEnum.enrollment_parallel)
-            .subscribe({next: v => this.parallels.set(v as CatalogueInterface[])});
+            .subscribe({ next: v => this.parallels.set(v as CatalogueInterface[]) });
         this.cataloguesHttpService.findByTypeObservable(CatalogueTypeEnum.enrollment_academic_state)
-            .subscribe({next: v => this.academicStates.set(v as CatalogueInterface[])});
+            .subscribe({ next: v => this.academicStates.set(v as CatalogueInterface[]) });
     }
     private loadSubjects(): void {
-        const careerId = this.store.selectedItem()?.career?.id ?? 'career00-0000-0000-0000-000000000001';
+        const cachedCareerId = this.store.selectedItem()?.career?.id;
+
+        if (cachedCareerId) {
+            this.loadSubjectsByCareer(cachedCareerId);
+            return;
+        }
+
+        // FIX real (reemplaza el ID de relleno 'career00-0000-...'): si no hay
+        // selectedItem en memoria (por ejemplo, si el usuario recargó la página
+        // estando en este formulario), se reconstruye el contexto consultando la
+        // matrícula real por su enrollmentId (que sí viene siempre en la URL), en
+        // vez de asumir un ID inventado que el backend correctamente rechaza.
+        this.enrollmentService.findEnrollment(this.enrollmentId()).subscribe({
+            next: (enrollment) => {
+                const careerId = enrollment?.career?.id;
+                if (careerId) {
+                    this.store.selectItem(enrollment);
+                    this.loadSubjectsByCareer(careerId);
+                } else {
+                    this.messageService.showError({
+                        summary: 'No se pudo cargar el contexto',
+                        detail: 'No se encontró la carrera de esta matrícula.',
+                    });
+                }
+            },
+        });
+    }
+
+    private loadSubjectsByCareer(careerId: string): void {
         this.enrollmentService.findSubjectsByCareer(careerId).subscribe({
             next: (items: SubjectModel[]) => {
                 this.subjects.set(items);
@@ -174,16 +214,16 @@ export class EnrollmentDetailFormComponent implements OnInit, OnDestroy {
                     ? this.store.detailFormSection()
                     : null;
                 this.form$.set({
-                    subject:         d.subject         ?? null,
-                    type:            d.type            ?? null,
-                    workday:         stored?.workday    ?? d.workday         ?? null,
-                    parallel:        stored?.parallel   ?? d.parallel        ?? null,
-                    number:          d.number          ?? null,
-                    date:            d.date            ?? null,
-                    finalGrade:      stored?.finalGrade      ?? d.finalGrade      ?? null,
+                    subject: d.subject ?? null,
+                    type: d.type ?? null,
+                    workday: stored?.workday ?? d.workday ?? null,
+                    parallel: stored?.parallel ?? d.parallel ?? null,
+                    number: d.number ?? null,
+                    date: d.date ?? null,
+                    finalGrade: stored?.finalGrade ?? d.finalGrade ?? null,
                     finalAttendance: stored?.finalAttendance ?? d.finalAttendance ?? null,
-                    academicState:   stored?.academicState   ?? d.academicState   ?? null,
-                    observation:     stored?.observation     ?? d.observation     ?? null,
+                    academicState: stored?.academicState ?? d.academicState ?? null,
+                    observation: stored?.observation ?? d.observation ?? null,
                 });
                 this.store.updateSection('detailForm', this.form$());
             },
