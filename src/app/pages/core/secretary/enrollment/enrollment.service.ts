@@ -23,7 +23,7 @@ export class EnrollmentService {
     // TEMPORAL: el backend real de careers vive en 'core/career-coordinator/careers',
     // no en 'core/shared/careers' (que todavía no existe). Cuando el equipo decida/cree
     // la ruta compartida definitiva, revertir esto.
-    private readonly apiUrlSchoolPeriods = `${environment.API_URL}/core/shared/school-periods`; // ⚠️ sigue sin existir en el backend, ver nota en el chat
+    private readonly apiUrlSchoolPeriods = `${environment.API_URL}/core/shared/school-periods`;
     private readonly apiUrlCareers = `${environment.API_URL}/core/career-coordinator/careers`;
 
     // ─── School Periods ───────────────────────────────────────────────────────

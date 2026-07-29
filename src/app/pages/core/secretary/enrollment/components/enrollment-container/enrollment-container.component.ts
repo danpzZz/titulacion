@@ -1,66 +1,106 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { Button } from 'primeng/button';
+import { Component, computed, inject, input, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+
+import { BreadcrumbService } from '@layout/service/breadcrumb.service';
+import { AppService, CustomMessageService } from '@utils/services';
 import { FormRegistryService } from '@utils/services/form-registry.service';
 import { CustomIcons } from '@utils/icons/custom-icons';
-import { BreadcrumbService } from '@layout/service/breadcrumb.service';
-import { CustomMessageService } from '@utils/services';
+import { SECRETARY_ROUTES } from '@routes';
+import { BreadcrumbEnum, RoutesEnum } from '@utils/enums';
+import { EnrollmentDetailModel } from '@utils/interfaces';
+
 import { EnrollmentStore } from '../../enrollment.store';
 import { EnrollmentService } from '../../enrollment.service';
-import { BreadcrumbEnum } from '@utils/enums';
-import { SECRETARY_ROUTES } from '@routes';
-import { ActivatedRoute, Router } from '@angular/router';
+import { EnrollmentDetailFormComponent } from '../enrollment-detail-form/enrollment-detail-form.component';
+
+import { ButtonModule } from 'primeng/button';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-enrollment-container',
-    imports: [Button],
-    templateUrl: './enrollment-container.component.html'
+    standalone: true,
+    imports: [CommonModule, ButtonModule, EnrollmentDetailFormComponent],
+    templateUrl: './enrollment-container.component.html',
 })
-export class EnrollmentContainerComponent implements OnInit {
+export class EnrollmentContainerComponent implements OnInit, OnDestroy {
+    public id = input.required<string>();
+    public enrollmentId = input.required<string>();
+
+    private readonly router = inject(Router);
     private readonly breadcrumbService = inject(BreadcrumbService);
     private readonly formRegistryService = inject(FormRegistryService);
     private readonly messageService = inject(CustomMessageService);
-    private readonly route = inject(ActivatedRoute);
-    private readonly router = inject(Router);
-    protected readonly enrollmentStore = inject(EnrollmentStore);
+    protected readonly appService = inject(AppService);
+    protected readonly store = inject(EnrollmentStore);
     protected readonly enrollmentService = inject(EnrollmentService);
     protected readonly CustomIcons = CustomIcons;
 
-    protected id = '';
+    protected isNew = computed(() => this.id() === RoutesEnum.NEW);
 
-    constructor() {
+    ngOnInit(): void {
         this.breadcrumbService.setItems([
-            { label: BreadcrumbEnum.ENROLLMENTS, routerLink: SECRETARY_ROUTES.enrollment.absolute },
+            {
+                label: BreadcrumbEnum.ENROLLMENTS,
+                routerLink: SECRETARY_ROUTES.enrollment.absolute,
+            },
+            {
+                label: BreadcrumbEnum.ENROLLMENT_DETAILS,
+                routerLink: SECRETARY_ROUTES.enrollment.detail.absoluteFn(this.enrollmentId()),
+            },
             { label: BreadcrumbEnum.FORM },
         ]);
     }
 
-    ngOnInit(): void {
-        this.id = this.route.snapshot.params['id'] ?? 'new';
-        if (this.id !== 'new') this.loadData();
+    ngOnDestroy(): void {
+        this.store.resetDetailForm();
     }
 
-    private loadData(): void {
-        this.enrollmentService.findEnrollment(this.id).subscribe({
-            next: response => {
-                this.enrollmentStore.updateSection('enrollmentForm', response as any);
+    onSubmit(): void {
+        if (!this.isNew()) {
+            const s = this.store.detailFormSection();
+            if (s.academicState && (s.finalGrade === null || s.finalAttendance === null)) {
+                this.messageService.showError({
+                    summary: 'Campos incompletos',
+                    detail: 'Para asignar un estado académico debe ingresar la calificación y la asistencia'
+                });
+                return;
             }
-        });
-    }
+        }
 
-    async onSubmit(): Promise<void> {
         if (this.formRegistryService.hasErrors()) {
             this.messageService.showFormErrors(this.formRegistryService.errors());
             return;
         }
-        const payload = this.enrollmentStore.enrollmentForm();
-        if (this.id === 'new') {
-            this.enrollmentService.createEnrollment(payload).subscribe({
-                next: () => this.router.navigateByUrl(SECRETARY_ROUTES.enrollment.absolute)
+
+        const payload = this.store.detailFormSection() as unknown as Partial<EnrollmentDetailModel>;
+
+        if (this.isNew()) {
+            const newPayload = {
+                ...payload,
+                enrollmentId: this.enrollmentId(),
+                date: new Date().toISOString().split('T')[0],
+                number: this.store.autoNumber(),
+            };
+            this.enrollmentService.createDetail(newPayload).subscribe({
+                next: created => {
+                    this.enrollmentService.sendDetailRequest(created.id, newPayload).subscribe({
+                        next: () => {
+                            this.store.resetDetailForm();
+                            this.back();
+                        }
+                    });
+                }
             });
         } else {
-            this.enrollmentService.updateEnrollment(this.id, payload).subscribe({
-                next: () => this.router.navigateByUrl(SECRETARY_ROUTES.enrollment.absolute)
+            this.enrollmentService.updateDetail(this.id(), payload).subscribe({
+                next: () => this.back()
             });
         }
+    }
+
+    back(): void {
+        this.router.navigateByUrl(
+            SECRETARY_ROUTES.enrollment.detail.absoluteFn(this.enrollmentId())
+        );
     }
 }

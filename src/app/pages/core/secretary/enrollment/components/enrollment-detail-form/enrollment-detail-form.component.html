@@ -3,43 +3,18 @@
     <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i>
   </div>
 } @else {
-<!-- Header -->
-<div class="custom-form-card">
-  <div class="custom-form-grid md:grid-cols-12">
-    <div class="custom-form-field md:col-span-6">
-      <div style="display:flex; align-items:center; gap:0.5rem">
-        <i [class]="CustomIcons.PENCIL_SOLID" style="color:var(--primary-color)"></i>
-        <span style="font-size:1.25rem; font-weight:600; color:var(--primary-color)">
-          {{ isNew() ? 'Nueva Asignatura' : 'Editar Asignatura' }}
-        </span>
-      </div>
-      <small style="color:var(--text-color-secondary)">Todos los campos con * son obligatorios.</small>
-    </div>
-    <div class="custom-form-field-row md:col-span-6" style="justify-content:flex-end">
-      <p-button label="Cancelar" [icon]="CustomIcons.ARROW_LEFT_SOLID" severity="danger" (click)="back()"/>
-      <p-button label="Guardar" [icon]="CustomIcons.FLOPPY_DISK_SOLID" severity="primary" (click)="onSubmit()"/>
-    </div>
-  </div>
-</div>
 
-<!-- Formulario -->
 <div class="custom-form-card">
   <form class="custom-form-grid md:grid-cols-12">
 
     <!-- Asignatura -->
     <div class="custom-form-field md:col-span-6">
       <label appLabel for="subject" label="Asignatura" [field]="formData.subject"></label>
-      @if (isNew()) {
-        <p-select
-          id="subject"
-          dataKey="id"
+      @if (isNew) {
+        <p-select id="subject" dataKey="id"
           [formField]="$any(formData.subject)"
-          [options]="subjects()"
-          [filter]="true"
-          filterBy="code,name"
-          optionLabel="name"
-          placeholder="Seleccionar"
-          styleClass="w-full"
+          [options]="subjects()" [filter]="true" filterBy="code,name"
+          optionLabel="name" placeholder="Seleccionar" styleClass="w-full"
           [optionDisabled]="$any(isSubjectDisabled.bind(this))">
           <ng-template pTemplate="selectedItem">
             @if (form$().subject) {
@@ -65,34 +40,27 @@
 
     <!-- Tipo de matrícula -->
     <div class="custom-form-field md:col-span-6">
-      <label appLabel for="type" label="Tipo de matrícula" [field]="isNew() ? formData.type : undefined"></label>
-      @if (isNew()) {
-        <p-select
-          id="type"
-          dataKey="id"
+      <label appLabel for="type" label="Tipo de matrícula" [field]="isNew ? formData.type : undefined"></label>
+      @if (isNew) {
+        <p-select id="type" dataKey="id"
           [formField]="$any(formData.type)"
-          [options]="types()"
-          optionLabel="name"
-          placeholder="Seleccionar"
-          styleClass="w-full">
+          [options]="types()" optionLabel="name"
+          placeholder="Seleccionar" styleClass="w-full">
         </p-select>
         <small [appErrorMessage]="$any(formData.type)"></small>
       } @else {
-        <input pInputText readonly style="background:var(--surface-hover)" [value]="form$().type?.name ?? ''"/>
+        <input pInputText readonly style="background:var(--surface-hover)"
+          [value]="form$().type?.name ?? ''"/>
       }
     </div>
 
     <!-- Horario -->
     <div class="custom-form-field md:col-span-6">
       <label appLabel for="workday" label="Horario" [field]="formData.workday"></label>
-      <p-select
-        id="workday"
-        dataKey="id"
+      <p-select id="workday" dataKey="id"
         [formField]="$any(formData.workday)"
-        [options]="workdays()"
-        optionLabel="name"
-        placeholder="Seleccionar"
-        styleClass="w-full">
+        [options]="workdays()" optionLabel="name"
+        placeholder="Seleccionar" styleClass="w-full">
       </p-select>
       <small [appErrorMessage]="$any(formData.workday)"></small>
     </div>
@@ -100,14 +68,10 @@
     <!-- Paralelo -->
     <div class="custom-form-field md:col-span-6">
       <label appLabel for="parallel" label="Paralelo" [field]="formData.parallel"></label>
-      <p-select
-        id="parallel"
-        dataKey="id"
+      <p-select id="parallel" dataKey="id"
         [formField]="$any(formData.parallel)"
-        [options]="parallels()"
-        optionLabel="name"
-        placeholder="Seleccionar"
-        styleClass="w-full">
+        [options]="parallels()" optionLabel="name"
+        placeholder="Seleccionar" styleClass="w-full">
       </p-select>
       <small [appErrorMessage]="$any(formData.parallel)"></small>
     </div>
@@ -116,8 +80,8 @@
     <div class="custom-form-field md:col-span-6">
       <label appLabel label="Número de matrícula"></label>
       <input pInputText readonly style="background:var(--surface-hover)"
-        [value]="isNew() ? autoNumber() : (form$().number ?? '')"/>
-      @if (isNew() && autoNumber() >= 3) {
+        [value]="isNew ? store.autoNumber() : (form$().number ?? '')"/>
+      @if (isNew && store.autoNumber() >= 3) {
         <small style="color:var(--p-red-500)">Límite máximo de 3 matrículas por asignatura</small>
       }
     </div>
@@ -126,11 +90,11 @@
     <div class="custom-form-field md:col-span-6">
       <label appLabel label="Fecha de matrícula"></label>
       <input pInputText readonly style="background:var(--surface-hover)"
-        [value]="isNew() ? 'Se registrará automáticamente' : (form$().date ?? '')"/>
+        [value]="isNew ? 'Se registrará automáticamente' : (form$().date ?? '')"/>
     </div>
 
     <!-- Calificación, Asistencia, Estado Académico — solo al EDITAR -->
-    @if (!isNew()) {
+    @if (!isNew) {
       <div class="custom-form-field md:col-span-4">
         <label appLabel for="finalGrade" label="Calificación Final" [field]="formData.finalGrade"></label>
         <input pInputText id="finalGrade" [formField]="$any(formData.finalGrade)" type="number"/>
@@ -145,14 +109,10 @@
 
       <div class="custom-form-field md:col-span-4">
         <label appLabel for="academicState" label="Estado Académico" [field]="formData.academicState"></label>
-        <p-select
-          id="academicState"
-          dataKey="id"
+        <p-select id="academicState" dataKey="id"
           [formField]="$any(formData.academicState)"
-          [options]="academicStates()"
-          optionLabel="name"
-          placeholder="Seleccionar"
-          styleClass="w-full">
+          [options]="academicStates()" optionLabel="name"
+          placeholder="Seleccionar" styleClass="w-full">
         </p-select>
         <small [appErrorMessage]="$any(formData.academicState)"></small>
       </div>

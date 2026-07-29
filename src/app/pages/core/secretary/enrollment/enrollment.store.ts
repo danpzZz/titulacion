@@ -63,6 +63,13 @@ export class EnrollmentStore {
         this.selectedItem.set(item);
     }
 
+    // ─── Número automático de matrícula (calculado en detail-form) ─────────────
+    readonly autoNumber = signal<number>(1);
+
+    setAutoNumber(n: number): void {
+        this.autoNumber.set(n);
+    }
+
     // ─── Formulario de matrícula ───────────────────────────────────────────────
     readonly enrollmentForm = signal<EnrollmentStateModel>(
         this.loadFromStorage<EnrollmentStateModel>(ENROLLMENT_FORM_KEY, ENROLLMENT_INITIAL_STATE)
