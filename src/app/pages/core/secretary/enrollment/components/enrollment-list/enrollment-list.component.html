@@ -103,11 +103,7 @@
   </ng-template>
 
   <ng-template pTemplate="body" let-row>
-
     <tr>
-      @if (search()) {
-      <td style="text-align:center">{{ row.schoolPeriod?.name }}</td>
-      }
       <td style="text-align:center">{{ row.career?.name }}</td>
       <td style="text-align:center">{{ row.student?.user?.identification }}</td>
       <td style="text-align:center">{{ row.student?.user?.lastname }}</td>
@@ -116,6 +112,10 @@
       <td style="text-align:center">{{ row.academicPeriod?.name }}</td>
       <td style="text-align:center">{{ row.workday?.name }}</td>
       <td style="text-align:center">{{ row.parallel?.name }}</td>
+      <!-- Periodo Lectivo en la misma posición que el header -->
+      @if (search()) {
+      <td style="text-align:center">{{ row.schoolPeriod?.name }}</td>
+      }
       <td style="text-align:center">
         @if (row.enrollmentState?.state) {
         <p-tag [value]="row.enrollmentState.state.name"

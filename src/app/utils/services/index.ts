@@ -1,13 +1,8 @@
-export { CatalogueService } from './catalogue.service';
+export { CatalogueService }    from './catalogue.service';
 export { CatalogueHttpService } from './catalogue-http.service';
-export { AppService } from './app.service';
+export { AppService }          from './app.service';
 export { CustomMessageService } from './custom-message.service';
-export { DpaHttpService } from './dpa-http.service';
-export { FileHttpService } from './file-http.service';
+export { DpaHttpService }      from './dpa-http.service';
+export { FileHttpService }     from './file-http.service';
 export { FormRegistryService } from './form-registry.service';
-
-export { CareersService } from './careers.service';
-export { CareersHttpService } from './careers-http.service';
 export { CataloguesHttpService } from './catalogues-http.service';
-export { SchoolPeriodsService } from './school-periods.service';
-export { SchoolPeriodsHttpService } from './school-periods-http.service';

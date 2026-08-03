@@ -65,6 +65,26 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
                 });
                 return;
             }
+            // Validar rangos
+            if (s.finalGrade !== null && s.finalGrade !== undefined) {
+                if (s.finalGrade < 0 || s.finalGrade > 10) {
+                    this.messageService.showError({
+                        summary: 'Calificación inválida',
+                        detail: 'La calificación debe estar entre 0 y 10'
+                    });
+                    return;
+                }
+            }
+            if (s.finalAttendance !== null && s.finalAttendance !== undefined) {
+                if (s.finalAttendance < 0 || s.finalAttendance > 100) {
+                    this.messageService.showError({
+                        summary: 'Asistencia inválida',
+                        detail: 'La asistencia debe estar entre 0 y 100'
+                    });
+                    return;
+                }
+            }
+
         }
 
         if (this.formRegistryService.hasErrors()) {

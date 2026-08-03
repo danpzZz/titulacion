@@ -1,10 +1,5 @@
-export interface CatalogueModel {
-    id: string;
-    name: string;
-    code: string;
-    description?: string;
-    [key: string]: any;
-}
+import {CatalogueInterface} from './catalogue.interface';
+import {PaginationInterface} from './paginator.interface';
 
 export interface UserModel {
     id: string;
@@ -44,7 +39,7 @@ export interface SubjectModel {
     id: string;
     code: string;
     name: string;
-    academicPeriod?: CatalogueModel;
+    academicPeriod?: CatalogueInterface;
     [key: string]: any;
 }
 
@@ -54,11 +49,11 @@ export interface EnrollmentModel {
     date?: string;
     student: StudentModel;
     career?: CareerModel;
-    type?: CatalogueModel;
-    academicPeriod?: CatalogueModel;
-    workday?: CatalogueModel;
-    parallel?: CatalogueModel;
-    enrollmentState?: {state: CatalogueModel};
+    type?: CatalogueInterface;
+    academicPeriod?: CatalogueInterface;
+    workday?: CatalogueInterface;
+    parallel?: CatalogueInterface;
+    enrollmentState?: {state: CatalogueInterface};
     observation?: string;
     socioeconomicCategory?: string;
     socioeconomicPercentage?: string | number;
@@ -71,27 +66,21 @@ export interface EnrollmentDetailModel {
     number?: number | string;
     date?: string;
     subject?: SubjectModel;
-    type?: CatalogueModel;
-    workday?: CatalogueModel;
-    parallel?: CatalogueModel;
-    enrollmentDetailState?: {state: CatalogueModel};
+    type?: CatalogueInterface;
+    workday?: CatalogueInterface;
+    parallel?: CatalogueInterface;
+    enrollmentDetailState?: {state: CatalogueInterface};
     finalGrade?: number | null;
     finalAttendance?: number | null;
-    academicState?: CatalogueModel | null;
+    academicState?: CatalogueInterface | null;
     observation?: string | null;
     [key: string]: any;
 }
 
-export interface PaginatorModel {
-    totalItems: number;
-    limit: number;
-    page: number;
-    offset: number;
-}
-
+// Typed HTTP response for enrollment module
 export interface HttpResponseModel<T> {
     data: T;
-    pagination?: PaginatorModel;
+    pagination?: PaginationInterface;
     message?: string;
     title?: string;
     [key: string]: any;

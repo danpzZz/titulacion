@@ -1,4 +1,5 @@
-import {CatalogueModel, CareerModel, SchoolPeriodModel} from '@utils/interfaces';
+import {CatalogueInterface} from '@utils/interfaces';
+import {CareerModel, SchoolPeriodModel} from '@utils/interfaces';
 
 // ─── Enrollment ───────────────────────────────────────────────────────────────
 
@@ -6,10 +7,10 @@ export interface EnrollmentStateModel {
   student: StudentStateModel;
   date: string | null;
   code: string | null;
-  type: CatalogueModel | null;
-  academicPeriod: CatalogueModel | null;
-  workday: CatalogueModel | null;
-  parallel: CatalogueModel | null;
+  type: CatalogueInterface | null;
+  academicPeriod: CatalogueInterface | null;
+  workday: CatalogueInterface | null;
+  parallel: CatalogueInterface | null;
   observation: string | null;
   enrollmentState: EnrollmentStateRefModel | null;
 }
@@ -29,7 +30,7 @@ export interface UserStateModel {
 }
 
 export interface EnrollmentStateRefModel {
-  state: CatalogueModel;
+  state: CatalogueInterface;
 }
 
 export const ENROLLMENT_INITIAL_STATE: EnrollmentStateModel = {
@@ -58,14 +59,14 @@ export const ENROLLMENT_INITIAL_STATE: EnrollmentStateModel = {
 
 export interface EnrollmentDetailStateModel {
   subject: any | null;
-  type: CatalogueModel | null;
-  workday: CatalogueModel | null;
-  parallel: CatalogueModel | null;
+  type: CatalogueInterface | null;
+  workday: CatalogueInterface | null;
+  parallel: CatalogueInterface | null;
   number: number | string | null;
   date: string | null;
   finalGrade: number | null;
   finalAttendance: number | null;
-  academicState: CatalogueModel | null;
+  academicState: CatalogueInterface | null;
   observation: string | null;
 }
 
@@ -87,8 +88,8 @@ export const ENROLLMENT_DETAIL_INITIAL_STATE: EnrollmentDetailStateModel = {
 export interface EnrollmentFiltersState {
   schoolPeriod: SchoolPeriodModel | null;
   career: CareerModel | null;
-  academicPeriod: CatalogueModel | null;
-  enrollmentState: CatalogueModel | null;
+  academicPeriod: CatalogueInterface | null;
+  enrollmentState: CatalogueInterface | null;
   search: string;
 }
 

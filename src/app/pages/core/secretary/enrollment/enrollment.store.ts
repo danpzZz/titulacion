@@ -8,7 +8,7 @@ import {
     ENROLLMENT_FILTERS_INITIAL_STATE,
     ENROLLMENT_INITIAL_STATE,
 } from './enrollment.state';
-import { EnrollmentModel, PaginatorModel } from '@utils/interfaces';
+import { EnrollmentModel, PaginationInterface } from '@utils/interfaces';
 
 const DETAIL_FORM_KEY = 'enrollmentDetailForm';
 const ENROLLMENT_FORM_KEY = 'enrollmentForm';
@@ -24,8 +24,8 @@ const ENROLLMENT_FORM_KEYS: Array<keyof EnrollmentStateModel> = [
     'workday', 'parallel', 'observation', 'enrollmentState',
 ];
 
-const PAGINATOR_INITIAL: PaginatorModel = {
-    totalItems: 0, limit: 10, page: 0, offset: 0,
+const PAGINATOR_INITIAL: PaginationInterface = {
+    page: 1, limit: 10, totalItems: 0,
 };
 
 @Injectable({ providedIn: 'root' })
@@ -49,9 +49,9 @@ export class EnrollmentStore {
 
     // ─── Lista de matrículas ───────────────────────────────────────────────────
     readonly items = signal<EnrollmentModel[]>([]);
-    readonly paginator = signal<PaginatorModel>(PAGINATOR_INITIAL);
+    readonly paginator = signal<PaginationInterface>(PAGINATOR_INITIAL);
 
-    setItems(items: EnrollmentModel[], paginator: PaginatorModel): void {
+    setItems(items: EnrollmentModel[], paginator: PaginationInterface): void {
         this.items.set(items);
         this.paginator.set(paginator);
     }

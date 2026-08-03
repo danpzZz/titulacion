@@ -145,20 +145,12 @@ export enum CatalogueProcessFoodDrinksClassificationEnum {
     servicio_catering = 'servicio_catering'
 }
 
-// ── Enrollment module additions ───────────────────────────────────────────────
-export const EnrollmentCatalogueTypeEnum = {
-    ACADEMIC_PERIOD:             'academic_period',
-    ENROLLMENTS_TYPE:            'enrollments_type',
-    ENROLLMENTS_STATE:           'enrollments_state',
-    ENROLLMENTS_WORKDAY:         'enrollments_workday',
-    ENROLLMENTS_ACADEMIC_STATE:  'enrollments_academic_state',
-    PARALLEL:                    'parallel',
-};
 
-export const CatalogueEnrollmentStateEnum = {
-    ENROLLED:   'enrolled',
-    APPROVED:   'approved',
-    REJECTED:   'rejected',
-    REVOKED:    'revoked',
-    REQUESTED:  'request_sent',
-};
+// ── Enrollment state codes ────────────────────────────────────────────────────
+export enum CatalogueEnrollmentStateEnum {
+    ENROLLED  = 'enrolled',
+    APPROVED  = 'approved',
+    REJECTED  = 'rejected',
+    REVOKED   = 'revoked',
+    REQUESTED = 'request_sent',
+}
