@@ -1,25 +1,29 @@
-<!-- Header con botones — igual que career-form.component.html del tutor -->
+<!-- Header con botones-->
 <div class="custom-form-card">
   <div class="custom-form-grid md:grid-cols-12">
     <div class="custom-form-field md:col-span-6">
       <div style="display:flex; align-items:center; gap:0.5rem">
         <i [class]="CustomIcons.PENCIL_SOLID" style="color:var(--primary-color)"></i>
         <span style="font-size:1.25rem; font-weight:600; color:var(--primary-color)">
+          @if (isReadOnly()) {
+          Consultar Asignatura
+          } @else {
           {{ isNew() ? 'Nueva Asignatura' : 'Editar Asignatura' }}
+          }
         </span>
       </div>
+      @if (!isReadOnly()) {
       <small style="color:var(--text-color-secondary)">Todos los campos con * son obligatorios.</small>
+      }
     </div>
     <div class="custom-form-field-row md:col-span-6" style="justify-content:flex-end">
-      <p-button label="Cancelar" [icon]="CustomIcons.ARROW_LEFT_SOLID" severity="danger"
-        (click)="back()"/>
-      <p-button label="Guardar" [icon]="CustomIcons.FLOPPY_DISK_SOLID" severity="primary"
-        (click)="onSubmit()"/>
+      <p-button label="Cancelar" [icon]="CustomIcons.ARROW_LEFT_SOLID" severity="danger" (click)="back()" />
+      @if (!isReadOnly()) {
+      <p-button label="Guardar" [icon]="CustomIcons.FLOPPY_DISK_SOLID" severity="primary" (click)="onSubmit()" />
+      }
     </div>
   </div>
 </div>
 
-<!-- Sub-componente con los campos del formulario — igual que <app-principal-data> del tutor -->
-<app-enrollment-detail-form
-  [enrollmentId]="enrollmentId()"
-  [id]="id()"/>
+<!-- Sub-componente con los campos del formulario -->
+<app-enrollment-detail-form [enrollmentId]="enrollmentId()" [id]="id()" />

@@ -1,7 +1,7 @@
-import {Routes} from '@angular/router';
-import {EnrollmentListComponent} from '@modules/core/secretary/enrollment/components/enrollment-list/enrollment-list.component';
-import {EnrollmentDetailListComponent} from '@modules/core/secretary/enrollment/components/enrollment-detail-list/enrollment-detail-list.component';
-import {EnrollmentContainerComponent} from '@modules/core/secretary/enrollment/components/enrollment-container/enrollment-container.component';
+import { Routes } from '@angular/router';
+import { EnrollmentListComponent } from '@modules/core/secretary/work-flows/enrollment/components/enrollment-list/enrollment-list.component';
+import { EnrollmentDetailListComponent } from '@modules/core/secretary/work-flows/enrollment/components/enrollment-detail-list/enrollment-detail-list.component';
+import { EnrollmentContainerComponent } from '@modules/core/secretary/work-flows/enrollment/components/enrollment-container/enrollment-container.component';
 
 export default [
     {

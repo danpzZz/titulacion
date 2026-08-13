@@ -20,9 +20,6 @@ export class EnrollmentService {
     private readonly apiUrlEnrollments = `${environment.API_URL}/core/secretary/enrollments`;
     private readonly apiUrlEnrollmentDetails = `${environment.API_URL}/core/secretary/enrollment-details`;
     private readonly apiUrlEnrollmentReports = `${environment.API_URL}/core/secretary/enrollment-reports`;
-    // TEMPORAL: el backend real de careers vive en 'core/career-coordinator/careers',
-    // no en 'core/shared/careers' (que todavía no existe). Cuando el equipo decida/cree
-    // la ruta compartida definitiva, revertir esto.
     private readonly apiUrlSchoolPeriods = `${environment.API_URL}/core/shared/school-periods`;
     private readonly apiUrlCareers = `${environment.API_URL}/core/career-coordinator/careers`;
 
@@ -53,6 +50,7 @@ export class EnrollmentService {
     }
 
     // ─── Enrollments ──────────────────────────────────────────────────────────
+    // Consultas
     findEnrollmentsByCareer(
         careerId: string,
         schoolPeriodId: string,
@@ -80,6 +78,7 @@ export class EnrollmentService {
             .pipe(map(r => r.data));
     }
 
+    // Crear / Editar
     createEnrollment(payload: any): Observable<EnrollmentModel> {
         return this.http
             .post<HttpResponseModel<EnrollmentModel>>(this.apiUrlEnrollments, payload)
@@ -92,6 +91,7 @@ export class EnrollmentService {
             .pipe(map(r => r.data));
     }
 
+    // Acciones de estado (registrada → aprobada → matriculada / rechazada / anulada)
     enroll(id: string): Observable<EnrollmentModel> {
         return this.http
             .patch<HttpResponseModel<EnrollmentModel>>(`${this.apiUrlEnrollments}/${id}/enroll`, {})
@@ -117,6 +117,7 @@ export class EnrollmentService {
     }
 
     // ─── Enrollment Details ───────────────────────────────────────────────────
+    // Consultas
     findDetailsByEnrollment(enrollmentId: string): Observable<EnrollmentDetailModel[]> {
         return this.http
             .get<HttpResponseModel<EnrollmentDetailModel[]>>(
@@ -131,6 +132,7 @@ export class EnrollmentService {
             .pipe(map(r => r.data));
     }
 
+    // Crear / Editar / Eliminar
     createDetail(payload: any): Observable<EnrollmentDetailModel> {
         return this.http
             .post<HttpResponseModel<EnrollmentDetailModel>>(this.apiUrlEnrollmentDetails, payload)
@@ -147,6 +149,7 @@ export class EnrollmentService {
         return this.http.delete<void>(`${this.apiUrlEnrollmentDetails}/${id}`);
     }
 
+    // Acciones de estado (misma lógica que Enrollments, pero a nivel de asignatura)
     enrollDetail(id: string): Observable<EnrollmentDetailModel> {
         return this.http
             .patch<HttpResponseModel<EnrollmentDetailModel>>(`${this.apiUrlEnrollmentDetails}/${id}/enroll`, {})
@@ -205,6 +208,13 @@ export class EnrollmentService {
             .subscribe(blob => this.triggerDownload(blob, `Asignaturas_${schoolPeriod.name}.xlsx`));
     }
 
+    calculateEnrollmentNumber(studentId: string, subjectId: string): Observable<number> {
+        return this.http
+            .get<HttpResponseModel<number>>(`${this.apiUrlEnrollmentDetails}/calculate-number/${studentId}/${subjectId}`)
+            .pipe(map(r => r.data));
+    }
+
+
     // ─── Helper ───────────────────────────────────────────────────────────────
     private triggerDownload(blob: Blob, filename: string): void {
         const url = window.URL.createObjectURL(blob);
@@ -213,5 +223,9 @@ export class EnrollmentService {
         a.download = filename;
         a.click();
         window.URL.revokeObjectURL(url);
+        setTimeout(() => {
+            document.querySelectorAll('.p-overlay-mask-leave-active, .p-drawer-mask')
+                .forEach(el => el.remove());
+        }, 300);
     }
 }

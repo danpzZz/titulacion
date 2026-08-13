@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem } from 'primeng/api';
 
@@ -35,6 +35,7 @@ import { AcademicStateSeverityPipe } from '@utils/pipes/academic-state-severity.
     templateUrl: './enrollment-detail-list.component.html',
 })
 export class EnrollmentDetailListComponent implements OnInit {
+    // ─── Parámetro de ruta via input.required ──────────────────────────────────
     public enrollmentId = input.required<string>();
 
     private readonly router = inject(Router);
@@ -50,8 +51,18 @@ export class EnrollmentDetailListComponent implements OnInit {
     protected items = signal<EnrollmentDetailModel[]>([]);
     protected isButtonActionsEnabled = false;
     protected buttonActions = signal<MenuItem[]>([]);
-    protected canModify = signal(true);
     protected isLoading = signal(false);
+
+    protected canModify = signal(true);
+
+    // una matrícula solo puede tener una asignatura
+    // "activa" (no anulada/rechazada) a la vez. 
+    protected readonly hasActiveSubject = computed(() =>
+        this.items().some((item) => {
+            const code = item.enrollmentDetailState?.state?.code ?? '';
+            return code !== CatalogueEnrollmentStateEnum.REVOKED && code !== CatalogueEnrollmentStateEnum.REJECTED;
+        })
+    );
 
     ngOnInit(): void {
         this.breadcrumbService.setItems([
@@ -60,14 +71,18 @@ export class EnrollmentDetailListComponent implements OnInit {
         ]);
 
         const parentCode = this.store.selectedItem()?.enrollmentState?.state?.code ?? '';
-        this.canModify.set(
-            parentCode !== CatalogueEnrollmentStateEnum.REVOKED &&
-            parentCode !== CatalogueEnrollmentStateEnum.REJECTED
-        );
+        const parentNotRevoked = parentCode !== CatalogueEnrollmentStateEnum.REVOKED &&
+            parentCode !== CatalogueEnrollmentStateEnum.REJECTED;
+
+        // Periodos históricos son de solo lectura —
+        const isActivePeriod = this.store.isOpenPeriodSelected();
+
+        this.canModify.set(parentNotRevoked && isActivePeriod);
 
         this.loadDetails();
     }
 
+    // ─── Carga la lista de asignaturas ────────────────────────────────────────
     loadDetails(): void {
         this.isLoading.set(true);
         this.enrollmentService.findDetailsByEnrollment(this.enrollmentId()).subscribe({
@@ -79,10 +94,11 @@ export class EnrollmentDetailListComponent implements OnInit {
         });
     }
 
+    // ─── Acciones de cambio de estado ─────────────────────────────────────────
+
     enroll(id: string): void {
         this.enrollmentService.enrollDetail(id).subscribe({
             next: () => {
-                this.messageService.showSuccess({ summary: 'Matriculado', detail: 'La asignatura fue matriculada' });
                 this.isButtonActionsEnabled = false;
                 this.loadDetails();
             }
@@ -91,7 +107,6 @@ export class EnrollmentDetailListComponent implements OnInit {
     approve(id: string): void {
         this.enrollmentService.approveDetail(id).subscribe({
             next: () => {
-                this.messageService.showSuccess({ summary: 'Aprobado', detail: 'La asignatura fue aprobada' });
                 this.isButtonActionsEnabled = false;
                 this.loadDetails();
             }
@@ -108,7 +123,6 @@ export class EnrollmentDetailListComponent implements OnInit {
             accept: () => {
                 this.enrollmentService.rejectDetail(id).subscribe({
                     next: () => {
-                        this.messageService.showSuccess({ summary: 'Rechazado', detail: 'La asignatura fue rechazada' });
                         this.isButtonActionsEnabled = false;
                         this.loadDetails();
                     }
@@ -127,7 +141,6 @@ export class EnrollmentDetailListComponent implements OnInit {
             accept: () => {
                 this.enrollmentService.revokeDetail(id).subscribe({
                     next: () => {
-                        this.messageService.showSuccess({ summary: 'Anulado', detail: 'La asignatura fue anulada' });
                         this.isButtonActionsEnabled = false;
                         this.loadDetails();
                     }
@@ -146,7 +159,6 @@ export class EnrollmentDetailListComponent implements OnInit {
             accept: () => {
                 this.enrollmentService.removeDetail(id).subscribe({
                     next: () => {
-                        this.messageService.showSuccess({ summary: 'Eliminado', detail: 'La asignatura fue eliminada' });
                         this.isButtonActionsEnabled = false;
                         this.items.update(items => items.filter(i => i.id !== id));
                     }
@@ -155,6 +167,7 @@ export class EnrollmentDetailListComponent implements OnInit {
         });
     }
 
+    // ─── Selección de item — construye el drawer de acciones ──────────────────
     selectItem(item: EnrollmentDetailModel): void {
         const code = item.enrollmentDetailState?.state?.code ?? '';
         const isRegistered = code === 'registered';
@@ -165,15 +178,18 @@ export class EnrollmentDetailListComponent implements OnInit {
         const isRevoked = code === CatalogueEnrollmentStateEnum.REVOKED;
 
         const actions: MenuItem[] = [];
-
         actions.push({
             ...editButtonAction,
+            // Si el período está cerrado (o la matrícula fue anulada/rechazada), este
+            // botón sigue llevando al formulario, pero solo para consultar 
+            label: this.canModify() ? editButtonAction.label : 'Ver',
             command: () => {
                 this.isButtonActionsEnabled = false;
                 setTimeout(() => this.goToEdit(item.id), 300);
             }
         });
 
+        // Las demás acciones solo si el periodo es activo y la matrícula no está anulada
         if (this.canModify()) {
             if (isRegistered || isRequested) {
                 actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });

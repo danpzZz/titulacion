@@ -10,10 +10,11 @@ import {
 } from './enrollment.state';
 import { EnrollmentModel, PaginationInterface } from '@utils/interfaces';
 
+// ─── Claves de sessionStorage ─────────────────────────────────────────────────
 const DETAIL_FORM_KEY = 'enrollmentDetailForm';
 const ENROLLMENT_FORM_KEY = 'enrollmentForm';
 
-// Keys válidas por sección — permite updateSection tipado
+// ─── Keys válidas por sección ─────────────────────────────────────────────────
 const DETAIL_FORM_KEYS: Array<keyof EnrollmentDetailStateModel> = [
     'subject', 'type', 'workday', 'parallel', 'number',
     'date', 'finalGrade', 'finalAttendance', 'academicState', 'observation',
@@ -24,6 +25,7 @@ const ENROLLMENT_FORM_KEYS: Array<keyof EnrollmentStateModel> = [
     'workday', 'parallel', 'observation', 'enrollmentState',
 ];
 
+// Paginación inicial
 const PAGINATOR_INITIAL: PaginationInterface = {
     page: 1, limit: 10, totalItems: 0,
 };
@@ -37,6 +39,7 @@ export class EnrollmentStore {
         !!this.filters().schoolPeriod && !!this.filters().career
     );
 
+    // Accesos directos para el HTML
     readonly selectedSchoolPeriod = computed(() => this.filters().schoolPeriod);
     readonly selectedCareer = computed(() => this.filters().career);
     readonly selectedAcademicPeriod = computed(() => this.filters().academicPeriod);
@@ -51,6 +54,7 @@ export class EnrollmentStore {
     readonly items = signal<EnrollmentModel[]>([]);
     readonly paginator = signal<PaginationInterface>(PAGINATOR_INITIAL);
 
+    // Actualiza lista y paginación en una sola operación
     setItems(items: EnrollmentModel[], paginator: PaginationInterface): void {
         this.items.set(items);
         this.paginator.set(paginator);
@@ -63,7 +67,20 @@ export class EnrollmentStore {
         this.selectedItem.set(item);
     }
 
-    // ─── Número automático de matrícula (calculado en detail-form) ─────────────
+    // ─── Periodo lectivo abierto ───────────────────────────────────────────────
+    // Guarda el ID del periodo que el backend marcó como "abierto/activo".
+    readonly openSchoolPeriodId = signal<string>('');
+
+    setOpenSchoolPeriod(id: string): void {
+        this.openSchoolPeriodId.set(id);
+    }
+    readonly isOpenPeriodSelected = computed(() => {
+        const selected = this.filters().schoolPeriod;
+        if (!selected?.id || !this.openSchoolPeriodId()) return true;
+        return selected.id === this.openSchoolPeriodId();
+    });
+
+    // ─── Número automático de matrícula ───────────────────────────────────────
     readonly autoNumber = signal<number>(1);
 
     setAutoNumber(n: number): void {
@@ -87,6 +104,8 @@ export class EnrollmentStore {
     );
     readonly detailFormSection = computed(() => this.detailForm());
 
+    // Usado por enrollment-detail-form para saber si debe recuperar del storage
+    // o cargar todo desde el servidor al abrir el formulario de edición
     hasDetailFormData(): boolean {
         return !!sessionStorage.getItem(DETAIL_FORM_KEY);
     }
@@ -96,7 +115,7 @@ export class EnrollmentStore {
         sessionStorage.removeItem(DETAIL_FORM_KEY);
     }
 
-    // ─── updateSection ─────────────────────────────────────
+    // ─── updateSection ───────────────────────
     updateSection(section: 'enrollmentForm', data: Partial<EnrollmentStateModel>): void;
     updateSection(section: 'detailForm', data: Partial<EnrollmentDetailStateModel>): void;
     updateSection(section: 'enrollmentForm' | 'detailForm', data: any): void {
@@ -109,7 +128,7 @@ export class EnrollmentStore {
         }
     }
 
-    // ─── Constructor — effect guarda automáticamente en sessionStorage ─────────
+    // ─── Constructor — persistencia automática en sessionStorage ──────────────
     constructor() {
         effect(() => {
             sessionStorage.setItem(ENROLLMENT_FORM_KEY, JSON.stringify(this.enrollmentForm()));

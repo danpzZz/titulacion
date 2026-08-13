@@ -1,41 +1,22 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { DpaInterface } from '@utils/interfaces';
 import { CoreEnum } from '@utils/enums';
-import { CoreSessionStorageService } from '@utils/services/core-session-storage.service';
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class DpaService {
-    private readonly coreSessionStorageService = inject(CoreSessionStorageService);
-
-    async findProvinces(): Promise<DpaInterface[]> {
-        let dpa: DpaInterface[] = [];
-
-        if (sessionStorage.getItem(CoreEnum.dpa)) {
-            dpa = await this.coreSessionStorageService.getEncryptedValue(CoreEnum.dpa);
-            dpa = Object.values(dpa);
-
-            dpa = dpa.filter((item) => {
-                return item.parentId === null;
-            });
-        }
-
-        return dpa;
+    findProvinces(): DpaInterface[] {
+        const dpa = sessionStorage.getItem(CoreEnum.dpa);
+        const dpaParse = dpa ? JSON.parse(dpa) as DpaInterface[] : [];
+        return dpaParse.filter(item => item.parentId === null);
     }
 
-    async findDpaByParentId(parentId:string): Promise<DpaInterface[]> {
-        let dpa: DpaInterface[] = [];
+    findDpaByParentId(parentId: string): DpaInterface[] {
+        const dpa = sessionStorage.getItem(CoreEnum.dpa);
+        const dpaParse = dpa ? JSON.parse(dpa) as DpaInterface[] : [];
+        return dpaParse.filter(item => item.parentId === parentId);
+    }
 
-        if (sessionStorage.getItem(CoreEnum.dpa)) {
-            dpa = await this.coreSessionStorageService.getEncryptedValue(CoreEnum.dpa);
-            dpa = Object.values(dpa);
-
-            dpa = dpa.filter((item) => {
-                return item.parentId === parentId;
-            });
-        }
-
-        return dpa;
+    setDpa(value: DpaInterface[]): void {
+        sessionStorage.setItem(CoreEnum.dpa, JSON.stringify(value));
     }
 }

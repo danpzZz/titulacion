@@ -1,4 +1,3 @@
-
 import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem } from 'primeng/api';
@@ -40,45 +39,60 @@ import { EnrollmentStatePipe } from '@utils/pipes/enrollment-state.pipe';
     templateUrl: './enrollment-list.component.html',
 })
 export class EnrollmentListComponent implements OnInit {
-
-
-    private readonly cataloguesHttpService = inject(CataloguesHttpService);
-
+    // ─── Servicios ────────────────────────────────────────────────────────────
+    private readonly cataloguesHttpService = inject(CataloguesHttpService); // temporal hasta login real
     protected readonly appService = inject(AppService);
     private readonly router = inject(Router);
     private readonly breadcrumbService = inject(BreadcrumbService);
     private readonly enrollmentService = inject(EnrollmentService);
     private readonly messageService = inject(CustomMessageService);
     private readonly confirmationService = inject(ConfirmationService);
-    private readonly catalogueService = inject(CatalogueService);
+    private readonly catalogueService = inject(CatalogueService); // usar cuando haya login real
 
     protected readonly store = inject(EnrollmentStore);
     protected readonly CustomIcons = CustomIcons;
 
-    // Career para guardar la seleccionada al navegar a asignaturas
     private selectedCareerForDetail: CareerModel | null = null;
 
+    // ─── Datos para los filtros ───────────────────────────────────────────────
     protected schoolPeriods = signal<SchoolPeriodModel[]>([]);
     protected careers = signal<CareerModel[]>([]);
     protected academicPeriods = signal<CatalogueInterface[]>([]);
     protected enrollmentStates = signal<CatalogueInterface[]>([]);
 
+    // ─── Estado del drawer de acciones ────────────────────────────────────────
     protected isButtonActionsEnabled = false;
     protected isMoreActionsEnabled = false;
     protected buttonActions = signal<MenuItem[]>([]);
 
+    // ─── Buscador con debounce ────────────────────────────────────────────────
     protected readonly search = signal('');
     private readonly debouncedSearch = debouncedSignal(this.search);
 
+    // ─── Acciones de descarga (menú secundario) ───────────────────────────────
     protected readonly moreActions: MenuItem[] = [
-        { label: 'Matriculados por Carrera', icon: CustomIcons.DOWNLOAD_SOLID, command: () => this.downloadByCareer() },
-        { label: 'Matriculados por Periodo', icon: CustomIcons.DOWNLOAD_SOLID, command: () => this.downloadBySchoolPeriod() },
-        { label: 'Asignaturas por Periodo', icon: CustomIcons.DOWNLOAD_SOLID, command: () => this.downloadDetailsBySchoolPeriod() },
+        {
+            label: 'Matriculados por Carrera', icon: CustomIcons.DOWNLOAD_SOLID, command: () => {
+                this.isMoreActionsEnabled = false;
+                this.downloadByCareer();
+            }
+        },
+        {
+            label: 'Matriculados por Periodo', icon: CustomIcons.DOWNLOAD_SOLID, command: () => {
+                this.isMoreActionsEnabled = false;
+                this.downloadBySchoolPeriod();
+            }
+        },
+        {
+            label: 'Asignaturas por Periodo', icon: CustomIcons.DOWNLOAD_SOLID, command: () => {
+                this.isMoreActionsEnabled = false;
+                this.downloadDetailsBySchoolPeriod();
+            }
+        },
     ];
 
     constructor() {
         this.breadcrumbService.setItems([{ label: BreadcrumbEnum.ENROLLMENTS }]);
-
         effect(() => {
             const filters = this.store.filters();
             if (filters.schoolPeriod && filters.career) {
@@ -101,10 +115,11 @@ export class EnrollmentListComponent implements OnInit {
         this.loadAcademicPeriods();
         this.loadEnrollmentStates();
     }
-
     protected onSearchInput(event: Event): void {
         this.search.set((event.target as HTMLInputElement).value);
     }
+
+    // ─── Carga inicial de datos ───────────────────────────────────────────────
 
     private loadSchoolPeriods(): void {
         this.enrollmentService.findAllSchoolPeriods().subscribe({
@@ -112,16 +127,17 @@ export class EnrollmentListComponent implements OnInit {
                 this.schoolPeriods.set(periods);
                 this.enrollmentService.findOpenSchoolPeriod().subscribe({
                     next: (open: SchoolPeriodModel) => {
-                        if (open) this.store.updateFilter('schoolPeriod', open);
+                        if (open) {
+                            this.store.updateFilter('schoolPeriod', open);
+                            this.store.setOpenSchoolPeriod(open.id);
+                        }
                     }
                 });
             },
             error: () => {
-                // TEMPORAL: 'core/shared/school-periods' todavía no existe en el
-                // backend (nadie lo ha implementado). Mientras tanto, forzamos un
-                // período lectivo real (el mismo usado en las pruebas de Postman) para
-                // poder seguir probando el resto del flujo. Quitar en cuanto el
-                // endpoint real exista.
+                // TEMPORAL: el endpoint /core/shared/school-periods aún no existe.
+                // Se fuerza el periodo real de pruebas para poder probar el flujo.
+                // Quitar cuando el backend implemente el endpoint.
                 this.store.updateFilter('schoolPeriod', {
                     id: '64712a47-6566-4ec2-a3bc-8f82a3720d65',
                     name: 'JULIO 2026 - SEPTIEMBRE 2026',
@@ -142,19 +158,22 @@ export class EnrollmentListComponent implements OnInit {
         });
     }
 
-    // Catálogos con CatalogueService — síncrono, sin subscribe
+    // ─── Catálogos — TEMPORAL hasta login real ────────────────────────────────
+    // CatalogueService.findByType() requiere que el backend haya guardado los
+    // catálogos en sessionStorage durante el login. Sin login, devuelve vacío.
+    // Al conectar el backend con login, descomentar el bloque de CatalogueService
+    // y eliminar las llamadas a cataloguesHttpService.
+    //
     // private loadAcademicPeriods(): void {
     //     this.academicPeriods.set(
     //         this.catalogueService.findByType(CatalogueTypeEnum.enrollment_academic_period)
     //     );
     // }
-
     // private loadEnrollmentStates(): void {
     //     this.enrollmentStates.set(
     //         [...this.catalogueService.findByType(CatalogueTypeEnum.enrollment_state)]
     //             .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')));
     // }
-
 
     private loadAcademicPeriods(): void {
         this.cataloguesHttpService.findByTypeObservable(CatalogueTypeEnum.enrollment_academic_period)
@@ -170,6 +189,7 @@ export class EnrollmentListComponent implements OnInit {
             });
     }
 
+    // ─── Petición principal ───────────────────────────────────────────────────
     findEnrollments(page: number = 0): void {
         if (!this.store.canSearch()) return;
         const { career, schoolPeriod, academicPeriod, enrollmentState, search } = this.store.filters();
@@ -185,10 +205,11 @@ export class EnrollmentListComponent implements OnInit {
             });
     }
 
+    // ─── Acciones de cambio de estado ─────────────────────────────────────────
+
     enroll(id: string): void {
         this.enrollmentService.enroll(id).subscribe({
             next: () => {
-                this.messageService.showSuccess({ summary: 'Matriculado', detail: 'El estudiante fue matriculado correctamente' });
                 this.isButtonActionsEnabled = false;
                 this.findEnrollments();
             }
@@ -198,7 +219,6 @@ export class EnrollmentListComponent implements OnInit {
     approve(id: string): void {
         this.enrollmentService.approve(id).subscribe({
             next: () => {
-                this.messageService.showSuccess({ summary: 'Aprobada', detail: 'La solicitud fue aprobada' });
                 this.isButtonActionsEnabled = false;
                 this.findEnrollments();
             }
@@ -216,7 +236,6 @@ export class EnrollmentListComponent implements OnInit {
             accept: () => {
                 this.enrollmentService.reject(id).subscribe({
                     next: () => {
-                        this.messageService.showSuccess({ summary: 'Rechazada', detail: 'La solicitud fue rechazada' });
                         this.isButtonActionsEnabled = false;
                         this.findEnrollments();
                     }
@@ -236,7 +255,6 @@ export class EnrollmentListComponent implements OnInit {
             accept: () => {
                 this.enrollmentService.revoke(id).subscribe({
                     next: () => {
-                        this.messageService.showSuccess({ summary: 'Anulada', detail: 'La matrícula fue anulada' });
                         this.isButtonActionsEnabled = false;
                         this.findEnrollments();
                     }
@@ -246,6 +264,7 @@ export class EnrollmentListComponent implements OnInit {
     }
 
     downloadCertificate(enrollment: EnrollmentModel): void {
+        this.isButtonActionsEnabled = false;
         if (enrollment.enrollmentState?.state?.code === CatalogueEnrollmentStateEnum.ENROLLED) {
             this.enrollmentService.downloadEnrollmentCertificate(enrollment.id, enrollment.student.user.identification);
         } else {
@@ -266,9 +285,9 @@ export class EnrollmentListComponent implements OnInit {
         if (sp) this.enrollmentService.downloadEnrollmentDetailsBySchoolPeriod(sp);
     }
 
+    // ─── Selección de item — construye el drawer de acciones ──────────────────
     selectItem(item: EnrollmentModel): void {
         this.store.selectItem(item);
-        // Guardar la carrera del item seleccionado para usarla al navegar a asignaturas
         if (item.career) {
             this.selectedCareerForDetail = item.career;
         }
@@ -281,31 +300,51 @@ export class EnrollmentListComponent implements OnInit {
         const isRejected = code === CatalogueEnrollmentStateEnum.REJECTED;
         const isRevoked = code === CatalogueEnrollmentStateEnum.REVOKED;
 
+        const isActivePeriod = this.store.isOpenPeriodSelected();
+
         const actions: MenuItem[] = [];
 
-        if (!isRevoked && !isRejected) {
+        if (isActivePeriod) {
+            // ─── Periodo activo — acciones según estado de la matrícula ──────
+            if (!isRevoked && !isRejected) {
+                actions.push({
+                    label: 'Asignaturas', icon: CustomIcons.BOOK_SOLID,
+                    command: () => {
+                        this.isButtonActionsEnabled = false;
+                        this.goToDetails(item.id);
+                    }
+                });
+            }
+            if (isRegistered || isRequested) {
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+            }
+            if (isApproved) {
+                actions.push({ label: 'Matricular', icon: CustomIcons.STAR_SOLID, command: () => this.enroll(item.id) });
+            }
+            if (isRegistered || isRequested || isApproved) {
+                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => this.reject(item.id) });
+            }
+            if (isEnrolled) {
+                actions.push({ label: 'Descargar Certificado', icon: CustomIcons.DOWNLOAD_SOLID, command: () => this.downloadCertificate(item) });
+            }
+            if (isApproved || isEnrolled) {
+                actions.push({ label: 'Anular Matrícula', icon: CustomIcons.BAN_SOLID, command: () => this.revoke(item.id) });
+            }
+        } else {
+            // ─── Periodo histórico — solo consulta ────────────────────────────
             actions.push({
-                label: 'Asignaturas', icon: CustomIcons.BOOK_SOLID,
+                label: 'Ver Asignaturas', icon: CustomIcons.BOOK_SOLID,
                 command: () => {
                     this.isButtonActionsEnabled = false;
                     this.goToDetails(item.id);
                 }
             });
-        }
-        if (isRegistered || isRequested) {
-            actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
-        }
-        if (isApproved) {
-            actions.push({ label: 'Matricular', icon: CustomIcons.STAR_SOLID, command: () => this.enroll(item.id) });
-        }
-        if (isRegistered || isRequested || isApproved) {
-            actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => this.reject(item.id) });
-        }
-        if (isEnrolled) {
-            actions.push({ label: 'Descargar Certificado', icon: CustomIcons.DOWNLOAD_SOLID, command: () => this.downloadCertificate(item) });
-        }
-        if (isApproved || isEnrolled) {
-            actions.push({ label: 'Anular Matrícula', icon: CustomIcons.BAN_SOLID, command: () => this.revoke(item.id) });
+            if (isEnrolled) {
+                actions.push({
+                    label: 'Descargar Certificado', icon: CustomIcons.DOWNLOAD_SOLID,
+                    command: () => this.downloadCertificate(item)
+                });
+            }
         }
 
         this.buttonActions.set(actions);

@@ -6,7 +6,7 @@ import { AppService, CustomMessageService } from '@utils/services';
 import { FormRegistryService } from '@utils/services/form-registry.service';
 import { CustomIcons } from '@utils/icons/custom-icons';
 import { SECRETARY_ROUTES } from '@routes';
-import { BreadcrumbEnum, RoutesEnum } from '@utils/enums';
+import { BreadcrumbEnum, CatalogueEnrollmentStateEnum, RoutesEnum } from '@utils/enums';
 import { EnrollmentDetailModel } from '@utils/interfaces';
 
 import { EnrollmentStore } from '../../enrollment.store';
@@ -23,6 +23,7 @@ import { CommonModule } from '@angular/common';
     templateUrl: './enrollment-container.component.html',
 })
 export class EnrollmentContainerComponent implements OnInit, OnDestroy {
+    // ─── Parámetros de ruta via input.required ─────────────────────────────────
     public id = input.required<string>();
     public enrollmentId = input.required<string>();
 
@@ -36,6 +37,16 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
     protected readonly CustomIcons = CustomIcons;
 
     protected isNew = computed(() => this.id() === RoutesEnum.NEW);
+
+    // ─── Solo lectura si el período está cerrado o la matrícula fue anulada/
+    // rechazada.
+    protected readonly isReadOnly = computed(() => {
+        const parentCode = this.store.selectedItem()?.enrollmentState?.state?.code ?? '';
+        const parentNotRevoked = parentCode !== CatalogueEnrollmentStateEnum.REVOKED &&
+            parentCode !== CatalogueEnrollmentStateEnum.REJECTED;
+        const isActivePeriod = this.store.isOpenPeriodSelected();
+        return !(parentNotRevoked && isActivePeriod);
+    });
 
     ngOnInit(): void {
         this.breadcrumbService.setItems([
@@ -56,8 +67,11 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
     }
 
     onSubmit(): void {
+        // ─── Validaciones de negocio (solo al editar) ──────────────────────────
         if (!this.isNew()) {
             const s = this.store.detailFormSection();
+
+            // Si se asigna estado académico, calificación y asistencia son obligatorias
             if (s.academicState && (s.finalGrade === null || s.finalAttendance === null)) {
                 this.messageService.showError({
                     summary: 'Campos incompletos',
@@ -65,7 +79,7 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
                 });
                 return;
             }
-            // Validar rangos
+
             if (s.finalGrade !== null && s.finalGrade !== undefined) {
                 if (s.finalGrade < 0 || s.finalGrade > 10) {
                     this.messageService.showError({
@@ -84,9 +98,9 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
                     return;
                 }
             }
-
         }
 
+        // ─── Validaciones de SignalForms (required, min, max del formulario) ───
         if (this.formRegistryService.hasErrors()) {
             this.messageService.showFormErrors(this.formRegistryService.errors());
             return;
@@ -95,6 +109,7 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
         const payload = this.store.detailFormSection() as unknown as Partial<EnrollmentDetailModel>;
 
         if (this.isNew()) {
+            // Crear — agrega enrollmentId, fecha actual y número automático
             const newPayload = {
                 ...payload,
                 enrollmentId: this.enrollmentId(),
@@ -103,6 +118,7 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
             };
             this.enrollmentService.createDetail(newPayload).subscribe({
                 next: created => {
+
                     this.enrollmentService.sendDetailRequest(created.id, newPayload).subscribe({
                         next: () => {
                             this.store.resetDetailForm();

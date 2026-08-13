@@ -10,9 +10,14 @@
 @import './tailwind.css';
 
 @layer components {
+
+    // .custom-form-card {
+    //     @apply p-6 rounded-lg shadow-md mt-2;
+    //     background-color: var(--color-white);
+    // }
     .custom-form-card {
         @apply p-6 rounded-lg shadow-md mt-2;
-        background-color: var(--color-white);
+        background-color: var(--p-surface-card); // ← cambia con el tema
     }
 
     .custom-form-grid {

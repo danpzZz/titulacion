@@ -52,18 +52,22 @@
     <!-- Horario -->
     <div class="custom-form-field md:col-span-6">
       <label appLabel for="workday" label="Horario" [field]="formData.workday"></label>
-      <p-select id="workday" dataKey="id" [formField]="$any(formData.workday)" [options]="workdays()" optionLabel="name"
-        placeholder="Seleccionar" styleClass="w-full">
-      </p-select>
+      <div [style.pointer-events]="isReadOnly() ? 'none' : null" [style.opacity]="isReadOnly() ? 0.6 : null">
+        <p-select id="workday" dataKey="id" [formField]="$any(formData.workday)" [options]="workdays()"
+          optionLabel="name" placeholder="Seleccionar" styleClass="w-full">
+        </p-select>
+      </div>
       <small [appErrorMessage]="$any(formData.workday)"></small>
     </div>
 
     <!-- Paralelo -->
     <div class="custom-form-field md:col-span-6">
       <label appLabel for="parallel" label="Paralelo" [field]="formData.parallel"></label>
-      <p-select id="parallel" dataKey="id" [formField]="$any(formData.parallel)" [options]="parallels()"
-        optionLabel="name" placeholder="Seleccionar" styleClass="w-full">
-      </p-select>
+      <div [style.pointer-events]="isReadOnly() ? 'none' : null" [style.opacity]="isReadOnly() ? 0.6 : null">
+        <p-select id="parallel" dataKey="id" [formField]="$any(formData.parallel)" [options]="parallels()"
+          optionLabel="name" placeholder="Seleccionar" styleClass="w-full">
+        </p-select>
+      </div>
       <small [appErrorMessage]="$any(formData.parallel)"></small>
     </div>
 
@@ -88,22 +92,29 @@
     @if (!isNew) {
     <div class="custom-form-field md:col-span-4">
       <label appLabel for="finalGrade" label="Calificación Final (0-10)" [field]="formData.finalGrade"></label>
-      <input pInputText id="finalGrade" [formField]="$any(formData.finalGrade)" type="number" />
+      <div [style.pointer-events]="isReadOnly() ? 'none' : null" [style.opacity]="isReadOnly() ? 0.6 : null">
+        <input pInputText id="finalGrade" [formField]="$any(formData.finalGrade)" type="number" style="width:100%" />
+      </div>
       <small [appErrorMessage]="$any(formData.finalGrade)"></small>
     </div>
 
     <!-- Asistencia -->
     <div class="custom-form-field md:col-span-4">
       <label appLabel for="finalAttendance" label="Asistencia % (0-100)" [field]="formData.finalAttendance"></label>
-      <input pInputText id="finalAttendance" [formField]="$any(formData.finalAttendance)" type="number" />
+      <div [style.pointer-events]="isReadOnly() ? 'none' : null" [style.opacity]="isReadOnly() ? 0.6 : null">
+        <input pInputText id="finalAttendance" [formField]="$any(formData.finalAttendance)" type="number"
+          style="width:100%" />
+      </div>
       <small [appErrorMessage]="$any(formData.finalAttendance)"></small>
     </div>
 
     <div class="custom-form-field md:col-span-4">
       <label appLabel for="academicState" label="Estado Académico" [field]="formData.academicState"></label>
-      <p-select id="academicState" dataKey="id" [formField]="$any(formData.academicState)" [options]="academicStates()"
-        optionLabel="name" placeholder="Seleccionar" styleClass="w-full">
-      </p-select>
+      <div [style.pointer-events]="isReadOnly() ? 'none' : null" [style.opacity]="isReadOnly() ? 0.6 : null">
+        <p-select id="academicState" dataKey="id" [formField]="$any(formData.academicState)"
+          [options]="academicStates()" optionLabel="name" placeholder="Seleccionar" styleClass="w-full">
+        </p-select>
+      </div>
       <small [appErrorMessage]="$any(formData.academicState)"></small>
     </div>
     }
@@ -111,7 +122,9 @@
     <!-- Observación -->
     <div class="custom-form-field md:col-span-12">
       <label appLabel for="observation" label="Observación" [field]="formData.observation"></label>
-      <input pInputText id="observation" [formField]="$any(formData.observation)" />
+      <div [style.pointer-events]="isReadOnly() ? 'none' : null" [style.opacity]="isReadOnly() ? 0.6 : null">
+        <input pInputText id="observation" [formField]="$any(formData.observation)" style="width:100%" />
+      </div>
       <small [appErrorMessage]="$any(formData.observation)"></small>
     </div>
 

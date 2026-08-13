@@ -1,4 +1,4 @@
-import { Component, effect, inject, Input, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, Injector, Input, OnInit, runInInjectionContext, signal } from '@angular/core';
 import { FieldTree, form, FormField, SchemaPathTree } from '@angular/forms/signals';
 
 import { AppService, CatalogueService, CataloguesHttpService, CustomMessageService } from '@utils/services';
@@ -6,7 +6,7 @@ import { FormRegistryService } from '@utils/services/form-registry.service';
 import { CustomIcons } from '@utils/icons/custom-icons';
 
 import { CatalogueInterface, EnrollmentDetailModel, SubjectModel } from '@utils/interfaces';
-import { CatalogueTypeEnum, RoutesEnum } from '@utils/enums';
+import { CatalogueEnrollmentStateEnum, CatalogueTypeEnum, RoutesEnum } from '@utils/enums';
 import { EnrollmentStore } from '../../enrollment.store';
 import { EnrollmentService } from '../../enrollment.service';
 import { EnrollmentDetailStateModel } from '../../enrollment.state';
@@ -34,13 +34,13 @@ const FORM_KEY = 'enrollmentDetailForm';
     templateUrl: './enrollment-detail-form.component.html',
 })
 export class EnrollmentDetailFormComponent implements OnInit {
-    // Recibe parámetros del container — igual que principal-data recibe del career-form
+    // ─── Parámetros recibidos del enrollment-container ─────────────────────────
     @Input() id: string = RoutesEnum.NEW;
-    @Input() enrollmentId = '';
+    @Input() enrollmentId: string = '';
 
     protected readonly enrollmentService = inject(EnrollmentService);
     private readonly cataloguesHttpService = inject(CataloguesHttpService);
-    private readonly catalogueService = inject(CatalogueService);
+    private readonly catalogueService = inject(CatalogueService); // usar cuando haya login real
     private readonly messageService = inject(CustomMessageService);
     private readonly formRegistryService = inject(FormRegistryService);
     protected readonly appService = inject(AppService);
@@ -53,6 +53,16 @@ export class EnrollmentDetailFormComponent implements OnInit {
     protected isFormLoading = signal(false);
     protected enrolledSubjectIds = signal<string[]>([]);
 
+    // ─── Solo lectura si el período está cerrado o la matrícula fue anulada/rechazada.
+    protected readonly isReadOnly = computed(() => {
+        const parentCode = this.store.selectedItem()?.enrollmentState?.state?.code ?? '';
+        const parentNotRevoked = parentCode !== CatalogueEnrollmentStateEnum.REVOKED &&
+            parentCode !== CatalogueEnrollmentStateEnum.REJECTED;
+        const isActivePeriod = this.store.isOpenPeriodSelected();
+        return !(parentNotRevoked && isActivePeriod);
+    });
+
+    // ─── Catálogos para los dropdowns ─────────────────────────────────────────
     protected types = signal<CatalogueInterface[]>([]);
     protected workdays = signal<CatalogueInterface[]>([]);
     protected parallels = signal<CatalogueInterface[]>([]);
@@ -61,40 +71,34 @@ export class EnrollmentDetailFormComponent implements OnInit {
 
     protected readonly form$ = signal<EnrollmentDetailStateModel>(this.store.detailFormSection());
 
-    protected readonly formData: FieldTree<EnrollmentDetailStateModel> =
-        form<EnrollmentDetailStateModel>(
-            this.form$,
-            (schema: SchemaPathTree<EnrollmentDetailStateModel>) =>
-                validateEnrollmentDetailForm(schema, this.isNew)
-        );
+    // ─── formData con runInInjectionContext ────────────────────────────────────
+    private readonly injector = inject(Injector);
+    protected formData!: FieldTree<EnrollmentDetailStateModel>;
 
     constructor() {
-        // Sincroniza form$ → store → sessionStorage
         effect(() => { this.store.updateSection('detailForm', this.form$()); });
-
-        // Recalcular autoNumber cuando cambia la asignatura
-        effect(() => {
-            const selectedSubject = this.form$().subject;
-            if (this.isNew && selectedSubject?.id) {
-                this.enrollmentService.findDetailsByEnrollment(this.enrollmentId)
-                    .subscribe({
-                        next: (details: EnrollmentDetailModel[]) => {
-                            const count = details.filter(d => d.subject?.id === selectedSubject.id).length;
-                            this.store.setAutoNumber(Math.min(count + 1, 3));
-                        }
-                    });
-            }
-        });
     }
 
     ngOnInit(): void {
+
+        this.formData = runInInjectionContext(this.injector, () =>
+            form<EnrollmentDetailStateModel>(
+                this.form$,
+                (schema: SchemaPathTree<EnrollmentDetailStateModel>) =>
+                    validateEnrollmentDetailForm(schema, this.isNew)
+            )
+        );
         this.formRegistryService.register('Datos de Asignatura', FORM_KEY, this.formData, this.form$());
         this.loadCatalogues();
         this.loadSubjects();
         if (!this.isNew) this.loadData();
     }
 
-    // USAR CON LOGIN — reemplazar loadCatalogues por esto:
+    // ─── Catálogos ────────────────────────────────────────────────────────────
+    // TEMPORAL — usa CataloguesHttpService (petición HTTP con caché shareReplay)
+    // porque CatalogueService.findByType() requiere sessionStorage del login real.
+    // Al conectar el backend con login, reemplazar por el bloque comentado:
+    //
     // private loadCatalogues(): void {
     //     this.types.set(this.catalogueService.findByType(CatalogueTypeEnum.enrollment_type));
     //     this.workdays.set(this.catalogueService.findByType(CatalogueTypeEnum.enrollment_workday));
@@ -112,13 +116,13 @@ export class EnrollmentDetailFormComponent implements OnInit {
             .subscribe({ next: v => this.academicStates.set(v as CatalogueInterface[]) });
     }
 
+    // ─── Asignaturas ──────────────────────────────────────────────────────────
     private loadSubjects(): void {
         const cachedCareerId = this.store.selectedItem()?.career?.id;
         if (cachedCareerId) {
             this.loadSubjectsByCareer(cachedCareerId);
             return;
         }
-        // Si no hay selectedItem (recarga de página), reconstruir contexto
         this.enrollmentService.findEnrollment(this.enrollmentId).subscribe({
             next: (enrollment) => {
                 const careerId = enrollment?.career?.id;
@@ -139,13 +143,40 @@ export class EnrollmentDetailFormComponent implements OnInit {
                         this.enrolledSubjectIds.set(
                             details.map(d => d.subject?.id).filter((id): id is string => !!id)
                         );
-                        if (this.isNew) this.store.setAutoNumber(Math.min(details.length + 1, 3));
+                        if (this.isNew) this.store.setAutoNumber(1);
                     }
                 });
             }
         });
     }
+    onSubjectChange(subject: SubjectModel | null): void {
+        if (!subject?.id || !this.isNew) return;
 
+        const studentId = this.store.selectedItem()?.student?.id;
+
+        if (studentId) {
+            this.calculateNumber(studentId, subject.id);
+        } else {
+            // Mismo respaldo que loadSubjects(): si no hay nada en el store (ej.
+            // recarga de página), se busca la matrícula completa primero.
+            this.enrollmentService.findEnrollment(this.enrollmentId).subscribe({
+                next: (enrollment) => {
+                    if (enrollment?.student?.id) {
+                        this.calculateNumber(enrollment.student.id, subject.id);
+                    }
+                }
+            });
+        }
+    }
+
+    private calculateNumber(studentId: string, subjectId: string): void {
+        this.enrollmentService.calculateEnrollmentNumber(studentId, subjectId).subscribe({
+            next: (number) => this.store.setAutoNumber(number)
+        });
+    }
+
+
+    // ─── Carga de datos al editar ─────────────────────────────────────────────
     private loadData(): void {
         this.isFormLoading.set(true);
         this.enrollmentService.findOneDetail(this.id).subscribe({
@@ -159,10 +190,10 @@ export class EnrollmentDetailFormComponent implements OnInit {
                 this.form$.set({
                     subject: d.subject ?? null,
                     type: d.type ?? null,
-                    workday: stored?.workday ?? d.workday ?? null,
-                    parallel: stored?.parallel ?? d.parallel ?? null,
                     number: d.number ?? null,
                     date: d.date ?? null,
+                    workday: stored?.workday ?? d.workday ?? null,
+                    parallel: stored?.parallel ?? d.parallel ?? null,
                     finalGrade: stored?.finalGrade ?? d.finalGrade ?? null,
                     finalAttendance: stored?.finalAttendance ?? d.finalAttendance ?? null,
                     academicState: stored?.academicState ?? d.academicState ?? null,
@@ -176,7 +207,6 @@ export class EnrollmentDetailFormComponent implements OnInit {
             }
         });
     }
-
     isSubjectDisabled(subject: SubjectModel): boolean {
         return this.enrolledSubjectIds().includes(subject.id);
     }

@@ -1,5 +1,5 @@
-import {CatalogueInterface} from './catalogue.interface';
-import {PaginationInterface} from './paginator.interface';
+import { CatalogueInterface } from './catalogue.interface';
+import { PaginationInterface } from './paginator.interface';
 
 export interface UserModel {
     id: string;
@@ -24,7 +24,7 @@ export interface CareerModel {
     name: string;
     code?: string;
     acronym?: string;
-    curriculums?: Array<{id: string; [key: string]: any}>;
+    curriculums?: Array<{ id: string;[key: string]: any }>;
     [key: string]: any;
 }
 
@@ -53,11 +53,8 @@ export interface EnrollmentModel {
     academicPeriod?: CatalogueInterface;
     workday?: CatalogueInterface;
     parallel?: CatalogueInterface;
-    enrollmentState?: {state: CatalogueInterface};
+    enrollmentState?: { state: CatalogueInterface };
     observation?: string;
-    socioeconomicCategory?: string;
-    socioeconomicPercentage?: string | number;
-    socioeconomicScore?: string | number;
     [key: string]: any;
 }
 
@@ -69,7 +66,7 @@ export interface EnrollmentDetailModel {
     type?: CatalogueInterface;
     workday?: CatalogueInterface;
     parallel?: CatalogueInterface;
-    enrollmentDetailState?: {state: CatalogueInterface};
+    enrollmentDetailState?: { state: CatalogueInterface };
     finalGrade?: number | null;
     finalAttendance?: number | null;
     academicState?: CatalogueInterface | null;
