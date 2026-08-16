@@ -80,6 +80,11 @@ export class EnrollmentStore {
         return selected.id === this.openSchoolPeriodId();
     });
 
+    isSchoolPeriodOpen(schoolPeriodId: string | undefined | null): boolean {
+        if (!schoolPeriodId || !this.openSchoolPeriodId()) return true;
+        return schoolPeriodId === this.openSchoolPeriodId();
+    }
+
     // ─── Número automático de matrícula ───────────────────────────────────────
     readonly autoNumber = signal<number>(1);
 

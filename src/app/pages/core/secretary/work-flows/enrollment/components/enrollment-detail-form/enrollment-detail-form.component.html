@@ -85,7 +85,7 @@
     <div class="custom-form-field md:col-span-6">
       <label appLabel label="Fecha de matrícula"></label>
       <input pInputText readonly style="background:var(--surface-hover)"
-        [value]="isNew ? 'Se registrará automáticamente' : (form$().date ?? '')" />
+        [value]="isNew ? 'Se registrará automáticamente' : ((form$().date | date:'dd/MM/yyyy') ?? '')" />
     </div>
 
     <!-- Calificación, Asistencia, Estado Académico — solo al EDITAR -->

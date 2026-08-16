@@ -263,6 +263,7 @@ export class EnrollmentListComponent implements OnInit {
         });
     }
 
+    // FIX: no cerraba el drawer (isButtonActionsEnabled) al ejecutarse
     downloadCertificate(enrollment: EnrollmentModel): void {
         this.isButtonActionsEnabled = false;
         if (enrollment.enrollmentState?.state?.code === CatalogueEnrollmentStateEnum.ENROLLED) {
@@ -300,45 +301,42 @@ export class EnrollmentListComponent implements OnInit {
         const isRejected = code === CatalogueEnrollmentStateEnum.REJECTED;
         const isRevoked = code === CatalogueEnrollmentStateEnum.REVOKED;
 
-        const isActivePeriod = this.store.isOpenPeriodSelected();
+        const isActivePeriod = this.store.isSchoolPeriodOpen(item.schoolPeriod?.id);
 
         const actions: MenuItem[] = [];
 
-        if (isActivePeriod) {
-            // ─── Periodo activo — acciones según estado de la matrícula ──────
-            if (!isRevoked && !isRejected) {
-                actions.push({
-                    label: 'Asignaturas', icon: CustomIcons.BOOK_SOLID,
-                    command: () => {
-                        this.isButtonActionsEnabled = false;
-                        this.goToDetails(item.id);
-                    }
-                });
+        //Asignaturas" siempre visible, sin importar el estado
+        actions.push({
+            label: isActivePeriod ? 'Asignaturas' : 'Ver Asignaturas', icon: CustomIcons.BOOK_SOLID,
+            command: () => {
+                this.isButtonActionsEnabled = false;
+                this.goToDetails(item.id);
             }
+        });
+
+        if (isActivePeriod) {
+            // ─── Periodo activo — cada estado permite avanzar o revertir un paso,
             if (isRegistered || isRequested) {
                 actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => this.reject(item.id) });
             }
             if (isApproved) {
                 actions.push({ label: 'Matricular', icon: CustomIcons.STAR_SOLID, command: () => this.enroll(item.id) });
-            }
-            if (isRegistered || isRequested || isApproved) {
                 actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => this.reject(item.id) });
             }
             if (isEnrolled) {
                 actions.push({ label: 'Descargar Certificado', icon: CustomIcons.DOWNLOAD_SOLID, command: () => this.downloadCertificate(item) });
-            }
-            if (isApproved || isEnrolled) {
                 actions.push({ label: 'Anular Matrícula', icon: CustomIcons.BAN_SOLID, command: () => this.revoke(item.id) });
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+            }
+            if (isRejected) {
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+            }
+            if (isRevoked) {
+                actions.push({ label: 'Matricular', icon: CustomIcons.STAR_SOLID, command: () => this.enroll(item.id) });
             }
         } else {
-            // ─── Periodo histórico — solo consulta ────────────────────────────
-            actions.push({
-                label: 'Ver Asignaturas', icon: CustomIcons.BOOK_SOLID,
-                command: () => {
-                    this.isButtonActionsEnabled = false;
-                    this.goToDetails(item.id);
-                }
-            });
+            // ─── Periodo histórico — solo consulta, certificado si terminó matriculado ──
             if (isEnrolled) {
                 actions.push({
                     label: 'Descargar Certificado', icon: CustomIcons.DOWNLOAD_SOLID,

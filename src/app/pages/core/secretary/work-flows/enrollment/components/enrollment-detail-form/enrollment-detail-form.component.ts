@@ -58,7 +58,7 @@ export class EnrollmentDetailFormComponent implements OnInit {
         const parentCode = this.store.selectedItem()?.enrollmentState?.state?.code ?? '';
         const parentNotRevoked = parentCode !== CatalogueEnrollmentStateEnum.REVOKED &&
             parentCode !== CatalogueEnrollmentStateEnum.REJECTED;
-        const isActivePeriod = this.store.isOpenPeriodSelected();
+        const isActivePeriod = this.store.isSchoolPeriodOpen(this.store.selectedItem()?.schoolPeriod?.id);
         return !(parentNotRevoked && isActivePeriod);
     });
 

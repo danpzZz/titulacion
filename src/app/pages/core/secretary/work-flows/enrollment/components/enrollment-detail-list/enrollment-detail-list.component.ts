@@ -54,9 +54,8 @@ export class EnrollmentDetailListComponent implements OnInit {
     protected isLoading = signal(false);
 
     protected canModify = signal(true);
+    protected isRevokedOrRejected = signal(false);
 
-    // una matrícula solo puede tener una asignatura
-    // "activa" (no anulada/rechazada) a la vez. 
     protected readonly hasActiveSubject = computed(() =>
         this.items().some((item) => {
             const code = item.enrollmentDetailState?.state?.code ?? '';
@@ -75,9 +74,10 @@ export class EnrollmentDetailListComponent implements OnInit {
             parentCode !== CatalogueEnrollmentStateEnum.REJECTED;
 
         // Periodos históricos son de solo lectura —
-        const isActivePeriod = this.store.isOpenPeriodSelected();
+        const isActivePeriod = this.store.isSchoolPeriodOpen(this.store.selectedItem()?.schoolPeriod?.id);
 
         this.canModify.set(parentNotRevoked && isActivePeriod);
+        this.isRevokedOrRejected.set(!parentNotRevoked);
 
         this.loadDetails();
     }
@@ -94,7 +94,7 @@ export class EnrollmentDetailListComponent implements OnInit {
         });
     }
 
-    // ─── Acciones de cambio de estado ─────────────────────────────────────────
+    // ─── Acciones de cambio de estado ────────────────────────────────────────
 
     enroll(id: string): void {
         this.enrollmentService.enrollDetail(id).subscribe({
@@ -180,8 +180,6 @@ export class EnrollmentDetailListComponent implements OnInit {
         const actions: MenuItem[] = [];
         actions.push({
             ...editButtonAction,
-            // Si el período está cerrado (o la matrícula fue anulada/rechazada), este
-            // botón sigue llevando al formulario, pero solo para consultar 
             label: this.canModify() ? editButtonAction.label : 'Ver',
             command: () => {
                 this.isButtonActionsEnabled = false;
@@ -189,19 +187,25 @@ export class EnrollmentDetailListComponent implements OnInit {
             }
         });
 
-        // Las demás acciones solo si el periodo es activo y la matrícula no está anulada
+        // estado revertible
         if (this.canModify()) {
             if (isRegistered || isRequested) {
                 actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => this.reject(item.id) });
             }
             if (isApproved) {
                 actions.push({ label: 'Matricular', icon: CustomIcons.BOOK_SOLID, command: () => this.enroll(item.id) });
-            }
-            if (isRegistered || isRequested || isApproved) {
                 actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => this.reject(item.id) });
             }
-            if (isApproved || isEnrolled) {
+            if (isEnrolled) {
                 actions.push({ label: 'Anular', icon: CustomIcons.BAN_SOLID, command: () => this.revoke(item.id) });
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+            }
+            if (isRejected) {
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+            }
+            if (isRevoked) {
+                actions.push({ label: 'Matricular', icon: CustomIcons.BOOK_SOLID, command: () => this.enroll(item.id) });
             }
             if (isRegistered || isRejected || isRevoked) {
                 actions.push({ label: 'Eliminar', icon: CustomIcons.TRASH_CAN_SOLID, command: () => this.remove(item.id) });

@@ -13,10 +13,10 @@
 
     @if (!canModify()) {
     <div class="custom-form-field md:col-span-12">
-      @if (!store.isOpenPeriodSelected()) {
-      <p-tag value="Periodo histórico — solo lectura" severity="warn"></p-tag>
-      } @else {
+      @if (isRevokedOrRejected()) {
       <p-tag value="Matrícula anulada o rechazada — solo lectura" severity="danger"></p-tag>
+      } @else {
+      <p-tag value="Periodo histórico — solo lectura" severity="warn"></p-tag>
       }
     </div>
     }
@@ -37,7 +37,8 @@
   <ng-template pTemplate="header">
     <tr>
       <th pSortableColumn="subject.academicPeriod.name" style="text-align:center; white-space:nowrap">Periodo Académico
-        <p-sortIcon field="subject.academicPeriod.name"></p-sortIcon></th>
+        <p-sortIcon field="subject.academicPeriod.name"></p-sortIcon>
+      </th>
       <th pSortableColumn="subject.name" style="text-align:center; white-space:nowrap">Asignatura <p-sortIcon
           field="subject.name"></p-sortIcon></th>
       <th pSortableColumn="number" style="text-align:center; white-space:nowrap">Nº Matrícula <p-sortIcon
@@ -49,13 +50,15 @@
       <th pSortableColumn="type.name" style="text-align:center; white-space:nowrap">Tipo <p-sortIcon
           field="type.name"></p-sortIcon></th>
       <th pSortableColumn="enrollmentDetailState.state.name" style="text-align:center; white-space:nowrap">Estado
-        <p-sortIcon field="enrollmentDetailState.state.name"></p-sortIcon></th>
+        <p-sortIcon field="enrollmentDetailState.state.name"></p-sortIcon>
+      </th>
       <th pSortableColumn="finalGrade" style="text-align:center; white-space:nowrap">Calificación <p-sortIcon
           field="finalGrade"></p-sortIcon></th>
       <th pSortableColumn="finalAttendance" style="text-align:center; white-space:nowrap">Asistencia <p-sortIcon
           field="finalAttendance"></p-sortIcon></th>
       <th pSortableColumn="academicState.name" style="text-align:center; white-space:nowrap">Estado Académico
-        <p-sortIcon field="academicState.name"></p-sortIcon></th>
+        <p-sortIcon field="academicState.name"></p-sortIcon>
+      </th>
       <th style="text-align:center">Acciones</th>
     </tr>
   </ng-template>
