@@ -12,6 +12,12 @@ import { EnrollmentDetailModel } from '@utils/interfaces';
 import { EnrollmentStore } from '../../enrollment.store';
 import { EnrollmentService } from '../../enrollment.service';
 import { EnrollmentDetailFormComponent } from '../enrollment-detail-form/enrollment-detail-form.component';
+import {
+    ACADEMIC_STATE_APPROVED_CODES,
+    ACADEMIC_STATE_FAILED_CODES,
+    MIN_APPROVING_GRADE,
+    MIN_APPROVING_ATTENDANCE,
+} from '../enrollment-detail-form/enrollment-detail-form.validation';
 
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
@@ -23,7 +29,6 @@ import { CommonModule } from '@angular/common';
     templateUrl: './enrollment-container.component.html',
 })
 export class EnrollmentContainerComponent implements OnInit, OnDestroy {
-    // ─── Parámetros de ruta via input.required ─────────────────────────────────
     public id = input.required<string>();
     public enrollmentId = input.required<string>();
 
@@ -38,8 +43,6 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
 
     protected isNew = computed(() => this.id() === RoutesEnum.NEW);
 
-    // ─── Solo lectura si el período está cerrado o la matrícula fue anulada/
-    // rechazada.
     protected readonly isReadOnly = computed(() => {
         const parentCode = this.store.selectedItem()?.enrollmentState?.state?.code ?? '';
         const parentNotRevoked = parentCode !== CatalogueEnrollmentStateEnum.REVOKED &&
@@ -98,6 +101,31 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
                     return;
                 }
             }
+
+            // ─── Validación cruzada: estado académico vs nota/asistencia ────────
+            const academicCode = s.academicState?.code ?? '';
+            const isMarkedApproved = ACADEMIC_STATE_APPROVED_CODES.includes(academicCode);
+            const isMarkedFailed = ACADEMIC_STATE_FAILED_CODES.includes(academicCode);
+
+            if (isMarkedApproved && s.finalGrade !== null && s.finalAttendance !== null) {
+                if (s.finalGrade < MIN_APPROVING_GRADE || s.finalAttendance < MIN_APPROVING_ATTENDANCE) {
+                    this.messageService.showError({
+                        summary: 'Estado académico inconsistente',
+                        detail: `No puede marcar "Aprobado" con una calificación menor a ${MIN_APPROVING_GRADE} o asistencia menor al ${MIN_APPROVING_ATTENDANCE}%`
+                    });
+                    return;
+                }
+            }
+
+            if (isMarkedFailed && s.finalGrade !== null && s.finalAttendance !== null) {
+                if (s.finalGrade >= MIN_APPROVING_GRADE && s.finalAttendance >= MIN_APPROVING_ATTENDANCE) {
+                    this.messageService.showError({
+                        summary: 'Estado académico inconsistente',
+                        detail: `No puede marcar "Reprobado" con una calificación y asistencia que cumplen el mínimo para aprobar`
+                    });
+                    return;
+                }
+            }
         }
 
         // ─── Validaciones de SignalForms (required, min, max del formulario) ───
@@ -109,7 +137,6 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
         const payload = this.store.detailFormSection() as unknown as Partial<EnrollmentDetailModel>;
 
         if (this.isNew()) {
-            // Crear — agrega enrollmentId, fecha actual y número automático
             const newPayload = {
                 ...payload,
                 enrollmentId: this.enrollmentId(),
@@ -118,7 +145,6 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
             };
             this.enrollmentService.createDetail(newPayload).subscribe({
                 next: created => {
-
                     this.enrollmentService.sendDetailRequest(created.id, newPayload).subscribe({
                         next: () => {
                             this.store.resetDetailForm();

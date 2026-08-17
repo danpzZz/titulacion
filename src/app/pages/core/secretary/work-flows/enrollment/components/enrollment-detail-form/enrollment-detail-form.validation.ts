@@ -1,6 +1,14 @@
 import { required, min, max, SchemaPathTree } from '@angular/forms/signals';
 import { EnrollmentDetailStateModel } from '../../enrollment.state';
 
+// ─── Umbral de aprobación ───────────────────────────────────────────────────
+export const MIN_APPROVING_GRADE = 7;
+export const MIN_APPROVING_ATTENDANCE = 70;
+
+// Códigos del catálogo "Estado Académico" que representan aprobado/reprobado
+export const ACADEMIC_STATE_APPROVED_CODES = ['a', 'approved'];
+export const ACADEMIC_STATE_FAILED_CODES = ['r', 'failed'];
+
 // ─── Validaciones del formulario de asignatura ────────────────────────────────
 export function validateEnrollmentDetailForm(
     schema: SchemaPathTree<EnrollmentDetailStateModel>,
