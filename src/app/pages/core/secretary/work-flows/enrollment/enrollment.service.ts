@@ -51,10 +51,14 @@ export class EnrollmentService {
 
     // ─── Enrollments ──────────────────────────────────────────────────────────
     // Consultas
+    // FIX: el parámetro se llamaba academicPeriodId — el backend ya espera
+    // subjectId (el filtro pasó a ser por asignatura real, no por el catálogo
+    // académico genérico). El nombre no coincidía y el backend nunca aplicaba
+    // el filtro nuevo.
     findEnrollmentsByCareer(
         careerId: string,
         schoolPeriodId: string,
-        academicPeriodId?: string,
+        subjectId?: string,
         enrollmentStateId?: string,
         page: number = 0,
         search: string = ''
@@ -64,7 +68,7 @@ export class EnrollmentService {
             .set('page', page)
             .set('search', search);
 
-        if (academicPeriodId) params = params.set('academicPeriodId', academicPeriodId);
+        if (subjectId) params = params.set('subjectId', subjectId);
         if (enrollmentStateId) params = params.set('enrollmentStateId', enrollmentStateId);
 
         return this.http.get<HttpResponseModel<EnrollmentModel[]>>(

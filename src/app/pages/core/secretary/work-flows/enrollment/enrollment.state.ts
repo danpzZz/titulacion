@@ -1,5 +1,5 @@
 import { CatalogueInterface } from '@utils/interfaces';
-import { CareerModel, SchoolPeriodModel } from '@utils/interfaces';
+import { CareerModel, SchoolPeriodModel, SubjectModel } from '@utils/interfaces';
 
 // ─── Enrollment — forma del formulario principal de matrícula ─────────────────
 // Define los campos que se pueden editar en el formulario de matrícula.
@@ -88,11 +88,14 @@ export const ENROLLMENT_DETAIL_INITIAL_STATE: EnrollmentDetailStateModel = {
 };
 
 // ─── Filters — filtros de la lista de matrículas ──────────────────────────────
+// FIX: academicPeriod → subject. El filtro de nivel pasó a mostrar/filtrar por la
+// asignatura real (core.subjects) de la carrera, en vez del catálogo académico
+// genérico (que llegaba hasta "Décimo" aunque YEC solo tenga 4 niveles).
 
 export interface EnrollmentFiltersState {
     schoolPeriod: SchoolPeriodModel | null;
     career: CareerModel | null;
-    academicPeriod: CatalogueInterface | null;
+    subject: SubjectModel | null;
     enrollmentState: CatalogueInterface | null;
     search: string;
 }
@@ -101,7 +104,7 @@ export interface EnrollmentFiltersState {
 export const ENROLLMENT_FILTERS_INITIAL_STATE: EnrollmentFiltersState = {
     schoolPeriod: null,
     career: null,
-    academicPeriod: null,
+    subject: null,
     enrollmentState: null,
     search: '',
 };

@@ -40,9 +40,10 @@ export class EnrollmentStore {
     );
 
     // Accesos directos para el HTML
+    // Accesos directos para el HTML
     readonly selectedSchoolPeriod = computed(() => this.filters().schoolPeriod);
     readonly selectedCareer = computed(() => this.filters().career);
-    readonly selectedAcademicPeriod = computed(() => this.filters().academicPeriod);
+    readonly selectedSubject = computed(() => this.filters().subject);
     readonly selectedEnrollmentState = computed(() => this.filters().enrollmentState);
     readonly search = computed(() => this.filters().search);
 

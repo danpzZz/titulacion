@@ -55,6 +55,8 @@ export interface EnrollmentModel {
     parallel?: CatalogueInterface;
     enrollmentState?: { state: CatalogueInterface };
     observation?: string;
+    enrollmentDetails?: EnrollmentDetailModel[];
+
     [key: string]: any;
 }
 
