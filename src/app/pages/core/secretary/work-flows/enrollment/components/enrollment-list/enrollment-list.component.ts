@@ -132,15 +132,6 @@ export class EnrollmentListComponent implements OnInit {
                         }
                     }
                 });
-            },
-            error: () => {
-                // TEMPORAL: el endpoint /core/shared/school-periods aún no existe.
-                // Se fuerza el periodo real de pruebas para poder probar el flujo.
-                // Quitar cuando el backend implemente el endpoint.
-                this.store.updateFilter('schoolPeriod', {
-                    id: '64712a47-6566-4ec2-a3bc-8f82a3720d65',
-                    name: 'JULIO 2026 - SEPTIEMBRE 2026',
-                } as SchoolPeriodModel);
             }
         });
     }

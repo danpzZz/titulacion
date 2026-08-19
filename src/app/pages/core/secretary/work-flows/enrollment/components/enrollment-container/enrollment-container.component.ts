@@ -144,13 +144,9 @@ export class EnrollmentContainerComponent implements OnInit, OnDestroy {
                 number: this.store.autoNumber(),
             };
             this.enrollmentService.createDetail(newPayload).subscribe({
-                next: created => {
-                    this.enrollmentService.sendDetailRequest(created.id, newPayload).subscribe({
-                        next: () => {
-                            this.store.resetDetailForm();
-                            this.back();
-                        }
-                    });
+                next: () => {
+                    this.store.resetDetailForm();
+                    this.back();
                 }
             });
         } else {

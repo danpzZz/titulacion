@@ -54,8 +54,12 @@ export class EnrollmentDetailListComponent implements OnInit {
     protected isLoading = signal(false);
 
     protected canModify = signal(true);
+    // Expone el motivo real de solo lectura, para que el mensaje del HTML no repita
+    // (ni pueda desincronizarse de) la misma lógica que ya calcula canModify.
     protected isRevokedOrRejected = signal(false);
 
+    // una matrícula solo puede tener una asignatura
+    // "activa" (no anulada/rechazada) a la vez
     protected readonly hasActiveSubject = computed(() =>
         this.items().some((item) => {
             const code = item.enrollmentDetailState?.state?.code ?? '';
@@ -94,12 +98,18 @@ export class EnrollmentDetailListComponent implements OnInit {
         });
     }
 
-    // ─── Acciones de cambio de estado ────────────────────────────────────────
+    private cleanupStuckOverlay(): void {
+        setTimeout(() => {
+            document.querySelectorAll('.p-overlay-mask-leave-active, .p-drawer-mask')
+                .forEach(el => el.remove());
+        }, 300);
+    }
 
     enroll(id: string): void {
         this.enrollmentService.enrollDetail(id).subscribe({
             next: () => {
                 this.isButtonActionsEnabled = false;
+                this.cleanupStuckOverlay();
                 this.loadDetails();
             }
         });
@@ -108,6 +118,7 @@ export class EnrollmentDetailListComponent implements OnInit {
         this.enrollmentService.approveDetail(id).subscribe({
             next: () => {
                 this.isButtonActionsEnabled = false;
+                this.cleanupStuckOverlay();
                 this.loadDetails();
             }
         });
@@ -187,7 +198,8 @@ export class EnrollmentDetailListComponent implements OnInit {
             }
         });
 
-        // estado revertible
+        // Cada estado permite avanzar o revertir un paso, igual que a nivel de
+        // matrícula — nada queda sin ninguna acción disponible.
         if (this.canModify()) {
             if (isRegistered || isRequested) {
                 actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
