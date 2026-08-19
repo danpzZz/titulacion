@@ -149,7 +149,7 @@ export class EnrollmentListComponent implements OnInit {
         });
     }
 
-    // Asignaturas de la carrera — llenan el filtro "Todas las Asignaturas" 
+    // Asignaturas de la carrera — llenan el filtro "Todas las Asignaturas"
     private loadSubjects(careerId: string): void {
         this.enrollmentService.findSubjectsByCareer(careerId).subscribe({
             next: (list: SubjectModel[]) => this.subjects.set(list)
@@ -200,10 +200,18 @@ export class EnrollmentListComponent implements OnInit {
 
     // ─── Acciones de cambio de estado ─────────────────────────────────────────
 
+    private cleanupStuckOverlay(): void {
+        setTimeout(() => {
+            document.querySelectorAll('.p-overlay-mask-leave-active, .p-drawer-mask')
+                .forEach(el => el.remove());
+        }, 300);
+    }
+
     enroll(id: string): void {
         this.enrollmentService.enroll(id).subscribe({
             next: () => {
                 this.isButtonActionsEnabled = false;
+                this.cleanupStuckOverlay();
                 this.findEnrollments();
             }
         });
@@ -213,6 +221,7 @@ export class EnrollmentListComponent implements OnInit {
         this.enrollmentService.approve(id).subscribe({
             next: () => {
                 this.isButtonActionsEnabled = false;
+                this.cleanupStuckOverlay();
                 this.findEnrollments();
             }
         });
@@ -297,7 +306,7 @@ export class EnrollmentListComponent implements OnInit {
 
         const actions: MenuItem[] = [];
 
-        // Asignaturas siempre visible, sin importar el estado 
+        // Asignaturas siempre visible, sin importar el estado
         actions.push({
             label: isActivePeriod ? 'Asignaturas' : 'Ver Asignaturas', icon: CustomIcons.BOOK_SOLID,
             command: () => {
@@ -347,7 +356,7 @@ export class EnrollmentListComponent implements OnInit {
         this.router.navigateByUrl(SECRETARY_ROUTES.enrollment.detail.absoluteFn(enrollmentId));
     }
 
-    // Muestra todos los códigos de asignatura de la matrícula. 
+    // Muestra todos los códigos de asignatura de la matrícula.
     protected getSubjectCodes(row: EnrollmentModel): string {
         const codes = (row.enrollmentDetails ?? [])
             .map(d => d.subject?.code)
