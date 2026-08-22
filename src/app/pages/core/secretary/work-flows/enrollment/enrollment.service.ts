@@ -51,10 +51,6 @@ export class EnrollmentService {
 
     // ─── Enrollments ──────────────────────────────────────────────────────────
     // Consultas
-    // FIX: el parámetro se llamaba academicPeriodId — el backend ya espera
-    // subjectId (el filtro pasó a ser por asignatura real, no por el catálogo
-    // académico genérico). El nombre no coincidía y el backend nunca aplicaba
-    // el filtro nuevo.
     findEnrollmentsByCareer(
         careerId: string,
         schoolPeriodId: string,
@@ -218,6 +214,13 @@ export class EnrollmentService {
             .pipe(map(r => r.data));
     }
 
+    // nivel que le corresponde tomar al estudiante según su historial en la carrera 
+    findRequiredAcademicPeriod(studentId: string, careerId: string): Observable<string | null> {
+        return this.http
+            .get<HttpResponseModel<string | null>>(`${this.apiUrlEnrollments}/required-academic-period/${studentId}/${careerId}`)
+            .pipe(map(r => r.data));
+    }
+
 
     // ─── Helper ───────────────────────────────────────────────────────────────
     private triggerDownload(blob: Blob, filename: string): void {
@@ -227,9 +230,5 @@ export class EnrollmentService {
         a.download = filename;
         a.click();
         window.URL.revokeObjectURL(url);
-        setTimeout(() => {
-            document.querySelectorAll('.p-overlay-mask-leave-active, .p-drawer-mask')
-                .forEach(el => el.remove());
-        }, 300);
     }
 }

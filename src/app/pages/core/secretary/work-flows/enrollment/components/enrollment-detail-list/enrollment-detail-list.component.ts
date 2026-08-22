@@ -98,18 +98,24 @@ export class EnrollmentDetailListComponent implements OnInit {
         });
     }
 
-    private cleanupStuckOverlay(): void {
+    // ─── Fix drawer que queda "abierto" tras cambiar de estado ────────────────
+    // Mismo fix que en enrollment-list: se limpia el mask huérfano manualmente,
+    // pero solo si se confirma que el panel del drawer (.p-drawer) ya no está
+    // en el DOM — evita interferir con un drawer que sigue realmente abierto.
+    private closeDrawer(): void {
+        this.isButtonActionsEnabled = false;
         setTimeout(() => {
-            document.querySelectorAll('.p-overlay-mask-leave-active, .p-drawer-mask')
-                .forEach(el => el.remove());
-        }, 300);
+            const panelStillOpen = document.querySelector('.p-drawer');
+            if (!panelStillOpen) {
+                document.querySelectorAll('.p-drawer-mask, .p-overlay-mask').forEach(el => el.remove());
+                document.body.style.overflow = '';
+                document.body.classList.remove('p-overflow-hidden');
+            }
+        }, 350);
     }
-
     enroll(id: string): void {
         this.enrollmentService.enrollDetail(id).subscribe({
             next: () => {
-                this.isButtonActionsEnabled = false;
-                this.cleanupStuckOverlay();
                 this.loadDetails();
             }
         });
@@ -117,8 +123,6 @@ export class EnrollmentDetailListComponent implements OnInit {
     approve(id: string): void {
         this.enrollmentService.approveDetail(id).subscribe({
             next: () => {
-                this.isButtonActionsEnabled = false;
-                this.cleanupStuckOverlay();
                 this.loadDetails();
             }
         });
@@ -134,7 +138,6 @@ export class EnrollmentDetailListComponent implements OnInit {
             accept: () => {
                 this.enrollmentService.rejectDetail(id).subscribe({
                     next: () => {
-                        this.isButtonActionsEnabled = false;
                         this.loadDetails();
                     }
                 });
@@ -152,7 +155,6 @@ export class EnrollmentDetailListComponent implements OnInit {
             accept: () => {
                 this.enrollmentService.revokeDetail(id).subscribe({
                     next: () => {
-                        this.isButtonActionsEnabled = false;
                         this.loadDetails();
                     }
                 });
@@ -170,7 +172,6 @@ export class EnrollmentDetailListComponent implements OnInit {
             accept: () => {
                 this.enrollmentService.removeDetail(id).subscribe({
                     next: () => {
-                        this.isButtonActionsEnabled = false;
                         this.items.update(items => items.filter(i => i.id !== id));
                     }
                 });
@@ -193,8 +194,8 @@ export class EnrollmentDetailListComponent implements OnInit {
             ...editButtonAction,
             label: this.canModify() ? editButtonAction.label : 'Ver',
             command: () => {
-                this.isButtonActionsEnabled = false;
-                setTimeout(() => this.goToEdit(item.id), 300);
+                this.closeDrawer();
+                this.goToEdit(item.id);
             }
         });
 
@@ -202,25 +203,25 @@ export class EnrollmentDetailListComponent implements OnInit {
         // matrícula — nada queda sin ninguna acción disponible.
         if (this.canModify()) {
             if (isRegistered || isRequested) {
-                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
-                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => this.reject(item.id) });
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => { this.closeDrawer(); this.approve(item.id); } });
+                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => { this.closeDrawer(); this.reject(item.id); } });
             }
             if (isApproved) {
-                actions.push({ label: 'Matricular', icon: CustomIcons.BOOK_SOLID, command: () => this.enroll(item.id) });
-                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => this.reject(item.id) });
+                actions.push({ label: 'Matricular', icon: CustomIcons.BOOK_SOLID, command: () => { this.closeDrawer(); this.enroll(item.id); } });
+                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => { this.closeDrawer(); this.reject(item.id); } });
             }
             if (isEnrolled) {
-                actions.push({ label: 'Anular', icon: CustomIcons.BAN_SOLID, command: () => this.revoke(item.id) });
-                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+                actions.push({ label: 'Anular', icon: CustomIcons.BAN_SOLID, command: () => { this.closeDrawer(); this.revoke(item.id); } });
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => { this.closeDrawer(); this.approve(item.id); } });
             }
             if (isRejected) {
-                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => { this.closeDrawer(); this.approve(item.id); } });
             }
             if (isRevoked) {
-                actions.push({ label: 'Matricular', icon: CustomIcons.BOOK_SOLID, command: () => this.enroll(item.id) });
+                actions.push({ label: 'Matricular', icon: CustomIcons.BOOK_SOLID, command: () => { this.closeDrawer(); this.enroll(item.id); } });
             }
             if (isRegistered || isRejected || isRevoked) {
-                actions.push({ label: 'Eliminar', icon: CustomIcons.TRASH_CAN_SOLID, command: () => this.remove(item.id) });
+                actions.push({ label: 'Eliminar', icon: CustomIcons.TRASH_CAN_SOLID, command: () => { this.closeDrawer(); this.remove(item.id); } });
             }
         }
 

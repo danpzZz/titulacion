@@ -12,7 +12,7 @@ import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient, withInterceptors, withNoXsrfProtection } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors, withNoXsrfProtection } from '@angular/common/http';
 import { HttpInterceptorProviders } from '@utils/interceptors';
 import { mockInterceptor } from '@utils/interceptors/mock.interceptor';
 
@@ -26,8 +26,7 @@ export const appConfig: ApplicationConfig = {
             withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),
             withEnabledBlockingInitialNavigation()
         ),
-        provideHttpClient(withNoXsrfProtection(), withInterceptors([...HttpInterceptorProviders])),
-        provideAnimations(),
+        provideHttpClient(withFetch(), withNoXsrfProtection(), withInterceptors([...HttpInterceptorProviders])), provideAnimations(),
         provideZonelessChangeDetection(),
         providePrimeNG({ theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } } }),
         { provide: LOCALE_ID, useValue: 'es' },

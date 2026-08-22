@@ -53,6 +53,9 @@ export class EnrollmentDetailFormComponent implements OnInit {
     protected isFormLoading = signal(false);
     protected enrolledSubjectIds = signal<string[]>([]);
 
+    // solo se puede seleccionar el nivel que le corresponde al estudiante
+    protected requiredAcademicPeriod = signal<string | null>(null);
+
     // ─── Solo lectura si el período está cerrado o la matrícula fue anulada/rechazada.
     protected readonly isReadOnly = computed(() => {
         const parentCode = this.store.selectedItem()?.enrollmentState?.state?.code ?? '';
@@ -118,37 +121,48 @@ export class EnrollmentDetailFormComponent implements OnInit {
 
     // ─── Asignaturas ──────────────────────────────────────────────────────────
     private loadSubjects(): void {
-        const cachedCareerId = this.store.selectedItem()?.career?.id;
-        if (cachedCareerId) {
-            this.loadSubjectsByCareer(cachedCareerId);
+        const cachedItem = this.store.selectedItem();
+        const cachedCareerId = cachedItem?.career?.id;
+        const cachedStudentId = cachedItem?.student?.id;
+
+        if (cachedCareerId && cachedStudentId) {
+            this.loadSubjectsByCareer(cachedCareerId, cachedStudentId);
             return;
         }
         this.enrollmentService.findEnrollment(this.enrollmentId).subscribe({
             next: (enrollment) => {
                 const careerId = enrollment?.career?.id;
-                if (careerId) {
+                const studentId = enrollment?.student?.id;
+                if (careerId && studentId) {
                     this.store.selectItem(enrollment);
-                    this.loadSubjectsByCareer(careerId);
+                    this.loadSubjectsByCareer(careerId, studentId);
                 }
             }
         });
     }
 
-    private loadSubjectsByCareer(careerId: string): void {
-        this.enrollmentService.findSubjectsByCareer(careerId).subscribe({
-            next: (items: SubjectModel[]) => {
-                this.subjects.set(items);
-                this.enrollmentService.findDetailsByEnrollment(this.enrollmentId).subscribe({
-                    next: (details: EnrollmentDetailModel[]) => {
-                        this.enrolledSubjectIds.set(
-                            details.map(d => d.subject?.id).filter((id): id is string => !!id)
-                        );
-                        if (this.isNew) this.store.setAutoNumber(1);
+    private loadSubjectsByCareer(careerId: string, studentId: string): void {
+        this.enrollmentService.findRequiredAcademicPeriod(studentId, careerId).subscribe({
+            next: (level) => {
+                this.requiredAcademicPeriod.set(level);
+
+                this.enrollmentService.findSubjectsByCareer(careerId).subscribe({
+                    next: (items: SubjectModel[]) => {
+                        this.subjects.set(items);
+                        this.enrollmentService.findDetailsByEnrollment(this.enrollmentId).subscribe({
+                            next: (details: EnrollmentDetailModel[]) => {
+                                this.enrolledSubjectIds.set(
+                                    details.map(d => d.subject?.id).filter((id): id is string => !!id)
+                                );
+                                if (this.isNew) this.store.setAutoNumber(1);
+                            }
+                        });
                     }
                 });
             }
         });
     }
+
     onSubjectChange(subject: SubjectModel | null): void {
         if (!subject?.id || !this.isNew) return;
 
@@ -207,7 +221,14 @@ export class EnrollmentDetailFormComponent implements OnInit {
             }
         });
     }
+
+    // revisa que sea el nivel que le corresponde al estudiante según su historial 
     isSubjectDisabled(subject: SubjectModel): boolean {
-        return this.enrolledSubjectIds().includes(subject.id);
+        if (this.enrolledSubjectIds().includes(subject.id)) return true;
+
+        const required = this.requiredAcademicPeriod();
+        if (required === null) return false;
+
+        return subject.academicPeriod?.code !== required;
     }
 }

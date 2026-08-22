@@ -21,10 +21,12 @@
           }
         </ng-template>
         <ng-template pTemplate="item" let-item>
-          <span [style.opacity]="enrolledSubjectIds().includes(item.id) ? '0.4' : '1'">
+          <span [style.opacity]="isSubjectDisabled(item) ? '0.4' : '1'">
             {{ item.code }} - {{ item.name }} ({{ item.academicPeriod?.name }})
             @if (enrolledSubjectIds().includes(item.id)) {
             <small style="color:var(--p-red-400)"> — ya matriculada</small>
+            } @else if (isSubjectDisabled(item)) {
+            <small style="color:var(--p-orange-400)"> — no es tu nivel actual</small>
             }
           </span>
         </ng-template>

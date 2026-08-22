@@ -73,19 +73,16 @@ export class EnrollmentListComponent implements OnInit {
     protected readonly moreActions: MenuItem[] = [
         {
             label: 'Matriculados por Carrera', icon: CustomIcons.DOWNLOAD_SOLID, command: () => {
-                this.isMoreActionsEnabled = false;
                 this.downloadByCareer();
             }
         },
         {
             label: 'Matriculados por Periodo', icon: CustomIcons.DOWNLOAD_SOLID, command: () => {
-                this.isMoreActionsEnabled = false;
                 this.downloadBySchoolPeriod();
             }
         },
         {
             label: 'Asignaturas por Periodo', icon: CustomIcons.DOWNLOAD_SOLID, command: () => {
-                this.isMoreActionsEnabled = false;
                 this.downloadDetailsBySchoolPeriod();
             }
         },
@@ -116,6 +113,19 @@ export class EnrollmentListComponent implements OnInit {
     }
     protected onSearchInput(event: Event): void {
         this.search.set((event.target as HTMLInputElement).value);
+    }
+
+    // ─── Fix drawer que queda "abierto" tras cambiar de estado o descargar ────
+    private closeDrawer(): void {
+        this.isButtonActionsEnabled = false;
+        setTimeout(() => {
+            const panelStillOpen = document.querySelector('.p-drawer');
+            if (!panelStillOpen) {
+                document.querySelectorAll('.p-drawer-mask, .p-overlay-mask').forEach(el => el.remove());
+                document.body.style.overflow = '';
+                document.body.classList.remove('p-overflow-hidden');
+            }
+        }, 350);
     }
 
     // ─── Carga inicial de datos ───────────────────────────────────────────────
@@ -199,19 +209,9 @@ export class EnrollmentListComponent implements OnInit {
     }
 
     // ─── Acciones de cambio de estado ─────────────────────────────────────────
-
-    private cleanupStuckOverlay(): void {
-        setTimeout(() => {
-            document.querySelectorAll('.p-overlay-mask-leave-active, .p-drawer-mask')
-                .forEach(el => el.remove());
-        }, 300);
-    }
-
     enroll(id: string): void {
         this.enrollmentService.enroll(id).subscribe({
             next: () => {
-                this.isButtonActionsEnabled = false;
-                this.cleanupStuckOverlay();
                 this.findEnrollments();
             }
         });
@@ -220,8 +220,6 @@ export class EnrollmentListComponent implements OnInit {
     approve(id: string): void {
         this.enrollmentService.approve(id).subscribe({
             next: () => {
-                this.isButtonActionsEnabled = false;
-                this.cleanupStuckOverlay();
                 this.findEnrollments();
             }
         });
@@ -238,7 +236,6 @@ export class EnrollmentListComponent implements OnInit {
             accept: () => {
                 this.enrollmentService.reject(id).subscribe({
                     next: () => {
-                        this.isButtonActionsEnabled = false;
                         this.findEnrollments();
                     }
                 });
@@ -257,7 +254,6 @@ export class EnrollmentListComponent implements OnInit {
             accept: () => {
                 this.enrollmentService.revoke(id).subscribe({
                     next: () => {
-                        this.isButtonActionsEnabled = false;
                         this.findEnrollments();
                     }
                 });
@@ -266,7 +262,6 @@ export class EnrollmentListComponent implements OnInit {
     }
 
     downloadCertificate(enrollment: EnrollmentModel): void {
-        this.isButtonActionsEnabled = false;
         if (enrollment.enrollmentState?.state?.code === CatalogueEnrollmentStateEnum.ENROLLED) {
             this.enrollmentService.downloadEnrollmentCertificate(enrollment.id, enrollment.student.user.identification);
         } else {
@@ -310,7 +305,7 @@ export class EnrollmentListComponent implements OnInit {
         actions.push({
             label: isActivePeriod ? 'Asignaturas' : 'Ver Asignaturas', icon: CustomIcons.BOOK_SOLID,
             command: () => {
-                this.isButtonActionsEnabled = false;
+                this.closeDrawer();
                 this.goToDetails(item.id);
             }
         });
@@ -318,30 +313,30 @@ export class EnrollmentListComponent implements OnInit {
         if (isActivePeriod) {
             // ─── Periodo activo — cada estado permite avanzar o revertir un paso
             if (isRegistered || isRequested) {
-                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
-                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => this.reject(item.id) });
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => { this.closeDrawer(); this.approve(item.id); } });
+                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => { this.closeDrawer(); this.reject(item.id); } });
             }
             if (isApproved) {
-                actions.push({ label: 'Matricular', icon: CustomIcons.STAR_SOLID, command: () => this.enroll(item.id) });
-                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => this.reject(item.id) });
+                actions.push({ label: 'Matricular', icon: CustomIcons.STAR_SOLID, command: () => { this.closeDrawer(); this.enroll(item.id); } });
+                actions.push({ label: 'Rechazar', icon: CustomIcons.CIRCLE_XMARK_SOLID, command: () => { this.closeDrawer(); this.reject(item.id); } });
             }
             if (isEnrolled) {
-                actions.push({ label: 'Descargar Certificado', icon: CustomIcons.DOWNLOAD_SOLID, command: () => this.downloadCertificate(item) });
-                actions.push({ label: 'Anular Matrícula', icon: CustomIcons.BAN_SOLID, command: () => this.revoke(item.id) });
-                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+                actions.push({ label: 'Descargar Certificado', icon: CustomIcons.DOWNLOAD_SOLID, command: () => { this.closeDrawer(); this.downloadCertificate(item); } });
+                actions.push({ label: 'Anular Matrícula', icon: CustomIcons.BAN_SOLID, command: () => { this.closeDrawer(); this.revoke(item.id); } });
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => { this.closeDrawer(); this.approve(item.id); } });
             }
             if (isRejected) {
-                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => this.approve(item.id) });
+                actions.push({ label: 'Aprobar', icon: CustomIcons.CHECK_SOLID, command: () => { this.closeDrawer(); this.approve(item.id); } });
             }
             if (isRevoked) {
-                actions.push({ label: 'Matricular', icon: CustomIcons.STAR_SOLID, command: () => this.enroll(item.id) });
+                actions.push({ label: 'Matricular', icon: CustomIcons.STAR_SOLID, command: () => { this.closeDrawer(); this.enroll(item.id); } });
             }
         } else {
             // ─── Periodo histórico — solo consulta, certificado si terminó matriculado ──
             if (isEnrolled) {
                 actions.push({
                     label: 'Descargar Certificado', icon: CustomIcons.DOWNLOAD_SOLID,
-                    command: () => this.downloadCertificate(item)
+                    command: () => { this.closeDrawer(); this.downloadCertificate(item); }
                 });
             }
         }
