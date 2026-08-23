@@ -78,13 +78,7 @@ export class EnrollmentService {
             .pipe(map(r => r.data));
     }
 
-    // Crear / Editar
-    createEnrollment(payload: any): Observable<EnrollmentModel> {
-        return this.http
-            .post<HttpResponseModel<EnrollmentModel>>(this.apiUrlEnrollments, payload)
-            .pipe(map(r => r.data));
-    }
-
+    // Editar
     updateEnrollment(id: string, payload: any): Observable<EnrollmentModel> {
         return this.http
             .put<HttpResponseModel<EnrollmentModel>>(`${this.apiUrlEnrollments}/${id}`, payload)
@@ -214,7 +208,8 @@ export class EnrollmentService {
             .pipe(map(r => r.data));
     }
 
-    // nivel que le corresponde tomar al estudiante según su historial en la carrera 
+    // nivel que le corresponde tomar al estudiante según
+    // su historial en la carrera 
     findRequiredAcademicPeriod(studentId: string, careerId: string): Observable<string | null> {
         return this.http
             .get<HttpResponseModel<string | null>>(`${this.apiUrlEnrollments}/required-academic-period/${studentId}/${careerId}`)

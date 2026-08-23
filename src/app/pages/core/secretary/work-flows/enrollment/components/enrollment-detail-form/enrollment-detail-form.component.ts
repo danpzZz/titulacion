@@ -56,6 +56,15 @@ export class EnrollmentDetailFormComponent implements OnInit {
     // solo se puede seleccionar el nivel que le corresponde al estudiante
     protected requiredAcademicPeriod = signal<string | null>(null);
 
+    // si el nivel requerido ya agotó sus 3 intentos (sin
+    // aprobar), queda "atascado" — el estudiante no puede avanzar ni el sistema
+    // le ofrece ningún otro nivel para elegir. Se destraba temporalmente el nivel
+    // ANTERIOR (aunque ya esté aprobado) para que pueda volver a tomarlo; al
+    // aprobarlo de nuevo, calculateEnrollmentNumber() del nivel atascado vuelve a
+    // contar desde ahí en adelante de forma natural (cuenta reprobados con estado
+    // Matriculado, no historial completo sin condición).
+    protected unlockedPreviousLevel = signal<string | null>(null);
+
     // ─── Solo lectura si el período está cerrado o la matrícula fue anulada/rechazada.
     protected readonly isReadOnly = computed(() => {
         const parentCode = this.store.selectedItem()?.enrollmentState?.state?.code ?? '';
@@ -149,6 +158,23 @@ export class EnrollmentDetailFormComponent implements OnInit {
                 this.enrollmentService.findSubjectsByCareer(careerId).subscribe({
                     next: (items: SubjectModel[]) => {
                         this.subjects.set(items);
+
+                        // Detecta si el nivel requerido ya agotó sus 3 intentos —
+                        // de ser así, destraba el nivel anterior para reintentarlo.
+                        if (level !== null) {
+                            const targetSubject = items.find(s => s.academicPeriod?.code === level);
+                            if (targetSubject) {
+                                this.enrollmentService.calculateEnrollmentNumber(studentId, targetSubject.id).subscribe({
+                                    next: (attempts) => {
+                                        if (attempts >= 3) {
+                                            const previousLevel = (parseInt(level) - 1).toString();
+                                            this.unlockedPreviousLevel.set(previousLevel);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+
                         this.enrollmentService.findDetailsByEnrollment(this.enrollmentId).subscribe({
                             next: (details: EnrollmentDetailModel[]) => {
                                 this.enrolledSubjectIds.set(
@@ -222,13 +248,19 @@ export class EnrollmentDetailFormComponent implements OnInit {
         });
     }
 
-    // revisa que sea el nivel que le corresponde al estudiante según su historial 
+    // revisa que sea el nivel que le corresponde al estudiante según su historial,
+    // o el nivel anterior destrabado por atasco (ver unlockedPreviousLevel).
     isSubjectDisabled(subject: SubjectModel): boolean {
         if (this.enrolledSubjectIds().includes(subject.id)) return true;
 
         const required = this.requiredAcademicPeriod();
         if (required === null) return false;
 
-        return subject.academicPeriod?.code !== required;
+        if (subject.academicPeriod?.code === required) return false;
+
+        const unlocked = this.unlockedPreviousLevel();
+        if (unlocked !== null && subject.academicPeriod?.code === unlocked) return false;
+
+        return true;
     }
 }
