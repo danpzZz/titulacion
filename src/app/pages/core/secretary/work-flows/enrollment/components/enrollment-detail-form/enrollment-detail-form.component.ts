@@ -56,10 +56,8 @@ export class EnrollmentDetailFormComponent implements OnInit {
     // solo se puede seleccionar el nivel que le corresponde al estudiante
     protected requiredAcademicPeriod = signal<string | null>(null);
 
-    // si el nivel requerido ya agotó sus 3 intentos (sin
-    // aprobar), queda "atascado" — el estudiante no puede avanzar ni el sistema
-    // le ofrece ningún otro nivel para elegir. Se destraba temporalmente el nivel
-    // ANTERIOR (aunque ya esté aprobado) para que pueda volver a tomarlo; al
+    // si el nivel requerido ya agotó sus 3 intentos se destraba temporalmente el nivel
+    // anterior (aunque ya esté aprobado) para que pueda volver a tomarlo; al
     // aprobarlo de nuevo, calculateEnrollmentNumber() del nivel atascado vuelve a
     // contar desde ahí en adelante de forma natural (cuenta reprobados con estado
     // Matriculado, no historial completo sin condición).
